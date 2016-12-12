@@ -1,5 +1,15 @@
 function [theResult] = plotPIPRResponse()
 
+% Function to plot the average PIPR response
+% First, we determine which subjects can be kept for the analysis because
+% they do not mean exclusion criteria
+% Second, we plot the average pupil response to blue stimulation, red
+% stimulation, and the subtracted PIPR response
+% Finally plots a group average
+
+% 12/12/2016, wrote by hmm
+
+
 %% Setup basic variables
 % Discover user name and set Dropbox path
 [~, userName] = system('whoami');
