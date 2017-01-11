@@ -122,20 +122,21 @@ for ss = 1:length(goodSubjects);
     errBar(1,:) = semBlue(1:(length(averageBlue)));
     errBar(2,:) = semBlue(1:(length(averageBlue)));
     
-    shadedErrorBar(1:length(averageBlue),averageBlue*100, errBar*100, 'b', 1);
+    shadedErrorBar((1:length(averageBlue))*0.02,averageBlue*100, errBar*100, 'b', 1);
     hold on
     
     errBar(1,:) = semRed(1:(length(averageRed)));
     errBar(2,:) = semRed(1:(length(averageRed)));
     
-    shadedErrorBar(1:length(averageRed),averageRed*100, errBar*100, 'r', 1);
+    shadedErrorBar((1:length(averageRed))*0.02,averageRed*100, errBar*100, 'r', 1);
     
     errBar(1,:) = semPipr(1:(length(pipr)));
     errBar(2,:) = semPipr(1:(length(pipr)));
     
-    shadedErrorBar(1:length(pipr),pipr*-100, errBar*100, 'k', 1);
-    xlabel('Time (msec)');
+    shadedErrorBar((1:length(pipr))*0.02,pipr*-100, errBar*100, 'k', 1);
+    xlabel('Time (s)');
     ylabel('Percent Change (%)');
+    ylim([-60 20]);
     outDir = fullfile(dropboxAnalysisDir,subAnalysisDirectory);
     if ~exist(outDir, 'dir')
         mkdir(outDir);
@@ -159,20 +160,21 @@ plotFig = figure;
 errBar(1,:) = semBlueCollapsed(1:(length(averageBlueCollapsed)));
 errBar(2,:) = semBlueCollapsed(1:(length(averageBlueCollapsed)));
 
-shadedErrorBar(1:length(averageBlueCollapsed),averageBlueCollapsed*100, errBar*100, 'b', 1);
+shadedErrorBar((1:length(averageBlueCollapsed))*0.02,averageBlueCollapsed*100, errBar*100, 'b', 1);
 hold on
 
 errBar(1,:) = semRedCollapsed(1:(length(averageRedCollapsed)));
 errBar(2,:) = semRedCollapsed(1:(length(averageRedCollapsed)));
 
-shadedErrorBar(1:length(averageRedCollapsed),averageRedCollapsed*100, errBar*100, 'r', 1);
+shadedErrorBar((1:length(averageRedCollapsed))*0.02,averageRedCollapsed*100, errBar*100, 'r', 1);
 
 errBar(1,:) = semPiprCollapsed(1:(length(piprCollapsed)));
 errBar(2,:) = semPiprCollapsed(1:(length(piprCollapsed)));
 
-shadedErrorBar(1:length(piprCollapsed),piprCollapsed*-100, errBar*100, 'k', 1);
-xlabel('Time (msec)');
+shadedErrorBar((1:length(piprCollapsed))*0.02,piprCollapsed*-100, errBar*100, 'k', 1);
+xlabel('Time (s)');
 ylabel('Percent Change (%)');
+ylim([-60 20]);
 outDir = fullfile(dropboxAnalysisDir,subAnalysisDirectory);
 if ~exist(outDir, 'dir')
     mkdir(outDir);
@@ -211,12 +213,13 @@ for ss = 1:length(goodSubjects);
     errBar(1,:) = semLMS(1:(length(averageLMS)));
     errBar(2,:) = semLMS(1:(length(averageLMS)));
     
-    shadedErrorBar(1:length(averageLMS),averageLMS*100, errBar*100, 'b', 1);
+    shadedErrorBar((1:length(averageLMS))*0.02,averageLMS*100, errBar*100, 'b', 1);
     hold on
     
     
-    xlabel('Time (msec)');
+    xlabel('Time (s)');
     ylabel('Percent Change (%)');
+    ylim([-60 20]);
     outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseLMS/AverageResponse');
     if ~exist(outDir, 'dir')
         mkdir(outDir);
@@ -229,12 +232,13 @@ for ss = 1:length(goodSubjects);
     errBar(1,:) = semMel(1:(length(averageMel)));
     errBar(2,:) = semMel(1:(length(averageMel)));
     
-    shadedErrorBar(1:length(averageMel),averageMel*100, errBar*100, 'b', 1);
+    shadedErrorBar((1:length(averageMel))*0.02,averageMel*100, errBar*100, 'b', 1);
     hold on
     
     
-    xlabel('Time (msec)');
+    xlabel('Time (s)');
     ylabel('Percent Change (%)');
+    ylim([-60 20]);
     outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseMel/AverageResponse');
     if ~exist(outDir, 'dir')
         mkdir(outDir);
@@ -257,11 +261,12 @@ plotFig = figure;
 errBar(1,:) = semLMSCollapsed(1:(length(averageLMSCollapsed)));
 errBar(2,:) = semLMSCollapsed(1:(length(averageLMSCollapsed)));
 
-shadedErrorBar(1:length(averageLMSCollapsed),averageLMSCollapsed*100, errBar*100, 'b', 1);
+shadedErrorBar((1:length(averageLMSCollapsed))*0.02,averageLMSCollapsed*100, errBar*100, 'b', 1);
 
 
-xlabel('Time (msec)');
+xlabel('Time (s)');
 ylabel('Percent Change (%)');
+ylim([-60 20]);
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseLMS/AverageResponse');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
@@ -274,11 +279,12 @@ plotFig = figure;
 errBar(1,:) = semMelCollapsed(1:(length(averageMelCollapsed)));
 errBar(2,:) = semMelCollapsed(1:(length(averageMelCollapsed)));
 
-shadedErrorBar(1:length(averageMelCollapsed),averageMelCollapsed*100, errBar*100, 'b', 1);
+shadedErrorBar((1:length(averageMelCollapsed))*0.02,averageMelCollapsed*100, errBar*100, 'b', 1);
 
 
-xlabel('Time (msec)');
+xlabel('Time (s)');
 ylabel('Percent Change (%)');
+ylim([-60 20]);
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseMel/AverageResponse');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
