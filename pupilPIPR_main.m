@@ -21,3 +21,7 @@ subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR';
 %% and LMS-directed stimulation
 
 [ amplitudes ] = fitIAMPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+
+%% Calculate PIPR according to specific methods cited in the literature, and see how these results compare
+
+[ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, dropboxAnalysisDir)
