@@ -220,4 +220,32 @@ end
 saveas(plotFig, fullfile(outDir, ['group.png']), 'png');
 close(plotFig);
 
+% putting LMS and Mel average response on the same plot
+plotFig = figure;
+errBar(1,:) = semLMSCollapsed(1:(length(averageLMSCollapsed)));
+errBar(2,:) = semLMSCollapsed(1:(length(averageLMSCollapsed)));
+
+shadedErrorBar((1:length(averageLMSCollapsed))*0.02,averageLMSCollapsed*100, errBar*100, 'm', 1);
+
+
+xlabel('Time (s)');
+ylabel('Percent Change (%)');
+ylim([-60 20]);
+hold on
+errBar(1,:) = semMelCollapsed(1:(length(averageMelCollapsed)));
+errBar(2,:) = semMelCollapsed(1:(length(averageMelCollapsed)));
+
+shadedErrorBar((1:length(averageMelCollapsed))*0.02,averageMelCollapsed*100, errBar*100, 'c', 1);
+
+
+xlabel('Time (s)');
+ylabel('Percent Change (%)');
+ylim([-60 20]);
+outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseLMS/AverageResponse');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+saveas(plotFig, fullfile(outDir, ['LMSAndMel.png']), 'png');
+close(plotFig);
+
 end % end function
