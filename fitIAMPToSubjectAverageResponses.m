@@ -35,7 +35,7 @@ RedKernel = RedKernel/abs(min(RedKernel));
 
 % create the timebase: events are 14 s long, and we're sampling every 20
 % ms
-timebase = (1:length(averageLMSCombined))*20;
+timebase = (1:length(averageLMSCombined));
 
 % create stimulus profile -> has to be a blip with this
 % configuration of IAMP (it convolves the stimulus profile
@@ -72,7 +72,7 @@ for ss = 1:length(goodSubjects); % loop over subjects
         % finish kernel assembly
         kernel.timebase = timebase;
         thePacket.kernel = kernel;
-            
+        
         % create packet response values
         subject = goodSubjects(ss,:);
         thePacket.response.values = result(ss,:);
@@ -84,19 +84,46 @@ for ss = 1:length(goodSubjects); % loop over subjects
         % do the actual fitting via IAMP
         [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo,'paramLockMatrix',paramLockMatrix);
         amplitudes(ss,stimulation) = paramsFit.paramMainMatrix;
-        %figure; plot(thePacket.response.values); hold on; plot(modelResponseStruct.values)
+        %if stimulation == 3;
+            %figure; plot(thePacket.response.values); hold on; plot(modelResponseStruct.values); paramsFit.paramMainMatrix
+       % end
     end
 end
-    
+
 %% do some plotting to summarize the results
 
 %plot correlation of LMS and Mel
 plotFig = figure;
+x = amplitudes(:,1)*100;
+y = amplitudes(:,2)*100;
+combined = [x; y];
+maxValue = max(combined);
+minValue = min(combined);
 plot(amplitudes(:,1)*100,amplitudes(:,2)*100, 'o')
 xlabel('LMS Amplitude (%)')
 ylabel('Mel Amplitude (%)')
 r = corr2(amplitudes(:,1), amplitudes(:,2));
 legend(['r = ', num2str(r)])
+hold on
+xnan = isnan(x);
+
+xnanlist = [];
+hits = 0;
+for xx = 1:length(x);
+    if xnan(xx) == 1;
+        hits = hits+1;
+        x(xx-(hits-1)) = [];
+        y(xx-(hits-1)) = [];
+        
+    end
+end
+coeffs = polyfit(x, y, 1);
+fittedX = linspace(min(x), max(x), 200);
+fittedY = polyval(coeffs, fittedX);
+plot(fittedX, fittedY, 'LineWidth', 3)
+xlim([0 60]);
+ylim([0 60]);
+axis square
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
@@ -106,11 +133,36 @@ close(plotFig);
 
 % plot correlation of Mel and PIPR
 plotFig = figure;
-plot(amplitudes(:,3)*100,amplitudes(:,2)*100, 'o')
+x = ((amplitudes(:,4)*100)-(amplitudes(:,5)*100));
+y = amplitudes(:,2)*100;
+combined = [x; y];
+maxValue = max(combined);
+minValue = min(combined);
+plot(((amplitudes(:,4)*100)-(amplitudes(:,5)*100)),amplitudes(:,2)*100, 'o')
 xlabel('PIPR Amplitude (%)')
 ylabel('Mel Amplitude (%)')
-r = corr2(amplitudes(:,3), amplitudes(:,2));
+r = corr2(((amplitudes(:,4))-(amplitudes(:,5))), amplitudes(:,2));
 legend(['r = ', num2str(r)])
+hold on
+xnan = isnan(x);
+
+xnanlist = [];
+hits = 0;
+for xx = 1:length(x);
+    if xnan(xx) == 1;
+        hits = hits+1;
+        x(xx-(hits-1)) = [];
+        y(xx-(hits-1)) = [];
+        
+    end
+end
+coeffs = polyfit(x, y, 1);
+fittedX = linspace(min(x), max(x), 200);
+fittedY = polyval(coeffs, fittedX);
+plot(fittedX, fittedY, 'LineWidth', 3)
+xlim([0 60]);
+ylim([0 60]);
+axis square
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
@@ -120,11 +172,36 @@ close(plotFig);
 
 % plot correlation of PIPR and LMS
 plotFig = figure;
-plot(amplitudes(:,1)*100,amplitudes(:,3)*100, 'o')
-xlabel('LMS Amplitude (%)')
-ylabel('PIPR Amplitude (%)')
-r = corr2(amplitudes(:,1), amplitudes(:,3));
+y = amplitudes(:,1)*100;
+x = ((amplitudes(:,4)*100)-(amplitudes(:,5)*100));
+combined = [x; y];
+maxValue = max(combined);
+minValue = min(combined);
+plot(((amplitudes(:,4)*100)-(amplitudes(:,5)*100)), amplitudes(:,1)*100, 'o')
+ylabel('LMS Amplitude (%)')
+xlabel('PIPR Amplitude (%)')
+r = corr2(((amplitudes(:,4))-(amplitudes(:,5))), amplitudes(:,1));
 legend(['r = ', num2str(r)])
+hold on
+xnan = isnan(x);
+
+xnanlist = [];
+hits = 0;
+for xx = 1:length(x);
+    if xnan(xx) == 1;
+        hits = hits+1;
+        x(xx-(hits-1)) = [];
+        y(xx-(hits-1)) = [];
+        
+    end
+end
+coeffs = polyfit(x, y, 1);
+fittedX = linspace(min(x), max(x), 200);
+fittedY = polyval(coeffs, fittedX);
+plot(fittedX, fittedY, 'LineWidth', 3)
+xlim([0 60]);
+ylim([0 60]);
+axis square
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
@@ -134,16 +211,124 @@ close(plotFig);
 
 % plot correlation of blue and red
 plotFig = figure;
+x = amplitudes(:,4)*100;
+y = amplitudes(:,5)*100;
+combined = [x; y];
+maxValue = max(combined);
+minValue = min(combined);
 plot(amplitudes(:,4)*100,amplitudes(:,5)*100, 'o')
 xlabel('Blue Amplitude (%)')
 ylabel('Red Amplitude (%)')
 r = corr2(amplitudes(:,4), amplitudes(:,5));
 legend(['r = ', num2str(r)])
+hold on
+xnan = isnan(x);
+
+xnanlist = [];
+hits = 0;
+for xx = 1:length(x);
+    if xnan(xx) == 1;
+        hits = hits+1;
+        x(xx-(hits-1)) = [];
+        y(xx-(hits-1)) = [];
+        
+    end
+end
+coeffs = polyfit(x, y, 1);
+fittedX = linspace(min(x), max(x), 200);
+fittedY = polyval(coeffs, fittedX);
+plot(fittedX, fittedY, 'LineWidth', 3)
+xlim([0 60]);
+ylim([0 60]);
+axis square
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
 saveas(plotFig, fullfile(outDir, ['correlateBluexRed.png']), 'png');
+close(plotFig);
+
+% plot correlation of [blue + red] and [LMS + mel]
+plotFig = figure;
+x = (amplitudes(:,4)+amplitudes(:,5))/2*100;
+y = (amplitudes(:,2)+amplitudes(:,1))/2*100;
+combined = [x; y];
+maxValue = max(combined);
+minValue = min(combined);
+plot((amplitudes(:,4)+amplitudes(:,5))/2*100,(amplitudes(:,2)+amplitudes(:,1))/2*100, 'o')
+xlabel('Blue+Red Amplitude (%)')
+ylabel('LMS+Mel Amplitude (%)')
+r = corr2((amplitudes(:,4)+amplitudes(:,5))/2,(amplitudes(:,2)+amplitudes(:,1))/2);
+legend(['r = ', num2str(r)])
+hold on
+xnan = isnan(x);
+
+xnanlist = [];
+hits = 0;
+for xx = 1:length(x);
+    if xnan(xx) == 1;
+        hits = hits+1;
+        x(xx-(hits-1)) = [];
+        y(xx-(hits-1)) = [];
+        
+    end
+end
+coeffs = polyfit(x, y, 1);
+fittedX = linspace(min(x), max(x), 200);
+fittedY = polyval(coeffs, fittedX);
+plot(fittedX, fittedY, 'LineWidth', 3)
+xlim([0 60]);
+ylim([0 60]);
+
+axis square
+outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+saveas(plotFig, fullfile(outDir, ['correlateBlueRedxMelLMS.png']), 'png');
+close(plotFig);
+
+% plot correlation of [blue/red] and [mel/lms]
+x=[];
+y=[];
+plotFig = figure;
+for tt = 1:length(amplitudes(:,4))
+    x(tt) = amplitudes(tt,4)/amplitudes(tt,5);
+    y(tt) = (amplitudes(tt,2)/amplitudes(tt,1));
+end
+%x = (amplitudes(:,4)/amplitudes(:,5))*100;
+%y = (amplitudes(:,2)/amplitudes(:,1))*100;
+combined = [x; y];
+maxValue = max(combined);
+minValue = min(combined);
+plot(x, y, 'o')
+xlabel('Blue/Red Amplitude')
+ylabel('Mel/LMS Amplitude')
+r = corr2(x, y);
+legend(['r = ', num2str(r)])
+hold on
+xnan = isnan(x);
+
+xnanlist = [];
+hits = 0;
+for xx = 1:length(x);
+    if xnan(xx) == 1;
+        hits = hits+1;
+        x(xx-(hits-1)) = [];
+        y(xx-(hits-1)) = [];
+        
+    end
+end
+coeffs = polyfit(x, y, 1);
+fittedX = linspace(min(x), max(x), 200);
+fittedY = polyval(coeffs, fittedX);
+plot(fittedX, fittedY, 'LineWidth', 3)
+
+outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+saveas(plotFig, fullfile(outDir, ['correlateBlueToRedxMelToLMS.png']), 'png');
 close(plotFig);
 
 end % end function
