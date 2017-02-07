@@ -28,7 +28,7 @@ function [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(subjects, amplit
 % For our purposes, we will define sustained pupil size as pupil diameter
 % averaged over a 1 s window (the longest we can achieve) starting
 % from 10 seconds after stimulus offset
-stimulusOnsetTime = 1;
+stimulusOnsetTime = 0;
 stimulusOffsetTime = 3;
 sustainedOnsetTime = 13; % 10 s after stimulus offset
 sustainedOffsetTime = 14; % to the end of an individual trial
@@ -61,39 +61,56 @@ end
         
 %% Now to calculate the actual PIPR values
 for ss = 1:length(subjects);
-    pipr(ss) = sustainedAmplitudes(ss,1)*100;
-    netPipr(ss) = (sustainedAmplitudes(ss,1) - sustainedAmplitudes(ss,2))*100;
+    pipr(ss) = 0 - sustainedAmplitudes(ss,1)*100;
+    netPipr(ss) = ((0 - sustainedAmplitudes(ss,1)) - (0 - sustainedAmplitudes(ss,2)))*100;
 end
 
 %% Plot these results to show how the different values of PIPR relate to each other
 % Plot correlation of this PIPR with IAMP PIPR
+outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/calculatePIPR');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+
 plotFig = figure;
 plot(pipr, ((amplitudes(:,4)*100)-(amplitudes(:,5)*100)), 'o');
 xlabel('PIPR (Baseline - Sustained, %)')
 ylabel('PIPR (IAMP, %)')
+
+saveas(plotFig, fullfile(outDir, ['piprxIAMPPipr_', num2str(sustainedOnsetTime), '.png']), 'png');
+close(plotFig);
+
 
 % Plot correlation of PIPR and net PIPR
 plotFig = figure;
 plot(pipr, netPipr, 'o');
 xlabel('PIPR (Baseline - Sustained, %)')
 ylabel('Net PIPR (Blue PIPR - Red PIPR, %)')
+saveas(plotFig, fullfile(outDir, ['piprxNetPipr_', num2str(sustainedOnsetTime), '.png']), 'png');
+close(plotFig);
 
 % Plot correlation of net PIPR and IAMP PIPR
 plotFig = figure;
 plot(netPipr, ((amplitudes(:,4)*100)-(amplitudes(:,5)*100)), 'o');
 xlabel('Net PIPR (Blue PIPR - Red PIPR, %)')
 ylabel('PIPR (IAMP, %)')
+saveas(plotFig, fullfile(outDir, ['netPiprxIAMPPipr_', num2str(sustainedOnsetTime), '.png']), 'png');
+close(plotFig);
 
 % Plot correlation of PIPR and Melanopsin-directed silent substitution
 plotFig = figure;
 plot(pipr, amplitudes(:,2)*100, 'o');
 xlabel('PIPR (Baseline - Sustained, %)')
 ylabel('Melanopsin Silent Substitution Amplitude (%)')
+saveas(plotFig, fullfile(outDir, ['piprxMel_', num2str(sustainedOnsetTime), '.png']), 'png');
+close(plotFig);
 
 % Plot correlation of Net PIPR and Melanopsin-directed silent substitution
 plotFig = figure;
 plot(netPipr, amplitudes(:,2)*100, 'o');
 xlabel('Net PIPR (Blue PIPR - Red PIPR, %)')
 ylabel('Melanopsin Silent Substitution Amplitude (%)')
+saveas(plotFig, fullfile(outDir, ['netPiprxMel_', num2str(sustainedOnsetTime), '.png']), 'png');
+close(plotFig);
 
     
