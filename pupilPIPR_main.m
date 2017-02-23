@@ -10,7 +10,7 @@ subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR';
 
 %% Determine which subjects pass inclusion/exclusion criteria for use in further analyses
 
-[ goodSubjects ] = excludeSubjects()
+[ goodSubjects, badSubjects ] = excludeSubjects()
 
 %% Determine average response in each subject to PIPR, melanopsin-directed, 
 %% and LMS-directed stimulation
@@ -25,3 +25,6 @@ subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR';
 %% Calculate PIPR according to specific methods cited in the literature, and see how these results compare
 
 [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, dropboxAnalysisDir)
+
+%% Determine the test-retest reliability of our measures of melanopsin repsonse
+[] = acrossSessionCorrelation(subjects, amplitudes, dropboxAnalysisDir)
