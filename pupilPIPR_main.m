@@ -27,4 +27,4 @@ subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR';
 [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, dropboxAnalysisDir)
 
 %% Determine the test-retest reliability of our measures of melanopsin repsonse
-[] = acrossSessionCorrelation(subjects, amplitudes, dropboxAnalysisDir)
+[ theResult ] = acrossSessionCorrelation(subjects, amplitudes, dropboxAnalysisDir)
