@@ -26,11 +26,11 @@ temporalFit = tfeIAMP('verbosity','none');
 % 1
 for session = 1:2;
     for timepoints = 1:length(averageLMSCombined{session});
-        LMSKernel(1,timepoints) = nanmean(averageLMSCombined{session}(:,timepoints));
-        MelKernel(1,timepoints) = nanmean(averageMelCombined{session}(:,timepoints));
-        PIPRKernel(1,timepoints) = nanmean(piprCombined{session}(:,timepoints));
-        BlueKernel(1,timepoints) = nanmean(averageBlueCombined{session}(:,timepoints));
-        RedKernel(1,timepoints) = nanmean(averageRedCombined{session}(:,timepoints));
+        LMSKernel(1,timepoints) = nanmean(averageLMSCombined{1}(:,timepoints));
+        MelKernel(1,timepoints) = nanmean(averageMelCombined{1}(:,timepoints));
+        PIPRKernel(1,timepoints) = nanmean(piprCombined{1}(:,timepoints));
+        BlueKernel(1,timepoints) = nanmean(averageBlueCombined{1}(:,timepoints));
+        RedKernel(1,timepoints) = nanmean(averageRedCombined{1}(:,timepoints));
     end
     LMSKernel = LMSKernel/abs(min(LMSKernel));
     MelKernel = MelKernel/abs(min(MelKernel));
