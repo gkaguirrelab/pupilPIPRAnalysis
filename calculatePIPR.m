@@ -100,7 +100,7 @@ for session = 1:2;
     end
     
     plotFig = figure;
-    plot(pipr{session}, ((amplitudes{session}(:,4)*100)-(amplitudes{session}(:,5)*100)), 'o');
+    plot(pipr{session}, ((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)), 'o');
     xlabel('PIPR (Baseline - Sustained, %)')
     ylabel('PIPR (IAMP, %)')
     
@@ -118,7 +118,7 @@ for session = 1:2;
     
     % Plot correlation of net PIPR and IAMP PIPR
     plotFig = figure;
-    plot(netPipr{session}, ((amplitudes{session}(:,4)*100)-(amplitudes{session}(:,5)*100)), 'o');
+    plot(netPipr{session}, ((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)), 'o');
     xlabel('Net PIPR (Blue PIPR - Red PIPR, %)')
     ylabel('PIPR (IAMP, %)')
     saveas(plotFig, fullfile(outDir, ['netPiprxIAMPPipr_', num2str(sustainedOnsetTime), '.png']), 'png');

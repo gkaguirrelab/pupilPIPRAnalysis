@@ -25,8 +25,8 @@ for ss = 1:size(subjects{2},1) % loop over subjects that have completed both ses
     melTwo(ss) = amplitudes{2}(secondSessionIndex,2);
     melNormedOne(ss) = amplitudes{1}(firstSessionIndex,2)/amplitudes{1}(firstSessionIndex,1);
     melNormedTwo(ss) = amplitudes{2}(secondSessionIndex,2)/amplitudes{2}(secondSessionIndex,1);
-    piprOne(ss) = (amplitudes{1}(firstSessionIndex,4)*100)-(amplitudes{1}(firstSessionIndex,5)*100);
-    piprTwo(ss) = (amplitudes{2}(secondSessionIndex,4)*100)-(amplitudes{2}(secondSessionIndex,5)*100);
+    piprOne(ss) = (amplitudes{1}(firstSessionIndex,3)*100)-(amplitudes{1}(firstSessionIndex,4)*100);
+    piprTwo(ss) = (amplitudes{2}(secondSessionIndex,3)*100)-(amplitudes{2}(secondSessionIndex,4)*100);
     
     
 end
