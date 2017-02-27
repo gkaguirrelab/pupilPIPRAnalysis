@@ -24,6 +24,19 @@
 		"type": "git",
 		"update": "",
 		"url": "https:\/\/github.com\/raacampbell\/shadedErrorBar.git"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "temporalFittingEngine",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "",
+		"url": "https:\/\/github.com\/gkaguirrelab\/temporalFittingEngine.git"
 	}
 ]
 
