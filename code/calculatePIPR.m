@@ -1,4 +1,4 @@
-function [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(subjects, amplitudes, dropboxAnalysisDir)
+function [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(subjects, amplitudes, amplitudesSTD, numberOfTrials, dropboxAnalysisDir)
 
 % The purpose of this function is to calculate the PIPR a list of subjects
 % by following the protocol laid out by Kankipati 2010
