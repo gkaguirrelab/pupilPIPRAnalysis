@@ -60,7 +60,7 @@ plotFig = figure;
 hold on
 errorbar(melNormedOne, melNormedTwo, semMelOverLMSTwo, 'bo')
 herrorbar(melNormedOne, melNormedTwo, semMelOverLMSOne, 'bo')
-
+plot(0:10,0:10,'-')
 xlabel('Mel/LMS Session 1')
 ylabel('Mel/LMS Session 2')
 axis square
