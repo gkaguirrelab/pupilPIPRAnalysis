@@ -1,4 +1,4 @@
-function [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrial(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+function [ amplitudes, amplitudesSTD, numberOfTrials ] = fitIAMPToSubjectAverageResponses_byTrial(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
 
 % The main output will be an [ss x 3] matrix, called amplitude, which contains the results
 % from fitting the IAMP model to to average responses per subject. The
@@ -12,7 +12,8 @@ IAMPFitToData = [];
 
 for session = 1:2;
     amplitudes{session} = [];
-    amplitudesSEM{session} = [];
+    amplitudesSTD{session} = [];
+    numberOfTrials{session} = [];
 end
 
 % We will fit each average response as a single stimulus in a packet, so
@@ -96,13 +97,13 @@ for session = 1:2;
             thePacket.metaData = [];
             
             % determine number of trials
-            numberOfTrials = size(allTrials,2);
+            numberTrials = size(allTrials,2);
             
             packetCellArray = [];
-            for trial = 1:numberOfTrials
+            for trial = 1:numberTrials
                 packetCellArray{trial} = [];
             end
-            for trial = 1:numberOfTrials
+            for trial = 1:numberTrials
                 packetCellArray{trial} = thePacket;
                 if sum(isnan(allTrials(:,trial))) ~= 700;
                     packetCellArray{trial}.response.values = allTrials(:,trial)';
@@ -123,7 +124,8 @@ for session = 1:2;
                 stimulusAmplitudes(trial) = paramsFit.paramMainMatrix;
             end
             amplitudes{session}(ss,stimulation) = mean(stimulusAmplitudes);
-            amplitudesSEM{session}(ss,stimulation) = nanstd(stimulusAmplitudes)/sqrt((length(stimulusAmplitudes)));
+            amplitudesSTD{session}(ss,stimulation) = nanstd(stimulusAmplitudes);
+            numberOfTrials{session}(ss,stimulation) = length(packetCellArray);
             %if stimulation == 3;
             %figure; plot(thePacket.response.values); hold on; plot(modelResponseStruct.values); paramsFit.paramMainMatrix
             % end
@@ -134,12 +136,15 @@ for session = 1:2;
     
     %plot correlation of LMS and Mel
     plotFig = figure;
+    hold on
     x = amplitudes{session}(:,1)*100;
     y = amplitudes{session}(:,2)*100;
     combined = [x; y];
     maxValue = max(combined);
     minValue = min(combined);
-    plot(amplitudes{session}(:,1)*100,amplitudes{session}(:,2)*100, 'o')
+    errorbar(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*(amplitudesSTD{session}(:,2))./sqrt((numberOfTrials{session}(:,2))), 100*(amplitudesSTD{session}(:,2))./sqrt(numberOfTrials{session}(:,2)), 'bo')    
+    herrorbar(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*(amplitudesSTD{session}(:,1))./sqrt((numberOfTrials{session}(:,1))), 100*(amplitudesSTD{session}(:,1))./sqrt(numberOfTrials{session}(:,1)), 'bo')    
+
     xlabel('LMS Amplitude (%)')
     ylabel('Mel Amplitude (%)')
     r = corr2(amplitudes{session}(:,1), amplitudes{session}(:,2));
@@ -173,12 +178,14 @@ for session = 1:2;
     
     % plot correlation of Mel and PIPR
     plotFig = figure;
+    hold on
     x = ((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100));
     y = amplitudes{session}(:,2)*100;
     combined = [x; y];
     maxValue = max(combined);
     minValue = min(combined);
-    plot(((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)),amplitudes{session}(:,2)*100, 'o')
+    errorbar(((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)),amplitudes{session}(:,2)*100, 100*(amplitudesSTD{session}(:,2)./sqrt(numberOfTrials{session}(:,2))), 100*(amplitudesSTD{session}(:,2))./sqrt(numberOfTrials{session}(:,2)), 'bo')    
+    herrorbar(((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)),amplitudes{session}(:,2)*100, 100*sqrt(((amplitudes{session}(:,3)).^2+(amplitudes{session}(:,4)).^2))./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2), 100*sqrt(((amplitudes{session}(:,3)).^2+(amplitudes{session}(:,4)).^2))./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2), 'bo')    
     xlabel('PIPR Amplitude (%)')
     ylabel('Mel Amplitude (%)')
     r = corr2(((amplitudes{session}(:,3))-(amplitudes{session}(:,4))), amplitudes{session}(:,2));
@@ -212,12 +219,15 @@ for session = 1:2;
     
     % plot correlation of PIPR and LMS
     plotFig = figure;
+    hold on
     y = amplitudes{session}(:,1)*100;
     x = ((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100));
     combined = [x; y];
     maxValue = max(combined);
     minValue = min(combined);
-    plot(((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)), amplitudes{session}(:,1)*100, 'o')
+    errorbar(((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)), amplitudes{session}(:,1)*100, amplitudesSTD{session}(:,1)./sqrt(numberOfTrials{session}(:,1))*100,'bo')
+    herrorbar(((amplitudes{session}(:,3)*100)-(amplitudes{session}(:,4)*100)), amplitudes{session}(:,1)*100, 100*sqrt(((amplitudes{session}(:,3)).^2+(amplitudes{session}(:,4)).^2))./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2), 100*sqrt(((amplitudes{session}(:,3)).^2+(amplitudes{session}(:,4)).^2))./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2),'bo')
+    
     ylabel('LMS Amplitude (%)')
     xlabel('PIPR Amplitude (%)')
     r = corr2(((amplitudes{session}(:,3))-(amplitudes{session}(:,4))), amplitudes{session}(:,1));
@@ -251,12 +261,15 @@ for session = 1:2;
     
     % plot correlation of blue and red
     plotFig = figure;
+    hold on
     x = amplitudes{session}(:,3)*100;
     y = amplitudes{session}(:,4)*100;
     combined = [x; y];
     maxValue = max(combined);
     minValue = min(combined);
-    plot(amplitudes{session}(:,3)*100,amplitudes{session}(:,4)*100, 'o')
+    errorbar(amplitudes{session}(:,3)*100,amplitudes{session}(:,4)*100, amplitudesSTD{session}(:,4)*100./sqrt(numberOfTrials{session}(:,4)), 'bo')
+    herrorbar(amplitudes{session}(:,3)*100,amplitudes{session}(:,4)*100, amplitudesSTD{session}(:,3)*100./sqrt(numberOfTrials{session}(:,3)), 'bo')
+
     xlabel('Blue Amplitude (%)')
     ylabel('Red Amplitude (%)')
     r = corr2(amplitudes{session}(:,3), amplitudes{session}(:,4));
@@ -288,14 +301,17 @@ for session = 1:2;
     saveas(plotFig, fullfile(outDir, ['correlateBluexRed.png']), 'png');
     close(plotFig);
     
-    % plot correlation of [blue + red] and [LMS + mel]
+    % plot correlation of [blue + red]/2 and [LMS + mel]/2
     plotFig = figure;
+    hold on
     x = (amplitudes{session}(:,3)+amplitudes{session}(:,4))/2*100;
     y = (amplitudes{session}(:,2)+amplitudes{session}(:,1))/2*100;
     combined = [x; y];
     maxValue = max(combined);
     minValue = min(combined);
-    plot((amplitudes{session}(:,3)+amplitudes{session}(:,4))/2*100,(amplitudes{session}(:,2)+amplitudes{session}(:,1))/2*100, 'o')
+    errorbar((amplitudes{session}(:,3)+amplitudes{session}(:,4))/2*100,(amplitudes{session}(:,2)+amplitudes{session}(:,1))/2*100, 1/2*100*sqrt(amplitudesSTD{session}(:,2).^2+amplitudesSTD{session}(:,1).^2)./sqrt((numberOfTrials{session}(:,1)+numberOfTrials{session}(:,2))/2), 1/2*100*sqrt(amplitudesSTD{session}(:,2).^2+amplitudesSTD{session}(:,1).^2)./sqrt((numberOfTrials{session}(:,1)+numberOfTrials{session}(:,2))/2), 'bo')
+    herrorbar((amplitudes{session}(:,3)+amplitudes{session}(:,4))/2*100,(amplitudes{session}(:,2)+amplitudes{session}(:,1))/2*100, 1/2*100*sqrt(amplitudesSTD{session}(:,3).^2+amplitudesSTD{session}(:,4).^2)./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2), 1/2*100*sqrt(amplitudesSTD{session}(:,3).^2+amplitudesSTD{session}(:,4).^2)./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2), 'bo')
+
     xlabel('Blue+Red Amplitude (%)')
     ylabel('LMS+Mel Amplitude (%)')
     r = corr2((amplitudes{session}(:,3)+amplitudes{session}(:,4))/2,(amplitudes{session}(:,2)+amplitudes{session}(:,1))/2);
@@ -332,6 +348,7 @@ for session = 1:2;
     x=[];
     y=[];
     plotFig = figure;
+    hold on
     for tt = 1:length(amplitudes{session}(:,4))
         x(tt) = amplitudes{session}(tt,3)/amplitudes{session}(tt,4);
         y(tt) = (amplitudes{session}(tt,2)/amplitudes{session}(tt,1));
@@ -341,7 +358,16 @@ for session = 1:2;
     combined = [x; y];
     maxValue = max(combined);
     minValue = min(combined);
-    plot(x, y, 'o')
+    covarianceMelLMS = cov(amplitudes{session}(:,1), amplitudes{session}(:,2));
+    covarianceMelLMS = covarianceMelLMS(1,2);
+    semMelOverLMS = sqrt(1./((amplitudes{session}(:,1).^2)).*(amplitudesSTD{session}(:,2).^2)+(amplitudes{session}(:,2).^2)./(amplitudes{session}(:,1).^4).*(amplitudesSTD{session}(:,1).^2)-2*amplitudes{session}(:,2)./(amplitudes{session}(:,1).^3)*covarianceMelLMS)./sqrt((numberOfTrials{session}(:,1)+numberOfTrials{session}(:,2))/2);
+    covarianceBlueRed = cov(amplitudes{session}(:,3), amplitudes{session}(:,4));
+    covarianceBlueRed = covarianceBlueRed(1,2);
+    semBlueOverRed = sqrt(1./((amplitudes{session}(:,4).^2)).*(amplitudesSTD{session}(:,3).^2)+(amplitudes{session}(:,3).^2)./(amplitudes{session}(:,4).^4).*(amplitudesSTD{session}(:,4).^2)-2*amplitudes{session}(:,3)./(amplitudes{session}(:,4).^3)*covarianceBlueRed)./sqrt((numberOfTrials{session}(:,3)+numberOfTrials{session}(:,4))/2);
+    covarianceBlueRed = cov(amplitudes{session}(:,3), amplitudes{session}(:,4));
+    errorbar(amplitudes{session}(:,3)./amplitudes{session}(:,4), amplitudes{session}(:,2)./amplitudes{session}(:,1), semMelOverLMS, semMelOverLMS, 'bo')
+    herrorbar(amplitudes{session}(:,3)./amplitudes{session}(:,4), amplitudes{session}(:,2)./amplitudes{session}(:,1), semBlueOverRed, semBlueOverRed, 'bo')
+
     xlabel('Blue/Red Amplitude')
     ylabel('Mel/LMS Amplitude')
     r = corr2(x, y);
