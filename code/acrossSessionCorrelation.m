@@ -1,4 +1,4 @@
-function [ theResult ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSTD, numberOfTrials, dropboxAnalysisDir)
+function [ theResult ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
 
 % We've shown that a meaningful representation of the pupil response to
 % melanopsin stimulation is the amplitude of the pupil constriction to
@@ -22,31 +22,26 @@ for ss = 1:size(subjects{2},1) % loop over subjects that have completed both ses
         end
     end
   
-    melNormedOne(ss) = amplitudes{1}(firstSessionIndex,2)/amplitudes{1}(firstSessionIndex,1);
-    melNormedTwo(ss) = amplitudes{2}(secondSessionIndex,2)/amplitudes{2}(secondSessionIndex,1);
-    covarianceMelLMSOne = cov(amplitudes{1}(:,1), amplitudes{1}(:,2));
-    covarianceMelLMSOne = covarianceMelLMSOne(1,2);
-    semMelOverLMSOne(ss) = sqrt(1./((amplitudes{1}(firstSessionIndex,1).^2)).*(amplitudesSTD{1}(firstSessionIndex,2).^2)+(amplitudes{1}(firstSessionIndex,2).^2)./(amplitudes{1}(firstSessionIndex,1).^4).*(amplitudesSTD{1}(firstSessionIndex,1).^2)-2*amplitudes{1}(firstSessionIndex,2)./(amplitudes{1}(firstSessionIndex,1).^3)*covarianceMelLMSOne)./sqrt((numberOfTrials{1}(firstSessionIndex,1)+numberOfTrials{1}(firstSessionIndex,2))/2);
-    covarianceMelLMSTwo = cov(amplitudes{2}(:,1), amplitudes{2}(:,2));
-    covarianceMelLMSTwo = covarianceMelLMSTwo(1,2);
-    semMelOverLMSTwo(ss) = sqrt(1./((amplitudes{2}(secondSessionIndex,1).^2)).*(amplitudesSTD{2}(secondSessionIndex,2).^2)+(amplitudes{2}(secondSessionIndex,2).^2)./(amplitudes{2}(secondSessionIndex,1).^4).*(amplitudesSTD{2}(secondSessionIndex,1).^2)-2*amplitudes{2}(secondSessionIndex,2)./(amplitudes{2}(secondSessionIndex,1).^3)*covarianceMelLMSTwo)./sqrt((numberOfTrials{2}(secondSessionIndex,1)+numberOfTrials{2}(secondSessionIndex,2))/2);
+    melNormedOne(ss) = amplitudes{1}(firstSessionIndex,6);
+    melNormedTwo(ss) = amplitudes{2}(secondSessionIndex,6);
+    semMelOverLMSOne(ss) = amplitudesSEM{1}(firstSessionIndex,6);
+    semMelOverLMSTwo(ss) = amplitudesSEM{2}(secondSessionIndex,6);
     
     
-    piprOne(ss) = (amplitudes{1}(firstSessionIndex,3)*100)-(amplitudes{1}(firstSessionIndex,4)*100);
-    piprTwo(ss) = (amplitudes{2}(secondSessionIndex,3)*100)-(amplitudes{2}(secondSessionIndex,4)*100);
-    semPIPROne(ss) = 100*sqrt(amplitudesSTD{1}(firstSessionIndex,3).^2+amplitudesSTD{1}(firstSessionIndex,4).^2)./sqrt((numberOfTrials{1}(firstSessionIndex,3)+numberOfTrials{1}(firstSessionIndex,4))/2);
-    semPIPRTwo(ss) = 100*sqrt(amplitudesSTD{2}(secondSessionIndex,3).^2+amplitudesSTD{2}(secondSessionIndex,4).^2)./sqrt((numberOfTrials{2}(secondSessionIndex,3)+numberOfTrials{2}(secondSessionIndex,4))/2);
-
-    melPlusLMSOne(ss) = ((amplitudes{1}(firstSessionIndex,1)*100)+(amplitudes{1}(firstSessionIndex,2)*100/2));
-    melPlusLMSTwo(ss) = (amplitudes{2}(secondSessionIndex,1)*100)+(amplitudes{2}(secondSessionIndex,2)*100/2);
-    semMelPlusLMSOne(ss) = 100*sqrt(amplitudesSTD{1}(firstSessionIndex,1).^2+amplitudesSTD{1}(firstSessionIndex,2).^2)./sqrt((numberOfTrials{1}(firstSessionIndex,1)+numberOfTrials{1}(firstSessionIndex,2))/2);
-    semMelPlusLMSTwo(ss) = 100*sqrt(amplitudesSTD{2}(secondSessionIndex,1).^2+amplitudesSTD{2}(secondSessionIndex,2).^2)./sqrt((numberOfTrials{2}(secondSessionIndex,1)+numberOfTrials{2}(secondSessionIndex,2))/2);
-
-    bluePlusRedOne(ss) = ((amplitudes{1}(firstSessionIndex,3)*100)+(amplitudes{1}(firstSessionIndex,4)*100/2));
-    bluePlusRedTwo(ss) = (amplitudes{2}(secondSessionIndex,3)*100)+(amplitudes{2}(secondSessionIndex,4)*100/2);
-    semBluePlusRedOne(ss) = 100*sqrt(amplitudesSTD{1}(firstSessionIndex,3).^2+amplitudesSTD{1}(firstSessionIndex,4).^2)./sqrt((numberOfTrials{1}(firstSessionIndex,3)+numberOfTrials{1}(firstSessionIndex,4))/2);
-    semBluePlusRedTwo(ss) = 100*sqrt(amplitudesSTD{2}(secondSessionIndex,3).^2+amplitudesSTD{2}(secondSessionIndex,4).^2)./sqrt((numberOfTrials{2}(secondSessionIndex,3)+numberOfTrials{2}(secondSessionIndex,4))/2);
-
+    piprOne(ss) = amplitudes{1}(firstSessionIndex,5)*100;
+    piprTwo(ss) = amplitudes{2}(secondSessionIndex,5)*100;
+    semPIPROne(ss) = amplitudesSEM{1}(firstSessionIndex,5)*100;
+    semPIPRTwo(ss) = amplitudesSEM{2}(secondSessionIndex,5)*100;
+    
+    melPlusLMSOne(ss) = amplitudes{1}(firstSessionIndex,8)*100;
+    melPlusLMSTwo(ss) = amplitudes{2}(secondSessionIndex,8)*100;
+    semMelPlusLMSOne(ss) = amplitudesSEM{1}(firstSessionIndex,8)*100;
+    semMelPlusLMSTwo(ss) = amplitudesSEM{2}(secondSessionIndex,8)*100;
+    
+    bluePlusRedOne(ss) = amplitudes{1}(firstSessionIndex,9)*100;
+    bluePlusRedTwo(ss) = amplitudes{2}(secondSessionIndex,9)*100;
+    semBluePlusRedOne(ss) = amplitudesSEM{1}(firstSessionIndex,9)*100;
+    semBluePlusRedTwo(ss) = amplitudesSEM{2}(secondSessionIndex,9)*100;
 end
 
 % now do some plotting

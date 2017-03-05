@@ -20,11 +20,11 @@ subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR';
 %% Determine amplitude of verage response in each subject to PIPR, melanopsin-directed, 
 %% and LMS-directed stimulation
 
-[ amplitudes, amplitudesSTD, numberOfTrials ] = fitIAMPToSubjectAverageResponses_byTrial(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+[ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
 
 %% Calculate PIPR according to specific methods cited in the literature, and see how these results compare
 
-[ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, amplitudesSTD, dropboxAnalysisDir)
+[ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
 
 %% Determine the test-retest reliability of our measures of melanopsin repsonse
-[ theResult ] = acrossSessionCorrelation(goodSubjects, amplitudes, amplitudesSTD, numberOfTrials, dropboxAnalysisDir)
+[ theResult ] = acrossSessionCorrelation(goodSubjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
