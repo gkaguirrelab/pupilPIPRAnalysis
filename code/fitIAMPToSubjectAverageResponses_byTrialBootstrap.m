@@ -463,6 +463,8 @@ plot(-100:100,-100:100,'-')
     errorbar(amplitudes{session}(:,7), amplitudes{session}(:,6), amplitudesSEM{session}(:,6), 'bo')
     herrorbar(amplitudes{session}(:,7), amplitudes{session}(:,6), amplitudesSEM{session}(:,7), 'bo')
     plot(-100:100,-100:100,'-')
+    xlim([minValue maxValue])
+    ylim([minValue maxValue])
 
     xlabel('Blue/Red Amplitude')
     ylabel('Mel/LMS Amplitude')
