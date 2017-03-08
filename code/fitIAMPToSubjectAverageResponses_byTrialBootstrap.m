@@ -233,6 +233,7 @@ for session = 1:2
     minValue = min(combined);
     errorbar(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,2), 'bo')    
     herrorbar(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,1), 'bo')    
+plot(-100:100,-100:100,'-')
 
     xlabel('LMS Amplitude (%)')
     ylabel('Mel Amplitude (%)')
@@ -275,6 +276,8 @@ for session = 1:2
     minValue = min(combined);
     errorbar(amplitudes{session}(:,5)*100, amplitudes{session}(:,2)*100, amplitudesSEM{session}(:,2)*100, 'bo')    
     herrorbar(amplitudes{session}(:,5)*100, amplitudes{session}(:,2)*100, amplitudesSEM{session}(:,5)*100, 'bo')    
+    plot(-100:100,-100:100,'-')
+
     xlabel('PIPR Amplitude (%)')
     ylabel('Mel Amplitude (%)')
     r = corr2(amplitudes{session}(:,5), amplitudes{session}(:,2));
@@ -316,7 +319,8 @@ for session = 1:2
     minValue = min(combined);
     errorbar(amplitudes{session}(:,5)*100, amplitudes{session}(:,1)*100, amplitudesSEM{session}(:,1)*100, 'bo')
     herrorbar(amplitudes{session}(:,5)*100, amplitudes{session}(:,1)*100, amplitudesSEM{session}(:,5)*100, 'bo')
-    
+    plot(-100:100,-100:100,'-')
+
     ylabel('LMS Amplitude (%)')
     xlabel('PIPR Amplitude (%)')
     r = corr2(amplitudes{session}(:,5)*100, amplitudes{session}(:,1));
@@ -358,6 +362,7 @@ for session = 1:2
     minValue = min(combined);
     errorbar(amplitudes{session}(:,3)*100,amplitudes{session}(:,4)*100, amplitudesSEM{session}(:,4)*100, 'bo')
     herrorbar(amplitudes{session}(:,3)*100,amplitudes{session}(:,4)*100, amplitudesSEM{session}(:,3)*100, 'bo')
+    plot(-100:100,-100:100,'-')
 
     xlabel('Blue Amplitude (%)')
     ylabel('Red Amplitude (%)')
@@ -400,6 +405,7 @@ for session = 1:2
     minValue = min(combined);
     errorbar(amplitudes{session}(:,9)*100,amplitudes{session}(:,8)*100, amplitudesSEM{session}(:,8)*100, 'bo')
     herrorbar(amplitudes{session}(:,9)*100, amplitudes{session}(:,8)*100, amplitudesSEM{session}(:,9)*100, 'bo')
+    plot(-100:100,-100:100,'-')
 
     xlabel('Blue+Red Amplitude (%)')
     ylabel('LMS+Mel Amplitude (%)')
@@ -456,6 +462,7 @@ for session = 1:2
     %covarianceBlueRed = cov(amplitudes{session}(:,3), amplitudes{session}(:,4));
     errorbar(amplitudes{session}(:,7), amplitudes{session}(:,6), amplitudesSEM{session}(:,6), 'bo')
     herrorbar(amplitudes{session}(:,7), amplitudes{session}(:,6), amplitudesSEM{session}(:,7), 'bo')
+    plot(-100:100,-100:100,'-')
 
     xlabel('Blue/Red Amplitude')
     ylabel('Mel/LMS Amplitude')
