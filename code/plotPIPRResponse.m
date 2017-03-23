@@ -38,10 +38,10 @@ end
 
 for session = 1:2;
     
-    for ss = 1:size(goodSubjects{session},1);
+    for ss = 1:size(goodSubjects{session}{1},1);
         ss
         session
-        subject = goodSubjects{session}(ss,:);
+        subject = goodSubjects{session}{1}(ss,:);
         numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
         
@@ -49,16 +49,8 @@ for session = 1:2;
         dateList = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         dateList = dateList(~ismember({dateList.name},{'.','..', '.DS_Store'}));
         
-        if numberSessions == 1;
-            date = dateList(1).name;
-        end
-        if numberSessions == 2;
-            if session == 1;
-                date = dateList(2).name;
-            elseif session == 2;
-                date = dateList(1).name;
-            end
-        end
+        date = goodSubjects{session}{2}(ss,:);
+        
         blue = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRBlue_TimeSeries.csv']));
         red = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRRed_TimeSeries.csv']));
         % create average pupil response for a given subject to the red or blue
@@ -161,25 +153,13 @@ end
 
 %% Create plots across subjects that show the average response to the melanopsin and LMS stimuli
 for session = 1:2;
-    for ss = 1:size(goodSubjects{session},1);
-        subject = goodSubjects{session}(ss,:);
+    for ss = 1:size(goodSubjects{session}{1},1);
+        subject = goodSubjects{session}{1}(ss,:);
         numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
         
-        % determine the date of a session
-        dateList = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
-        dateList = dateList(~ismember({dateList.name},{'.','..', '.DS_Store'}));
-        
-        if numberSessions == 1;
-            date = dateList(1).name;
-        end
-        if numberSessions == 2;
-            if session == 1;
-                date = dateList(2).name;
-            elseif session == 2;
-                date = dateList(1).name;
-            end
-        end
+        date = goodSubjects{session}{2}(ss,:);
+
         lms = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulseLMS', subject, date, [subject, '_PupilPulseData_MaxLMS_TimeSeries.csv']));
         mel = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulseMel', subject, date, [subject, '_PupilPulseData_MaxMel_TimeSeries.csv']));
         % create average pupil response for a given subject to the red or blue

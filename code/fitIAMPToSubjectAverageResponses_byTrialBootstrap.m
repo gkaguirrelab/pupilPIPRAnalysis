@@ -17,7 +17,7 @@ for session = 1:2;
     amplitudes_nonBootstrapped{session} = [];
     amplitudesSTD_nonBootstrapped{session} = [];
     numberOfTrials{session} = [];
-    for subjects = 1:size(goodSubjects{session},1)
+    for subjects = 1:size(goodSubjects{session}{1},1)
         for stimuliTypes = 1:length(stimulusOrder)
             amplitudes_byTrial{session}{subjects}{stimuliTypes} = [];
         end
@@ -61,25 +61,12 @@ for session = 1:2;
     stimulus.timebase = timebase;
     thePacket.stimulus = stimulus;
     
-    for ss = 1:size(goodSubjects{session},1); % loop over subjects
-        subject = goodSubjects{session}(ss,:);
+    for ss = 1:size(goodSubjects{session}{1},1); % loop over subjects
+        subject = goodSubjects{session}{1}(ss,:);
         numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
-        
-        % determine the date of a session
-        dateList = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
-        dateList = dateList(~ismember({dateList.name},{'.','..', '.DS_Store'}));
-        
-        if numberSessions == 1;
-            date = dateList(1).name;
-        end
-        if numberSessions == 2;
-            if session == 1;
-                date = dateList(2).name;
-            elseif session == 2;
-                date = dateList(1).name;
-            end
-        end
+        date = goodSubjects{session}{2}(ss,:);
+
         
         for stimulation = 1:length(stimulusOrder);
             if stimulation == 1; % LMS condition
@@ -148,7 +135,7 @@ measures = {'lms' 'mel' 'blue' 'red' 'pipr' 'mel/lms' 'blue/red' 'lms+mel' 'blue
 nBootstraps = 100;
 
 for session = 1:2
-    for ss = 1:size(goodSubjects{session},1)
+    for ss = 1:size(goodSubjects{session}{1},1)
         for mm = 1:length(measures)
             if mm < 5 % for the lms, mel, blue, and red conditions, the bootstrap approach will be the same
                 result = [];

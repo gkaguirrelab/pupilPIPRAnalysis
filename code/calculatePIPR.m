@@ -49,25 +49,13 @@ for session = 1:2;
 end
 
 for session = 1:2;
-    for ss = 1:size(subjects{session},1);
-        subject = subjects{session}(ss,:);
+    for ss = 1:size(subjects{session}{1},1);
+        subject = subjects{session}{1}(ss,:);
         numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
         
-        % determine the date of a session
-        dateList = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
-        dateList = dateList(~ismember({dateList.name},{'.','..', '.DS_Store'}));
-        
-        if numberSessions == 1;
-            date = dateList(1).name;
-        end
-        if numberSessions == 2;
-            if session == 1;
-                date = dateList(2).name;
-            elseif session == 2;
-                date = dateList(1).name;
-            end
-        end
+        date = subjects{session}{2}(ss,:);
+
         blue = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRBlue_TimeSeries.csv']));
         red = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRRed_TimeSeries.csv']));
         for stimuli = 1:2;
@@ -86,7 +74,7 @@ end
 
 %% Now to calculate the actual PIPR values
 for session = 1:2;
-    for ss = 1:size(subjects{session},1);
+    for ss = 1:size(subjects{session}{1},1);
         pipr{session}(ss) = 0 - sustainedAmplitudes{session}(ss,1)*100;
         netPipr{session}(ss) = ((0 - sustainedAmplitudes{session}(ss,1)) - (0 - sustainedAmplitudes{session}(ss,2)))*100;
     end

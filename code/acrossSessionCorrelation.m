@@ -10,14 +10,14 @@ function [ theResult ] = acrossSessionCorrelation(subjects, amplitudes, amplitud
 % against the second session
 
 
-for ss = 1:size(subjects{2},1) % loop over subjects that have completed both sessions
-    subject = subjects{2}(ss,:);
+for ss = 1:size(subjects{2}{1},1) % loop over subjects that have completed both sessions
+    subject = subjects{2}{1}(ss,:);
     
     secondSessionIndex = ss;
     % determine the index corresponding to the same subject in the list of
     % subjects having successfully completed the first session
-    for x = 1:size(subjects{1},1)
-        if strcmp(subjects{1}(x,:),subject);
+    for x = 1:size(subjects{1}{1},1)
+        if strcmp(subjects{1}{1}(x,:),subject);
             firstSessionIndex = x;
         end
     end

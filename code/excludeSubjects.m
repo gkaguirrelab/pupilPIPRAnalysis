@@ -34,10 +34,18 @@ end
 
 blockTypes = {'PIPR', 'Mel', 'LMS'};
 
+% output will be a goodSubjects, which is a 1x2 cell array. The first cell
+% is the first session, the second cell is the second session. Within each
+% session is also a 1x2 cell array. The first cell array will be all of the
+% subject IDs, while the second cell array will be the corresponding dates
 for session = 1:2;
-    goodSubjects{session} = [];
+    goodSubjects{session}{1} = [];
+    goodSubjects{session}{2} = [];
+
+    badSubjects{session} = [];
     badSubjects{session} = [];
 end
+
 
 for ss = 1:length(subjectList);
     subject = subjectList(ss,:);
@@ -45,6 +53,7 @@ for ss = 1:length(subjectList);
     numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
     numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
     
+    numberGoodSessions = 0;
     for session = 1:numberSessions;
         % if failurePotential =/= 0, that means this subject meets exclusion
         % criteria and will be discarded
@@ -53,17 +62,13 @@ for ss = 1:length(subjectList);
         dateList = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         dateList = dateList(~ismember({dateList.name},{'.','..', '.DS_Store'}));
         
-        if numberSessions == 1;
-            date = dateList(1).name;
-        end
-        if numberSessions == 2;
-            if session == 1;
-                date = dateList(2).name;
-            elseif session == 2;
-                date = dateList(1).name;
-            end
-        end
         
+        
+        date = dateList(numberSessions - session + 1).name;
+        
+        % create a counter for each subject so we know how many good
+        % sessions they have. This will be used to organize a given "good
+        % session" as either the first or second session for that subject
         
         
         failurePotential = 0;
@@ -93,10 +98,20 @@ for ss = 1:length(subjectList);
             failurePotential = failurePotential +1;
         end
         if failurePotential == 0;
-            goodSubjects{session} = [goodSubjects{session}; subject];
+            if numberGoodSessions == 0;
+                goodSubjects{1}{1} = [goodSubjects{1}{1}; subject];
+                goodSubjects{1}{2} = [goodSubjects{1}{2}; date];
+                
+            end
+            if numberGoodSessions == 1;
+                goodSubjects{2}{1} = [goodSubjects{2}{1}; subject];
+                goodSubjects{2}{2} = [goodSubjects{2}{2}; date];
+            end
+            numberGoodSessions = numberGoodSessions + 1;
         end
         if failurePotential ~= 0;
-            badSubjects{session} = [badSubjects{session}; subject];
+            badSubjects{1} = [badSubjects{1}; subject];
+            badSubjects{2} = [badSubjects{2}; date];
         end
     end
 end
