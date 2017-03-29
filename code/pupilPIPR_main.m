@@ -10,7 +10,7 @@ subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR';
 
 %% Determine which subjects pass inclusion/exclusion criteria for use in further analyses
 
-[ goodSubjects, badSubjects ] = excludeSubjects()
+[ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
 
 %% Determine average response in each subject to PIPR, melanopsin-directed, 
 %% and LMS-directed stimulation
