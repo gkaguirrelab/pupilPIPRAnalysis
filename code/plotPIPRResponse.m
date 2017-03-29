@@ -11,8 +11,10 @@ function [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombi
 
 
 
+
 %% Create plots across subjects that show the average response to the red
 %% stimulus, the blue stimulus, and the blue-red response
+
 
 % Pre-allocate space for results variables
 for session = 1:2;
@@ -88,6 +90,7 @@ for session = 1:2;
         
         shadedErrorBar((1:length(averageBlue{session}))*0.02,averageBlue{session}*100, errBar*100, 'b', 1);
         hold on
+        line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
         
         errBar(1,:) = semRed{session}(1:(length(averageRed{session})));
         errBar(2,:) = semRed{session}(1:(length(averageRed{session})));
@@ -128,7 +131,7 @@ for session = 1:2;
     
     shadedErrorBar((1:length(averageBlueCollapsed{session}))*0.02,averageBlueCollapsed{session}*100, errBar*100, 'b', 1);
     hold on
-    
+    line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
     errBar(1,:) = semRedCollapsed{session}(1:(length(averageRedCollapsed{session})));
     errBar(2,:) = semRedCollapsed{session}(1:(length(averageRedCollapsed{session})));
     
@@ -190,7 +193,7 @@ for session = 1:2;
         
         shadedErrorBar((1:length(averageLMS{session}))*0.02,averageLMS{session}*100, errBar*100, 'b', 1);
         hold on
-        
+        line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
         
         xlabel('Time (s)');
         ylabel('Percent Change (%)');
@@ -240,7 +243,8 @@ errBar(1,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})))
 errBar(2,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 
 shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'b', 1);
-
+hold on
+line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 
 xlabel('Time (s)');
 ylabel('Percent Change (%)');
@@ -258,7 +262,8 @@ errBar(1,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})))
 errBar(2,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 
 shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'b', 1);
-
+hold on
+line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 
 xlabel('Time (s)');
 ylabel('Percent Change (%)');
@@ -282,6 +287,7 @@ xlabel('Time (s)');
 ylabel('Percent Change (%)');
 ylim([-60 20]);
 hold on
+line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 errBar(1,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 errBar(2,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 
