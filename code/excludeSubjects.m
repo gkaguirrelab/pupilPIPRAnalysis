@@ -1,13 +1,6 @@
-function [ goodSubjects, badSubjects ] = excludeSubjects()
+function [ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
 
-%% Setup basic variables
-% Discover user name and set Dropbox path
-[~, userName] = system('whoami');
-userName = strtrim(userName);
-dropboxAnalysisDir = ...
-    fullfile('/Users', userName, ...
-    '/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/');
-subAnalysisDirectory = 'PIPRMaxPulse_PulsePIPR/PIPRAverageResponse';
+
 
 % Obtain list of subjects. Dynanmically figures out who the subjects are
 % based on the contents of the PIPRMaxPulse_PulsePIPR folder
@@ -23,6 +16,13 @@ for ss = 1:length(dirSubjectList);
         subjectList = [subjectList; name];
     end
 end
+
+% run script to determine splatter results
+dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDir,' ','\\ ');
+dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ' (', ' \\(');
+dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ')', '\\)');
+
+[testOne, testTwo] = system(['bash ~/Dropbox-Personal/Aguirre/Code/averageValidation.sh ', dropboxAnalysisDirCleaned, '..']);
 
 %% First, determine which subjects had data of high enough quality to avoid exclusion criteria
 % For each subject, we're going to read in the subject's corresponding
@@ -41,7 +41,7 @@ blockTypes = {'PIPR', 'Mel', 'LMS'};
 for session = 1:2;
     goodSubjects{session}{1} = [];
     goodSubjects{session}{2} = [];
-
+    
     badSubjects{session} = [];
     badSubjects{session} = [];
 end
@@ -69,8 +69,7 @@ for ss = 1:length(subjectList);
         % create a counter for each subject so we know how many good
         % sessions they have. This will be used to organize a given "good
         % session" as either the first or second session for that subject
-        
-        
+       
         failurePotential = 0;
         totalFailedTrials = 0;
         totalTrials = 0;
@@ -79,6 +78,41 @@ for ss = 1:length(subjectList);
             blockTotalTrials = 0;
             dataQualityCSV = importdata(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse', blockTypes{bb}], subject, date, [subject, '_PupilPulseData_DataQuality.csv']));
             trialTypes = size(dataQualityCSV.data,1)-1;
+            
+            % apply exclusion criteria based on splatter
+            if exist(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 'file') % for mel and LMS, we also have to check to makes sure the splatter results are reasonable
+                preSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 1);
+                postSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'postSessionSplatterValidationStats.txt'), 1);
+                if bb == 3
+                    for xx = 4:6
+                        if preSplatterValues(xx) > 0.2
+                            failurePotential = failurePotential + 1;
+                        end
+                        if postSplatterValues(xx) > 0.2
+                            failurePotential = failurePotential + 1;
+                        end
+                    end
+                    if preSplatterValues(3) < 3.5
+                       failurePotential = failurePotential + 1;
+                    end
+                end
+                if bb == 2
+                    for xx = 3:5
+                        if preSplatterValues(xx) > 0.2
+                            failurePotential = failurePotential + 1;
+                        end
+                        if postSplatterValues(xx) > 0.2
+                            failurePotential = failurePotential + 1;
+                        end
+                    end
+                    if preSplatterValues(6) < 3.5
+                       failurePotential = failurePotential + 1;
+                    end
+                end
+            end
+            
+            
+            
             for tt = 1:trialTypes;
                 % keep track of total number of trials
                 totalTrials = totalTrials + dataQualityCSV.data(tt,2);
