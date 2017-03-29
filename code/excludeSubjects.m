@@ -22,7 +22,7 @@ dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDir,' ','\\ ');
 dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ' (', ' \\(');
 dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ')', '\\)');
 
-[testOne, testTwo] = system(['bash ~/Dropbox-Personal/Aguirre/Code/averageValidation.sh ', dropboxAnalysisDirCleaned, '..']);
+[testOne, testTwo] = system(['bash ', pwd,  '/helpers/averageValidation.sh ', dropboxAnalysisDirCleaned, '..']);
 
 %% First, determine which subjects had data of high enough quality to avoid exclusion criteria
 % For each subject, we're going to read in the subject's corresponding
