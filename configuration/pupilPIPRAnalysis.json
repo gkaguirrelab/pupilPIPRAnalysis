@@ -12,6 +12,19 @@
 		"update": "",
 		"url": ""
 	},
+{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "configuration/pupilPIPRAnalysisLocalHook",
+		"name": "pupilPIPRAnalysis",
+		"pathPlacement": "append",
+		"subfolder": "helpers",
+		"toolboxRoot": "",
+		"type": "git",
+		"update": "",
+		"url": ""
+	},
  	{
 		"flavor": "",
 		"hook": "",
