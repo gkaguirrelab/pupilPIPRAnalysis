@@ -220,7 +220,7 @@ for session = 1:2
     minValue = min(combined);
     errorbar(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,2), 'bo')    
     herrorbar(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,1), 'bo')    
-plot(-100:100,-100:100,'-')
+    plot(-100:100,-100:100,'-')
 
     xlabel('LMS Amplitude (%)')
     ylabel('Mel Amplitude (%)')
@@ -252,6 +252,9 @@ plot(-100:100,-100:100,'-')
     end
     saveas(plotFig, fullfile(outDir, ['correlateLMSxMel.png']), 'png');
     close(plotFig);
+    
+    prettyScatterplots(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,1), 100*amplitudesSEM{session}(:,2), 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'r', 'save', fullfile(outDir, ['correlateLMSxMel_pretty.png']), 'saveType', 'png')
+    
     
     % plot correlation of Mel and PIPR
     plotFig = figure;
@@ -382,6 +385,9 @@ plot(-100:100,-100:100,'-')
     saveas(plotFig, fullfile(outDir, ['correlateBluexRed.png']), 'png');
     close(plotFig);
     
+    prettyScatterplots(amplitudes{session}(:,3)*100, amplitudes{session}(:,4)*100, 100*amplitudesSEM{session}(:,3), 100*amplitudesSEM{session}(:,4), 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'r', 'save', fullfile(outDir, ['correlateBluexRed_pretty.png']), 'saveType', 'png')
+
+    
     % plot correlation of [blue + red]/2 and [LMS + mel]/2
     plotFig = figure;
     hold on
@@ -394,8 +400,8 @@ plot(-100:100,-100:100,'-')
     herrorbar(amplitudes{session}(:,9)*100, amplitudes{session}(:,8)*100, amplitudesSEM{session}(:,9)*100, 'bo')
     plot(-100:100,-100:100,'-')
 
-    xlabel('Blue+Red Amplitude (%)')
-    ylabel('LMS+Mel Amplitude (%)')
+    xlabel('(Blue+Red)/2 Amplitude (%)')
+    ylabel('(LMS+Mel)/2 Amplitude (%)')
     r = corr2(amplitudes{session}(:,9)*100,amplitudes{session}(:,8)*100);
     legend(['r = ', num2str(r)])
     hold on
@@ -426,6 +432,8 @@ plot(-100:100,-100:100,'-')
     saveas(plotFig, fullfile(outDir, ['correlateBlueRedxMelLMS.png']), 'png');
     close(plotFig);
     
+        prettyScatterplots(amplitudes{session}(:,9)*100, amplitudes{session}(:,8)*100, 100*amplitudesSEM{session}(:,9), 100*amplitudesSEM{session}(:,8), 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', '(Blue+Red)/2 Amplitude (%)', 'yLabel', '(Mel+LMS)/2 Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'r', 'save', fullfile(outDir, ['correlateBlueRedxMelLMS_pretty.png']), 'saveType', 'png')
+
     % plot correlation of [blue/red] and [mel/lms]
     x=[];
     y=[];

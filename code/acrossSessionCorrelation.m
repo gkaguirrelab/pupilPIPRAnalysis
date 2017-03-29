@@ -65,6 +65,7 @@ xlabel('Mel/LMS Session 1')
 ylabel('Mel/LMS Session 2')
 axis square
 maxValue = max(max(melNormedOne,melNormedTwo));
+minValue = min(min(melNormedOne,melNormedTwo));
 xlim([ 0 maxValue ]);
 ylim([ 0 maxValue ]);
 % determine spearman correlation:
@@ -73,6 +74,8 @@ legend(['rho = ', num2str(rho)])
 
 saveas(plotFig, fullfile(outDir, ['melNormedTestRetest.png']), 'png');
 close(plotFig);
+
+prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ minValue maxValue ], 'yLim', [ minValue maxValue ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melNormedTestRetest_pretty.png']), 'saveType', 'png', 'plotOption', 'square')
 
 % plot blue response normed by response to red (that is blue/red amplitude
 % ratio)
@@ -112,6 +115,8 @@ rho = corr(piprOne', piprTwo', 'type', 'Spearman');
 legend(['rho = ', num2str(rho)])
 saveas(plotFig, fullfile(outDir, ['PIPRTestRetest.png']), 'png');
 close(plotFig);
+prettyScatterplots(piprOne, piprTwo, semPIPROne, semPIPRTwo, 'xLim', [ minValue maxValue ], 'yLim', [ minValue maxValue ], 'xLabel', 'PIPR Session 1', 'yLabel', 'PIPR Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['PIPRTestRetest_pretty.png']), 'saveType', 'png')
+
 
 % next mel+lms response
 plotFig = figure;
@@ -131,6 +136,8 @@ legend(['rho = ', num2str(rho)])
 axis square
 saveas(plotFig, fullfile(outDir, ['melPlusLMSTestRetest.png']), 'png');
 close(plotFig);
+prettyScatterplots(melPlusLMSOne, melPlusLMSTwo, semMelPlusLMSOne, semMelPlusLMSTwo, 'xLim', [ 0 60 ], 'yLim', [ 0 60 ], 'xLabel', '(Mel+LMS)/2 Session 1', 'yLabel', '(Mel+LMS)/2 Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['MelPlusLMSTestRetest_pretty.png']), 'saveType', 'png')
+
 
 % next blue+red response
 plotFig = figure;
@@ -142,8 +149,8 @@ xlabel('(Blue+Red)/2 (%) Session 1')
 ylabel('(Blue+Red)/2 (%) Session 2')
 maxValue = max(max(bluePlusRedOne,bluePlusRedTwo));
 minValue = min(min(bluePlusRedOne,bluePlusRedTwo));
-xlim([ minValue maxValue ]);
-ylim([ minValue maxValue ]);
+xlim([ 0 60 ]);
+ylim([ 0 60 ]);
 axis square
 % determine spearman correlation:
 rho = corr(bluePlusRedOne', bluePlusRedTwo', 'type', 'Spearman');
@@ -151,5 +158,6 @@ legend(['rho = ', num2str(rho)])
 saveas(plotFig, fullfile(outDir, ['bluePlusRedTestRetest.png']), 'png');
 close(plotFig);
 
+prettyScatterplots(bluePlusRedOne, bluePlusRedTwo, semBluePlusRedOne, semBluePlusRedTwo, 'xLim', [ 0 60 ], 'yLim', [ 0 60 ], 'xLabel', '(Blue+Red)/2 Session 1', 'yLabel', '(Blue+Red)/2 Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['BluePlusRedTestRetest_pretty.png']), 'saveType', 'png')
 
 end % end function
