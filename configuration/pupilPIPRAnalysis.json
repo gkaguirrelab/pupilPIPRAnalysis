@@ -30,19 +30,6 @@
 		"hook": "",
 		"importance": "",
 		"localHookTemplate": "",
-		"name": "errbar",
-		"pathPlacement": "append",
-		"subfolder": "",
-		"toolboxRoot": "",
-		"type": "webget",
-		"update": "",
-		"url": "http:\/\/www.mathworks.com\/matlabcentral\/mlc-downloads\/downloads\/submissions\/50472\/versions\/3\/download\/zip"
-	},
-	{
-		"flavor": "",
-		"hook": "",
-		"importance": "",
-		"localHookTemplate": "",
 		"name": "temporalFittingEngine",
 		"pathPlacement": "append",
 		"subfolder": "",
@@ -56,6 +43,19 @@
 		"hook": "",
 		"importance": "",
 		"localHookTemplate": "",
+		"name": "errbar",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "webget",
+		"update": "",
+		"url": "http:\/\/www.mathworks.com\/matlabcentral\/mlc-downloads\/downloads\/submissions\/50472\/versions\/3\/download\/zip"
+	},
+	{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
 		"name": "PupilAnalysisToolbox",
 		"pathPlacement": "append",
 		"subfolder": "",
@@ -63,6 +63,20 @@
 		"type": "git",
 		"update": "",
 		"url": "https:\/\/github.com\/gkaguirrelab\/PupilAnalysisToolbox.git"
+	},
+		{
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "fshift",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "webget",
+		"update": "",
+		"url": "https:\/\/www.mathworks.com\/matlabcentral\/mlc-downloads\/downloads\/submissions\/7886\/versions\/5\/download\/zip"
 	}
+
 ]
 
