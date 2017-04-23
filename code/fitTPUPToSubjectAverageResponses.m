@@ -103,17 +103,19 @@ for session = 1:2;
         end
         
         thePacket.response.timebase = timebase;
-        thePacket.response.values = result;
+        thePacket.response.values = result*100;
         
         thePacket.metaData = [];
         
+        
+        initialValues=[200, 200, 10, -10, -25, -25];
+        vlb=[-500, 100, 1, -2000, -2000, -2000];
+        vub=[0, 500, 30, 0, 0, 0];
+        
         % do the fitting on the group average data
-        %[paramsFit,fVal,modelResponseStruct] =
-        %temporalFit.fitResponse(thePacket, 'defaultParamsInfo',
-        %defaultParamsInfo,'paramLockMatrix',paramLockMatrix,
-        %'initialValues', initialValues, 'vlb', vlb, 'vub',vub); % with
+        [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub); % with
         %first three parameters fixed
-        [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo,'paramLockMatrix',paramLockMatrix);
+        %[paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo,'paramLockMatrix',paramLockMatrix);
         
         if ~exist(outDir, 'dir')
             mkdir(outDir);
@@ -124,7 +126,7 @@ for session = 1:2;
             LMSParams{session} = paramsFit.paramMainMatrix;
             
             plotFig = figure;
-            plot(timebase/1000, result)
+            plot(timebase/1000, thePacket.response.values)
             hold on
             plot(timebase/1000, modelResponseStruct.values)
             xlabel('Time (s)')
@@ -153,7 +155,7 @@ for session = 1:2;
             MelParams{session} = paramsFit.paramMainMatrix;
             
             plotFig = figure;
-            plot(timebase/1000, result)
+            plot(timebase/1000, thePacket.response.values)
             hold on
             plot(timebase/1000, modelResponseStruct.values)
             xlabel('Time (s)')
@@ -180,7 +182,7 @@ for session = 1:2;
             % save params for fitting individual subjects
             blueParams{session} = paramsFit.paramMainMatrix;
             plotFig = figure;
-            plot(timebase/1000, result, 'Color', 'b')
+            plot(timebase/1000, thePacket.response.values, 'Color', 'b')
             hold on
             plot(timebase/1000, modelResponseStruct.values, '-', 'Color', 'b')
             xlabel('Time (s)')
@@ -207,7 +209,7 @@ for session = 1:2;
             % save params for fitting individual subjects
             redParams{session} = paramsFit.paramMainMatrix;
             plotFig = figure;
-            plot(timebase/1000, result, 'Color', 'r')
+            plot(timebase/1000, thePacket.response.values, 'Color', 'r')
             hold on
             plot(timebase/1000, modelResponseStruct.values, '-', 'Color', 'r')
             % determine variance explained
@@ -294,25 +296,25 @@ for session = 1:2;
             if stimulation == 1; % LMS condition
                 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseLMS/TPUP', num2str(session));
                 params = LMSParams;
-                result = averageLMSCombined{session}(ss, :);
+                result = 100*averageLMSCombined{session}(ss, :);
                 
             elseif stimulation == 2; % mel condition
                 params = MelParams;
                 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseMel/TPUP', num2str(session));
                 
-                result = averageMelCombined{session}(ss, :);
+                result = 100*averageMelCombined{session}(ss, :);
                 
                 
             elseif stimulation == 3; % blue condition
                 params = blueParams;
                 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/TPUP', num2str(session));
                 
-                result = averageBlueCombined{session}(ss, :);
+                result = 100*averageBlueCombined{session}(ss, :);
             elseif stimulation == 4; % red condition
                 params = redParams;
                 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/TPUP', num2str(session));
                 
-                result = averageRedCombined{session}(ss, :);
+                result = 100*averageRedCombined{session}(ss, :);
                 
             end
             
@@ -327,17 +329,29 @@ for session = 1:2;
             thePacket.metaData = [];
             
             % Set some initial values
-            initialValues=[params{1}(1), params{1}(2), params{1}(3), -10, -25, -25];
-            vlb=[params{1}(1), params{1}(2), params{1}(3), -2000, -2000, -2000];
-            vub=[params{1}(1), params{1}(2), params{1}(3), 0, 0, 0];
+            %initialValues=[params{1}(1), params{1}(2), params{1}(3), -10, -25, -25];
+            %vlb=[params{1}(1), params{1}(2), params{1}(3), -2000, -2000, -2000];
+            %vub=[params{1}(1), params{1}(2), params{1}(3), 0, 0, 0];
+            
+            initialValues=[200, 200, 10, -10, -25, -25];
+            vlb=[-500, 100, 1, -2000, -2000, -2000];
+            vub=[0, 500, 30, 0, 0, 0];
             
             % do the actual fitting via TPUP
-            [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo,'paramLockMatrix',paramLockMatrix, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub);
-            %[paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo,'paramLockMatrix',paramLockMatrix);
+            [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub);
+            %[paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo);
+            defaultVlb = [0 100 1 -2000 -2000 -2000];
+            defaultVub = [500 350 30 0 0 0];
             
             TPUPAmplitudes{session}{stimulation}(ss,1) = paramsFit.paramMainMatrix(4);
             TPUPAmplitudes{session}{stimulation}(ss,2) = paramsFit.paramMainMatrix(5);
             TPUPAmplitudes{session}{stimulation}(ss,3) = paramsFit.paramMainMatrix(6);
+            for pp = 1:3;
+                if paramsFit.paramMainMatrix(pp) == vlb(pp) || paramsFit.paramMainMatrix(pp) >= vub(pp)
+                   
+                    fprintf(['Subject: ', num2str(ss), ' Stimulation: ', stimulusOrder{stimulation}, ' Session: ', num2str(session), '\n Param ', num2str(pp), ': ', num2str(paramsFit.paramMainMatrix(pp)), '\n'])  
+                end
+            end
             
             % determine variance explained
             mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
