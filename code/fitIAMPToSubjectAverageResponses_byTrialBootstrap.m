@@ -123,7 +123,7 @@ for session = 1:2;
             amplitudes_nonBootstrapped{session}(ss,stimulation) = mean(stimulusAmplitudes(1:length(packetCellArray)));
             amplitudesSTD_nonBootstrapped{session}(ss,stimulation) = nanstd(stimulusAmplitudes(1:length(packetCellArray)));
             numberOfTrials{session}(ss,stimulation) = length(packetCellArray);
-            %if stimulation == 3;
+            if stimulation == 3;
             %figure; plot(thePacket.response.values); hold on; plot(modelResponseStruct.values); paramsFit.paramMainMatrix
             % end
         end
@@ -132,7 +132,7 @@ end % end loop over sessions
 
 %% now to do the bootstrapping:
 measures = {'lms' 'mel' 'blue' 'red' 'pipr' 'mel/lms' 'blue/red' 'lms+mel' 'blue+red'};
-nBootstraps = 100;
+nBootstraps = 10000;
 
 for session = 1:2
     for ss = 1:size(goodSubjects{session}{1},1)
