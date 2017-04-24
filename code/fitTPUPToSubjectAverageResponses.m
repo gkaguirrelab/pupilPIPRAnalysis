@@ -1,4 +1,4 @@
-function [ TPUPAmplitudes ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+function [ TPUPAmplitudes, temporalParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
 
 % The main output will be an [ss x 3] matrix, called amplitude, which contains the results
 % from fitting the IAMP model to to average responses per subject. The
@@ -239,6 +239,8 @@ end
 for session = 1:2;
     for stimulation = 1:length(stimulusOrder)
         TPUPAmplitudes{session}{stimulation} = [];
+        temporalParameters{session}{stimulation} = [];
+        varianceExplained{session}{stimulation} = [];
     end
 end
 
@@ -346,6 +348,10 @@ for session = 1:2;
             TPUPAmplitudes{session}{stimulation}(ss,1) = paramsFit.paramMainMatrix(4);
             TPUPAmplitudes{session}{stimulation}(ss,2) = paramsFit.paramMainMatrix(5);
             TPUPAmplitudes{session}{stimulation}(ss,3) = paramsFit.paramMainMatrix(6);
+            temporalParameters{session}{stimulation}(ss,1) = paramsFit.paramMainMatrix(1);
+            temporalParameters{session}{stimulation}(ss,2) = paramsFit.paramMainMatrix(2);
+            temporalParameters{session}{stimulation}(ss,3) = paramsFit.paramMainMatrix(3);
+            
             for pp = 1:3;
                 if paramsFit.paramMainMatrix(pp) == vlb(pp) || paramsFit.paramMainMatrix(pp) >= vub(pp)
                    
@@ -356,6 +362,7 @@ for session = 1:2;
             % determine variance explained
             mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
             rSquared = mdl.Rsquared.Ordinary;
+            varianceExplained{session}{stimulation}(ss,1) = rSquared;
             
             % save plot of model fits
             plotFig = figure;
@@ -394,11 +401,15 @@ for session = 1:2
     amplitudes = [];
     sem = [];
     for stimulus = 1:length(stimulusOrder)
-        for measure = 1:3 % we have three measures of amplitude: transient, sustained, persistent
+        for measure = 1:3 % we have three measures of amplitude: transient, sustained, persistent as well as three temporal parameters
             amplitudes(measure,stimulus) = mean(TPUPAmplitudes{session}{stimulus}(:,measure));
             sem(measure,stimulus) = std(TPUPAmplitudes{session}{stimulus}(:,measure))/sqrt(length(TPUPAmplitudes{session}{stimulus}));
+            meanTemporalParameters(measure,stimulus) = mean(temporalParameters{session}{stimulus}(:,measure));
+            semTemporalParameters(measure,stimulus) = std(temporalParameters{session}{stimulus}(:,measure))/sqrt(length(temporalParameters{session}{stimulus}));
+
         end
     end
+    
     
     plotFig = figure;
     
@@ -408,9 +419,50 @@ for session = 1:2
     b(3).FaceColor = 'b';
     b(4).FaceColor = 'r';
     set(gca,'XTickLabel',{'Transient', 'Sustained', 'Persistent'})
+    title('Mean TPUP Amplitudes')
     legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
     outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/TPUP', num2str(session));
     saveas(plotFig, fullfile(outDir, ['compareStimuli.png']), 'png');
+    close(plotFig);
+    
+    
+    % now compare the temporal parameters
+    % first set the delay to positive
+    for stimulus = 1:length(stimulusOrder)
+        meanTemporalParameters(1,stimulus) = meanTemporalParameters(1,stimulus) * -1;
+    end
+    
+    plotFig = figure;
+    b = barwitherr(semTemporalParameters, meanTemporalParameters);
+    b(1).FaceColor = 'c';
+    b(2).FaceColor = 'm';
+    b(3).FaceColor = 'b';
+    b(4).FaceColor = 'r';
+    set(gca,'XTickLabel',{'Delay', 'Gamma Tau', 'Exponential Tau'})
+    legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthEast')
+    title('Mean Temporal Parameters')
+    outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/TPUP', num2str(session));
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_temporalParameters.png']), 'png');
+    close(plotFig);
+    
+    % now compare the median variance explained
+    % first calculate the median variance for each stimulation
+    for stimulus = 1:length(stimulusOrder)
+        medianVarianceExplained(measure,stimulus) = median(varianceExplained{session}{stimulus}(:,1));
+        iqrVarianceExplained(measure,stimulus) = iqr(varianceExplained{session}{stimulus}(:,1))
+    end
+    % now do the plotting
+    plotFig = figure;
+    b = barwitherr(1/2*iqrVarianceExplained, medianVarianceExplained);
+    b(1).FaceColor = 'c';
+    b(2).FaceColor = 'm';
+    b(3).FaceColor = 'b';
+    b(4).FaceColor = 'r';
+    set(gca,'XTickLabel',{'Variance Explained'})
+    legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
+    title('Median Variance Explained')
+    outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/TPUP', num2str(session));
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_medianVarianceExplained.png']), 'png');
     close(plotFig);
 end
 
