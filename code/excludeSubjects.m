@@ -69,7 +69,7 @@ for ss = 1:length(subjectList);
         % create a counter for each subject so we know how many good
         % sessions they have. This will be used to organize a given "good
         % session" as either the first or second session for that subject
-       
+        
         failurePotential = 0;
         totalFailedTrials = 0;
         totalTrials = 0;
@@ -80,33 +80,39 @@ for ss = 1:length(subjectList);
             trialTypes = size(dataQualityCSV.data,1)-1;
             
             % apply exclusion criteria based on splatter
-            if exist(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 'file') % for mel and LMS, we also have to check to makes sure the splatter results are reasonable
-                preSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 1);
-                postSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'postSessionSplatterValidationStats.txt'), 1);
-                if bb == 3
-                    for xx = 4:6
-                        if preSplatterValues(xx) > 0.2
-                            failurePotential = failurePotential + 1;
+            if bb == 2 || bb == 3
+                if datenum(date, 'mmddyy') > datenum('092916', 'mmddyy')
+                    if exist(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 'file') % for mel and LMS, we also have to check to makes sure the splatter results are reasonable
+                        preSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 1);
+                        postSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'postSessionSplatterValidationStats.txt'), 1);
+                        if bb == 3
+                            for xx = 4:6
+                                if preSplatterValues(xx) > 0.2
+                                    failurePotential = failurePotential + 1;
+                                end
+                                if postSplatterValues(xx) > 0.2
+                                    failurePotential = failurePotential + 1;
+                                end
+                            end
+                            if preSplatterValues(3) < 3.5
+                                failurePotential = failurePotential + 1;
+                            end
                         end
-                        if postSplatterValues(xx) > 0.2
-                            failurePotential = failurePotential + 1;
+                        if bb == 2
+                            for xx = 3:5
+                                if preSplatterValues(xx) > 0.2
+                                    failurePotential = failurePotential + 1;
+                                end
+                                if postSplatterValues(xx) > 0.2
+                                    failurePotential = failurePotential + 1;
+                                end
+                            end
+                            if preSplatterValues(6) < 3.5
+                                failurePotential = failurePotential + 1;
+                            end
                         end
-                    end
-                    if preSplatterValues(3) < 3.5
-                       failurePotential = failurePotential + 1;
-                    end
-                end
-                if bb == 2
-                    for xx = 3:5
-                        if preSplatterValues(xx) > 0.2
-                            failurePotential = failurePotential + 1;
-                        end
-                        if postSplatterValues(xx) > 0.2
-                            failurePotential = failurePotential + 1;
-                        end
-                    end
-                    if preSplatterValues(6) < 3.5
-                       failurePotential = failurePotential + 1;
+                    else % if you don't have the splatter values past a certain date, you fail
+                        failurePotential = failurePotential + 1;
                     end
                 end
             end
