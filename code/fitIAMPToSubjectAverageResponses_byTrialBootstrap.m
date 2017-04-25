@@ -62,6 +62,8 @@ for session = 1:2;
     thePacket.stimulus = stimulus;
     
     for ss = 1:size(goodSubjects{session}{1},1); % loop over subjects
+        
+        
         subject = goodSubjects{session}{1}(ss,:);
         numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
@@ -123,9 +125,7 @@ for session = 1:2;
             amplitudes_nonBootstrapped{session}(ss,stimulation) = mean(stimulusAmplitudes(1:length(packetCellArray)));
             amplitudesSTD_nonBootstrapped{session}(ss,stimulation) = nanstd(stimulusAmplitudes(1:length(packetCellArray)));
             numberOfTrials{session}(ss,stimulation) = length(packetCellArray);
-            if stimulation == 3;
-            %figure; plot(thePacket.response.values); hold on; plot(modelResponseStruct.values); paramsFit.paramMainMatrix
-            % end
+            
         end
     end
 end % end loop over sessions
