@@ -143,9 +143,9 @@ for session = 1:2;
             xrange = xlims(2)-xlims(1);
             yrange = ylims(2) - ylims(1);
             xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.15*yrange;
+            ypos = ylims(1)+0.20*yrange;
             
-            string = (sprintf(['Transient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
             text(xpos, ypos, string)
             saveas(plotFig, fullfile(outDir, ['groupAverage.png']), 'png');
             
@@ -171,9 +171,9 @@ for session = 1:2;
             xrange = xlims(2)-xlims(1);
             yrange = ylims(2) - ylims(1);
             xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.15*yrange;
+            ypos = ylims(1)+0.20*yrange;
             
-            string = (sprintf(['Transient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
             text(xpos, ypos, string)
             saveas(plotFig, fullfile(outDir, ['groupAverage.png']), 'png');
             
@@ -182,9 +182,9 @@ for session = 1:2;
             % save params for fitting individual subjects
             blueParams{session} = paramsFit.paramMainMatrix;
             plotFig = figure;
-            plot(timebase/1000, thePacket.response.values, 'Color', 'b')
+            plot(timebase/1000, thePacket.response.values)
             hold on
-            plot(timebase/1000, modelResponseStruct.values, '-', 'Color', 'b')
+            plot(timebase/1000, modelResponseStruct.values)
             xlabel('Time (s)')
             ylabel('Pupil Diameter (% Change)')
             % determine variance explained
@@ -197,9 +197,9 @@ for session = 1:2;
             xrange = xlims(2)-xlims(1);
             yrange = ylims(2) - ylims(1);
             xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.15*yrange;
+            ypos = ylims(1)+0.20*yrange;
             
-            string = (sprintf(['Transient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
             text(xpos, ypos, string)
             saveas(plotFig, fullfile(outDir, ['blueGroupAverage.png']), 'png');
             close(plotFig)
@@ -209,9 +209,9 @@ for session = 1:2;
             % save params for fitting individual subjects
             redParams{session} = paramsFit.paramMainMatrix;
             plotFig = figure;
-            plot(timebase/1000, thePacket.response.values, 'Color', 'r')
+            plot(timebase/1000, thePacket.response.values)
             hold on
-            plot(timebase/1000, modelResponseStruct.values, '-', 'Color', 'r')
+            plot(timebase/1000, modelResponseStruct.values)
             % determine variance explained
             mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
             rSquared = mdl.Rsquared.Ordinary;
@@ -225,9 +225,9 @@ for session = 1:2;
             xrange = xlims(2)-xlims(1);
             yrange = ylims(2) - ylims(1);
             xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.15*yrange;
+            ypos = ylims(1)+0.20*yrange;
             
-            string = (sprintf(['Transient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
             text(xpos, ypos, string)
             saveas(plotFig, fullfile(outDir, ['redGroupAverage.png']), 'png');
             close(plotFig);
@@ -377,16 +377,16 @@ for session = 1:2;
             xrange = xlims(2)-xlims(1);
             yrange = ylims(2) - ylims(1);
             xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.15*yrange;
+            ypos = ylims(1)+0.20*yrange;
             
-            string = (sprintf(['Transient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
             text(xpos, ypos, string)
             
             
             
             
             
-            saveas(plotFig, fullfile(outDir, [subject, '.png']), 'png');
+            saveas(plotFig, fullfile(outDir, [subject, '_', stimulusOrder{stimulation}, '.png']), 'png');
             close(plotFig);
             
         end
@@ -448,18 +448,15 @@ for session = 1:2
     % now compare the median variance explained
     % first calculate the median variance for each stimulation
     for stimulus = 1:length(stimulusOrder)
-        medianVarianceExplained(measure,stimulus) = median(varianceExplained{session}{stimulus}(:,1));
-        iqrVarianceExplained(measure,stimulus) = iqr(varianceExplained{session}{stimulus}(:,1))
+        medianVarianceExplained(1,stimulus) = median(varianceExplained{session}{stimulus}(:,1));
+        iqrVarianceExplained(1,stimulus) = iqr(varianceExplained{session}{stimulus}(:,1));
     end
     % now do the plotting
     plotFig = figure;
     b = barwitherr(1/2*iqrVarianceExplained, medianVarianceExplained);
-    b(1).FaceColor = 'c';
-    b(2).FaceColor = 'm';
-    b(3).FaceColor = 'b';
-    b(4).FaceColor = 'r';
-    set(gca,'XTickLabel',{'Variance Explained'})
-    legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
+    
+    set(gca,'XTickLabel',{'LMS', 'Mel', 'Blue', 'Red'})
+    %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
     title('Median Variance Explained')
     outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/TPUP', num2str(session));
     saveas(plotFig, fullfile(outDir, ['compareStimuli_medianVarianceExplained.png']), 'png');
