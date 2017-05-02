@@ -77,6 +77,13 @@ if strcmp(p.Results.unity, 'on')
     plot(-100:100, -100:100, '-.', 'Color', errorBarColor)
 end
 
+if strcmp(p.Results.xLim, 'none')
+else
+    xlim([p.Results.xLim(1) p.Results.xLim(2)])
+    ylim([p.Results.yLim(1), p.Results.yLim(2)])
+end
+
+
 if strcmp(p.Results.xLabel, 'none') && strcmp(p.Results.yLabel, 'none')
 else
     xlabel(p.Results.xLabel)
@@ -116,26 +123,50 @@ end
 
 if strcmp(p.Results.significance, 'r')
     r = corr2(x, y);
-    legend(['r = ', num2str(r)])
+    xlims=get(gca,'xlim');
+    ylims=get(gca,'ylim');
+    xrange = xlims(2)-xlims(1);
+    yrange = ylims(2) - ylims(1);
+    xpos = xlims(1)+0.20*xrange;
+    ypos = ylims(1)+0.80*yrange;
+    string = (sprintf(['r = ', num2str(r)]));
+    text(xpos, ypos, string, 'fontsize',12)
 elseif strcmp(p.Results.significance, 'pearson')
     r = corr2(x, y);
-    legend(['r = ', num2str(r)])
+    xlims=get(gca,'xlim');
+    ylims=get(gca,'ylim');
+    xrange = xlims(2)-xlims(1);
+    yrange = ylims(2) - ylims(1);
+    xpos = xlims(1)+0.20*xrange;
+    ypos = ylims(1)+0.80*yrange;
+    string = (sprintf(['r = ', num2str(r)]));
+    text(xpos, ypos, string, 'fontsize',12)
 elseif strcmp(p.Results.significance, 'rho')
-   rho = corr(x', y', 'type', 'Spearman');
-    legend(['rho = ', num2str(rho)])
+    rho = corr(x', y', 'type', 'Spearman');
+    xlims=get(gca,'xlim');
+    ylims=get(gca,'ylim');
+    xrange = xlims(2)-xlims(1);
+    yrange = ylims(2) - ylims(1);
+    xpos = xlims(1)+0.20*xrange;
+    ypos = ylims(1)+0.80*yrange;
+    string = (sprintf(['rho = ', num2str(rho)]));
+    text(xpos, ypos, string, 'fontsize',12)
 elseif strcmp(p.Results.significance, 'spearman')
     rho = corr(x', y', 'type', 'Spearman');
-    legend(['rho = ', num2str(rho)])
+    xlims=get(gca,'xlim');
+    ylims=get(gca,'ylim');
+    xrange = xlims(2)-xlims(1);
+    yrange = ylims(2) - ylims(1);
+    xpos = xlims(1)+0.20*xrange;
+    ypos = ylims(1)+0.80*yrange;
+    string = (sprintf(['rho = ', num2str(rho)]));
+    text(xpos, ypos, string, 'fontsize',12)
 end
-    
+
 
 
 %'lineOfBestFit', square, statistic, squareFromZero
-if strcmp(p.Results.xLim, 'none')
-else
-    xlim([p.Results.xLim(1) p.Results.xLim(2)])
-    ylim([p.Results.yLim(1), p.Results.yLim(2)])
-end
+
 
 
 
