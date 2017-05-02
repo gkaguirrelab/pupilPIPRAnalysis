@@ -280,7 +280,7 @@ plotFig = figure;
 errBar(1,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 errBar(2,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 
-shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'm', 1);
+h1 = shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'm', 1);
 
 
 xlabel('Time (s)');
@@ -291,17 +291,20 @@ line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 errBar(1,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 errBar(2,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 
-shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'c', 1);
+h2 = shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'c', 1);
 
 
 xlabel('Time (s)');
 ylabel('Percent Change (%)');
+legend([h1.mainLine,h2.mainLine],'Cone-Directed', 'Melanopsin-Directed')
 ylim([-60 20]);
 outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulseLMS/AverageResponse', num2str(session));
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
 saveas(plotFig, fullfile(outDir, ['LMSAndMel.png']), 'png');
+saveas(plotFig, fullfile(outDir, ['LMSAndMel.pdf']), 'pdf');
+
 close(plotFig);
 end
 
