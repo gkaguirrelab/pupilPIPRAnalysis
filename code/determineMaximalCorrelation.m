@@ -11,7 +11,7 @@ end
 
 
 
-nSubjects = 30;
+nSubjects = 23;
 
 
 
