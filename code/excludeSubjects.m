@@ -156,4 +156,20 @@ for ss = 1:length(subjectList);
     end
 end
 
+% addendum until we figure out a more elegant way to code this piece:
+% -MELA_0037 on 12/06/2016: post experiment, both LMS and mel have very high splatter (200%) for just the first of 5 post-experiment validations -> but the other ones look great
+% -MELA_0038 on 2/02/2017: for the mel validation, the first validation post-experiment also has very high S-splatter (-150%) -> but again, the other values look great
+% so since these scans look like they're actually good, we'll just manually
+% add them
+
+goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0037'];
+goodSubjects{2}{2} = [goodSubjects{2}{2}; '120616'];
+
+
+goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0038'];
+goodSubjects{2}{2} = [goodSubjects{2}{2}; '020217'];
+
+
+
+
 end % end function
