@@ -1,4 +1,4 @@
-function [] = calculateDerivative(pupilPacket)
+function [derivative] = calculateDerivative(pupilPacket)
 
 numberTimepoints = 7;
 
@@ -19,7 +19,7 @@ for timepoint = 1:length(pupilPacket.response.values)
         derivative(timepoint) = slope;
 end
 
-plot(pupilPacket.response.timebase, abs(derivative))
+%plot(pupilPacket.response.timebase, abs(derivative))
 
 
         
