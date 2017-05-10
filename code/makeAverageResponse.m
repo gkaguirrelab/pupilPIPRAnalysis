@@ -211,7 +211,8 @@ for session = 1:2;
         
         shadedErrorBar((1:length(averageMel{session}))*0.02,averageMel{session}*100, errBar*100, 'b', 1);
         hold on
-        
+        line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
+
         
         xlabel('Time (s)');
         ylabel('Percent Change (%)');
