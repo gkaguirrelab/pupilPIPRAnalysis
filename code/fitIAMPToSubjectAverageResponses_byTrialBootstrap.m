@@ -240,6 +240,21 @@ for session = 1:2
             xlabel('Time (s)')
             ylabel('Pupil Diameter (% Change)')
             
+            % determine goodness of fit
+            mdl = fitlm(response{session}(ss,:), kernel*amplitudes{session}(ss,mm));
+            rSquared = mdl.Rsquared.Ordinary;
+            
+            % print some summary info to the plot
+            xlims=get(gca,'xlim');
+            ylims=get(gca,'ylim');
+            xrange = xlims(2)-xlims(1);
+            yrange = ylims(2) - ylims(1);
+            xpos = xlims(1)+0.70*xrange;
+            ypos = ylims(1)+0.20*yrange;
+            
+            string = (sprintf(['Amplitude: ', num2str(amplitudes{session}(ss,mm)), '\nAmplitude SEM: ',  num2str(amplitudesSEM{session}(ss,mm)), '\nR2: ', num2str(rSquared)]));
+            text(xpos, ypos, string)
+            
             outDir = fullfile(dropboxAnalysisDir,subDir, subFolder, num2str(session));
             if ~exist(outDir, 'dir')
                 mkdir(outDir);
