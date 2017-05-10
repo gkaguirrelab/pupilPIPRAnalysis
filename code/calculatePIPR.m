@@ -80,9 +80,11 @@ for session = 1:2;
     end
 end
 %% Plot these results to show how the different values of PIPR relate to each other
+subDir = 'pupilPIPRAnalysis/IAMP/calculatePIPR'
+
 % Plot correlation of this PIPR with IAMP PIPR
 for session = 1:2;
-    outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/calculatePIPR', num2str(session));
+    outDir = fullfile(dropboxAnalysisDir,subDir, num2str(session));
     if ~exist(outDir, 'dir')
         mkdir(outDir);
     end

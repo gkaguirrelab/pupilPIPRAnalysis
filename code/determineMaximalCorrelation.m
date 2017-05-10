@@ -1,8 +1,8 @@
-function [trueRho] = determineMaximalCorrelation(amplitudesSEM, dropboxAnalysisDir)
+function [trueRho] = determineMaximalCorrelation(amplitudesSEM, rhoMel, dropboxAnalysisDir)
 
 
 
-outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/AverageResponse');
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/IAMP/testRetest');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -232,7 +232,7 @@ plotFig = figure;
 h = histogram(rhoWithMeasurementError);
 xlabel('Rho With Measurement Error')
 ylabel('Frequency')
-line([0.56748 0.56748], [0 max(h.Values)])
+line([rhoMel rhoMel], [0 max(h.Values)])
 mean(rhoWithMeasurementError)
 saveas(plotFig, fullfile(outDir, ['perfectTestRetestHistogram.png']), 'png');
 close(plotFig);
