@@ -27,12 +27,12 @@ fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff'; % with extended gamma range
 switch packetCacheBehavior
     case 'make'  % If we are not to load the cache, then we must generate it
         % Make the average responses. 
-        [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined] = makeAverageResponse(goodSubjects, dropboxAnalysisDir);
+        [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined, semLMS, semMel, semBlue, semRed] = makeAverageResponse(goodSubjects, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the packetCellArray
         packetCacheHash = DataHash(averageBlueCombined);
         % Set path to the packetCache and save it using the MD5 hash name
         packetCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [packetCacheTag '_' packetCacheHash '.mat']);
-        save(packetCacheFileName, 'averageMelCombined', 'averageLMSCombined', 'averageBlueCombined', 'averageRedCombined','-v7.3');
+        save(packetCacheFileName, 'averageMelCombined', 'averageLMSCombined', 'averageBlueCombined', 'averageRedCombined', 'semLMS', 'semMel', 'semBlue', 'semRed','-v7.3');
         fprintf(['Saved the ' packetCacheTag ' with hash ID ' packetCacheHash '\n']);
     case 'load'  % load a cached packetCellArray
         fprintf('>> Loading cached packetCellArray\n');
@@ -63,12 +63,12 @@ end
 % Fit TPUP model to avg packets
 switch fitTPUPCacheBehavior    
     case 'make'
-        [ TPUPAmplitudes, temporalParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
+        [ TPUPAmplitudes, temporalParameters, varianceExplained ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the TPUP fits
         fitTPUPCacheHash = DataHash(TPUPAmplitudes);        
         % Set path to the packetCache and save it using the MD5 hash name
         fitTPUPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitTPUPCacheTag '_' fitTPUPCacheHash '.mat']);
-        save(fitTPUPCacheFileName,'TPUPAmplitudes', 'temporalParameters','-v7.3');
+        save(fitTPUPCacheFileName,'TPUPAmplitudes', 'temporalParameters', 'varianceExplained', '-v7.3');
         fprintf(['Saved the ' fitTPUPCacheTag ' with hash ID ' fitTPUPCacheHash '\n']);        
     case 'load'  % load a cached TPUP parameters        
         fprintf(['>> Loading cached ' fitTPUPCacheTag ' \n']);
@@ -100,9 +100,12 @@ acrossStimulusCorrelations(amplitudes, amplitudesSEM, dropboxAnalysisDir);
 [trueRho] = determineMaximalCorrelation(amplitudesSEM, rhoMel, dropboxAnalysisDir)
 
 
-%% Fit individual average repsonses with the TPUP Model
-[ TPUPAmplitudes, temporalParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+%% TPUP Analysis
+% First summarize results of the TPUP fits
+summarizeTPUP(TPUPAmplitudes, temporalParameters, varianceExplained, dropboxAnalysisDir)
+
+%% Summary plotting
+% Create sparkline
+plotSparkline(averageBlueCombined, averageLMSCombined, averageMelCombined, averageRedCombined, semBlue, semLMS, semMel, semRed, dropboxAnalysisDir)
 
 
-
-%% Determine the test-retest reliability of our measures of melanopsin repsonse
