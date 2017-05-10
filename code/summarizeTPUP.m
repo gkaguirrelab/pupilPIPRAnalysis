@@ -92,8 +92,8 @@ for session = 1:2
     % Transient Amplitude
     subplot(2,3,1)
     hold on
-    edges = -70:10:0
-    edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2
+    edges = -70:10:0;
+    edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
         h = histc(TPUPAmplitudes{session}{stimulation}(:,1), edges);
