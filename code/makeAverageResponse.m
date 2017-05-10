@@ -1,4 +1,4 @@
-function [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined] = makeAverageResponse(goodSubjects, dropboxAnalysisDir)
+function [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined, semLMS, semMel, semBlue, semRed] = makeAverageResponse(goodSubjects, dropboxAnalysisDir)
 
 % Function to plot the average  response
 
@@ -65,34 +65,34 @@ for session = 1:2;
             for timepoints = 1:length(color);
                 if stimuli == 1;
                     averageBlue{session}(1, timepoints) = nanmean(color(timepoints, :));
-                    semBlue{session}(1,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
+                    semBlue{session}(ss,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
                     averageBlueCombined{session}(ss, timepoints) = nanmean(color(timepoints, :));
                 elseif stimuli == 2;
                     averageRed{session}(1, timepoints) = nanmean(color(timepoints, :));
                     averageRedCombined{session}(ss, timepoints) = nanmean(color(timepoints, :));
-                    semRed{session}(1,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
+                    semRed{session}(ss,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
                 end
             end
         end
         pipr{session} = averageBlue{session}-averageRed{session};
         % calculate SEM for pipr
         for timepoints = 1:length(pipr{session});
-            semPipr{session}(1,timepoints) = (semBlue{session}(1,timepoints)^2 + semRed{session}(1,timepoints)^2)^(1/2);
+            semPipr{session}(1,timepoints) = (semBlue{session}(ss,timepoints)^2 + semRed{session}(ss,timepoints)^2)^(1/2);
         end
         piprCombined{session}(ss,:) = averageBlue{session}-averageRed{session};
         averageBlueCombined{session}(ss,:) = averageBlue{session};
         averageRedCombined{session}(ss,:) = averageRed{session};
         % now do the plotting per subject
         plotFig = figure;
-        errBar(1,:) = semBlue{session}(1:(length(averageBlue{session})));
-        errBar(2,:) = semBlue{session}(1:(length(averageBlue{session})));
+        errBar(1,:) = semBlue{session}(ss,1:(length(averageBlue{session})));
+        errBar(2,:) = semBlue{session}(ss,1:(length(averageBlue{session})));
         
         shadedErrorBar((1:length(averageBlue{session}))*0.02,averageBlue{session}*100, errBar*100, 'b', 1);
         hold on
         line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
         
-        errBar(1,:) = semRed{session}(1:(length(averageRed{session})));
-        errBar(2,:) = semRed{session}(1:(length(averageRed{session})));
+        errBar(1,:) = semRed{session}(ss,1:(length(averageRed{session})));
+        errBar(2,:) = semRed{session}(ss,1:(length(averageRed{session})));
         
         shadedErrorBar((1:length(averageRed{session}))*0.02,averageRed{session}*100, errBar*100, 'r', 1);
         
@@ -175,20 +175,20 @@ for session = 1:2;
             for timepoints = 1:length(color);
                 if stimuli == 1;
                     averageLMS{session}(1, timepoints) = nanmean(color(timepoints, :));
-                    semLMS{session}(1,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
+                    semLMS{session}(ss,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
                     averageLMSCombined{session}(ss, timepoints) = nanmean(color(timepoints, :));
                 elseif stimuli == 2;
                     averageMel{session}(1, timepoints) = nanmean(color(timepoints, :));
                     averageMelCombined{session}(ss, timepoints) = nanmean(color(timepoints, :));
-                    semMel{session}(1,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
+                    semMel{session}(ss,timepoints)  = nanstd(color(timepoints, :))/sqrt((size(color,2)));
                 end
             end
         end
         % now do the plotting per subject
         % first lms plots
         plotFig = figure;
-        errBar(1,:) = semLMS{session}(1:(length(averageLMS{session})));
-        errBar(2,:) = semLMS{session}(1:(length(averageLMS{session})));
+        errBar(1,:) = semLMS{session}(ss,1:(length(averageLMS{session})));
+        errBar(2,:) = semLMS{session}(ss,1:(length(averageLMS{session})));
         
         shadedErrorBar((1:length(averageLMS{session}))*0.02,averageLMS{session}*100, errBar*100, 'b', 1);
         hold on
@@ -206,8 +206,8 @@ for session = 1:2;
         
         % now mel plots
         plotFig = figure;
-        errBar(1,:) = semMel{session}(1:(length(averageMel{session})));
-        errBar(2,:) = semMel{session}(1:(length(averageMel{session})));
+        errBar(1,:) = semMel{session}(ss,1:(length(averageMel{session})));
+        errBar(2,:) = semMel{session}(ss,1:(length(averageMel{session})));
         
         shadedErrorBar((1:length(averageMel{session}))*0.02,averageMel{session}*100, errBar*100, 'b', 1);
         hold on
