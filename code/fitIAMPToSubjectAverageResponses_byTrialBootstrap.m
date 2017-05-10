@@ -204,9 +204,51 @@ for session = 1:2
     end
 end
 
-    
-    
-    %% do some plotting to summarize the results
-    
+%% plot show of fits
 
+subDir = 'pupilPIPRAnalysis/IAMP/modelFits';
+stimulusOrder = {'LMS' 'mel' 'blue' 'red'};
+
+
+for session = 1:2
+    for ss = 1:size(goodSubjects{session}{1},1)
+        for mm = 1:length(stimulusOrder)
+            if mm == 1 % LMS
+                response = averageLMSCombined;
+                kernel = LMSKernel;
+                subFolder = 'LMS';
+            elseif mm == 2 % mel
+                response = averageMelCombined;
+                kernel = MelKernel;
+                subFolder = 'mel';
+            elseif mm == 3 % blue
+                response = averageBlueCombined;
+                kernel = BlueKernel;
+                subFolder = 'PIPR';
+            elseif mm == 4
+                response = averageRedCombined;
+                kernel = RedKernel;
+                subFolder = 'PIPR';
+            end
+        
+   
+            plotFig = figure;
+            plot(timebase*0.02, response{session}(ss,:))
+            hold on
+            plot(timebase*0.02, kernel*amplitudes{session}(ss,mm))
+            legend('Averaged Data', 'Model Fit')
+            xlabel('Time (s)')
+            ylabel('Pupil Diameter (% Change)')
+            
+            outDir = fullfile(dropboxAnalysisDir,subDir, subFolder, num2str(session));
+            if ~exist(outDir, 'dir')
+                mkdir(outDir);
+            end
+            saveas(plotFig, fullfile(outDir, [goodSubjects{session}{1}(ss,:),'.png']), 'png');
+            close(plotFig);
+        end
+    end
+end
+        
+    
 end % end function
