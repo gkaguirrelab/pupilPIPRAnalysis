@@ -20,16 +20,14 @@ fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3';
 
 fitTPUPCacheBehavior='load';
 fitTPUPCacheTag='TPUPParameters';
-fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff';
+fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff'; % with extended gamma range (150-700)
 
-makePupilPlots='skip';
-analyzeBlinksBehavior='make';
 
 % Create or load the packetCellArray
 switch packetCacheBehavior
     case 'make'  % If we are not to load the cache, then we must generate it
         % Make the average responses. 
-        [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined] = plotPIPRResponse(goodSubjects, dropboxAnalysisDir);
+        [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined] = makeAverageResponse(goodSubjects, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the packetCellArray
         packetCacheHash = DataHash(averageBlueCombined);
         % Set path to the packetCache and save it using the MD5 hash name
@@ -47,16 +45,16 @@ end
 % Fit IAMP model to avg packets
 switch fitIAMPCacheBehavior    
     case 'make'
-        [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+        [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the amplitudes result
         fitIAMPCacheHash = DataHash(amplitudes);        
         % Set path to the packetCache and save it using the MD5 hash name
         fitIAMPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitIAMPCacheTag '_' fitIAMPCacheHash '.mat']);
         save(fitIAMPCacheFileName,'amplitudes', 'amplitudesSEM','-v7.3');
         fprintf(['Saved the ' fitIAMPCacheTag ' with hash ID ' fitIAMPCacheHash '\n']);        
-    case 'load'  % load a cached twoComponentFitToData        
+    case 'load'  % load a cached amplitude and amplitudeSEM variable        
         fprintf(['>> Loading cached ' fitIAMPCacheTag ' \n']);
-        fitIAMPCacheFileName=fullfile(dropboxAnalysisDir, 'analysisCache', [fitIAMPCacheTag '_' fitIAMPCacheHash '.mat']);
+        fitIAMPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitIAMPCacheTag '_' fitIAMPCacheHash '.mat']);
         load(fitIAMPCacheFileName);        
     otherwise        
         error('Please define a legal packetCacheBehavior');
@@ -66,15 +64,15 @@ end
 switch fitTPUPCacheBehavior    
     case 'make'
         [ TPUPAmplitudes, temporalParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
-        % calculate the hex MD5 hash for the twoComponentFitToData
+        % calculate the hex MD5 hash for the TPUP fits
         fitTPUPCacheHash = DataHash(TPUPAmplitudes);        
         % Set path to the packetCache and save it using the MD5 hash name
         fitTPUPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitTPUPCacheTag '_' fitTPUPCacheHash '.mat']);
         save(fitTPUPCacheFileName,'TPUPAmplitudes', 'temporalParameters','-v7.3');
         fprintf(['Saved the ' fitTPUPCacheTag ' with hash ID ' fitTPUPCacheHash '\n']);        
-    case 'load'  % load a cached twoComponentFitToData        
+    case 'load'  % load a cached TPUP parameters        
         fprintf(['>> Loading cached ' fitTPUPCacheTag ' \n']);
-        fitTPUPCacheFileName=fullfile(dropboxAnalysisDir, 'analysisCache', [fitTPUPCacheTag '_' fitTPUPCacheHash '.mat']);
+        fitTPUPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitTPUPCacheTag '_' fitTPUPCacheHash '.mat']);
         load(fitTPUPCacheFileName);        
     otherwise        
         error('Please define a legal packetCacheBehavior');
@@ -86,22 +84,25 @@ end
 
 [ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
 
-%% Determine average response in each subject to PIPR, melanopsin-directed, 
-%% and LMS-directed stimulation
+%% IAMP Analysis
 
-[piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined] = plotPIPRResponse(goodSubjects, dropboxAnalysisDir)
+% Examine correlation of response amplitudes across different stimulus
+% conditions
+acrossStimulusCorrelations(amplitudes, amplitudesSEM, dropboxAnalysisDir);
 
-%% Determine amplitude of average response in each subject to PIPR, melanopsin-directed, 
-%% and LMS-directed stimulation
+% Calculate PIPR, and examine relationship with other measures of
+% melanopsin-driven pupil constriction (other calculations of the PIPR and
+% pupil constriction elicited through silent substitution)
+[ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
 
-[ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+% Determine test-retest reliability
+[ rhoMel ] = acrossSessionCorrelation(goodSubjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
+[trueRho] = determineMaximalCorrelation(amplitudesSEM, rhoMel, dropboxAnalysisDir)
+
 
 %% Fit individual average repsonses with the TPUP Model
 [ TPUPAmplitudes, temporalParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
 
-%% Calculate PIPR according to specific methods cited in the literature, and see how these results compare
 
-[ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(goodSubjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
 
 %% Determine the test-retest reliability of our measures of melanopsin repsonse
-[ theResult ] = acrossSessionCorrelation(goodSubjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
