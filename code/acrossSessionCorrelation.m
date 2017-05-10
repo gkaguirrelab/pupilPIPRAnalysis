@@ -1,4 +1,4 @@
-function [ theResult ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
+function [ rhoMel ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
 
 % We've shown that a meaningful representation of the pupil response to
 % melanopsin stimulation is the amplitude of the pupil constriction to
@@ -50,7 +50,7 @@ for ss = 1:size(subjects{2}{1},1) % loop over subjects that have completed both 
 end
 
 % now do some plotting
-outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_PulsePIPR/testRetest');
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRanalysis/IAMP/testRetest');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -70,6 +70,7 @@ xlim([ 0 maxValue ]);
 ylim([ 0 maxValue ]);
 % determine spearman correlation:
 rho = corr(melNormedOne', melNormedTwo', 'type', 'Spearman');
+rhoMel = rho;
 legend(['rho = ', num2str(rho)])
 
 saveas(plotFig, fullfile(outDir, ['melNormedTestRetest.png']), 'png');
