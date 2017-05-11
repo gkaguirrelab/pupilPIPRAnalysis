@@ -76,6 +76,29 @@ legend(['rho = ', num2str(rho)])
 saveas(plotFig, fullfile(outDir, ['melNormedTestRetest.png']), 'png');
 close(plotFig);
 
+
+
+% compute the test-retest reliability mentioned in the Zhou paper
+for ss = 1:length(melNormedOne)
+    squaredDifference(ss) = (melNormedOne(ss)-melNormedTwo(ss))^2;
+end
+withinSubjectSD = sqrt(sum(squaredDifference)/(2*length(melNormedOne)));
+testRetestRepeatability = withinSubjectSD*2.77
+% the interval in within which we'd expect 95% of the differences between
+% measurements to lie
+plotFig = figure;
+plot((melNormedOne+melNormedTwo)/2, melNormedOne-melNormedTwo, 'o')
+hold on
+line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) + testRetestRepeatability/2) (mean(melNormedOne-melNormedTwo) + testRetestRepeatability/2)]);
+line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) - testRetestRepeatability/2) (mean(melNormedOne-melNormedTwo) - testRetestRepeatability/2)]);
+
+title('Bland-Altman Plot')
+xlabel('Average of the Two Measures')
+ylabel('Difference of the Two Measures')
+saveas(plotFig, fullfile(outDir, ['melNormed_Bland-AltmanPlot.png']), 'png');
+close(plotFig);
+
+
 prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ minValue maxValue ], 'yLim', [ minValue maxValue ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melNormedTestRetest_pretty.png']), 'saveType', 'png', 'plotOption', 'square')
 
 % plot blue response normed by response to red (that is blue/red amplitude
