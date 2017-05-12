@@ -14,9 +14,11 @@ packetCacheBehavior='load';
 packetCacheTag='averageResponses';
 packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
-fitIAMPCacheBehavior='load';
+fitIAMPCacheBehavior='make';
 fitIAMPCacheTag='IAMPParameters';
-fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3';
+fitIAMPCacheHash='1cb86f142cea0cac341ada71fdc3e4e0'; % with 10000 bootstrap iterations
+%fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3'; % with 1000 bootstrap iterations
+%fitIAMPCacheHash='2c0fb7a2620551afe8d3a0849b368685'; % with 100 bootstrap iterations
 
 fitTPUPCacheBehavior='load';
 fitTPUPCacheTag='TPUPParameters';
@@ -45,7 +47,7 @@ end
 % Fit IAMP model to avg packets
 switch fitIAMPCacheBehavior    
     case 'make'
-        [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
+        [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the amplitudes result
         fitIAMPCacheHash = DataHash(amplitudes);        
         % Set path to the packetCache and save it using the MD5 hash name
