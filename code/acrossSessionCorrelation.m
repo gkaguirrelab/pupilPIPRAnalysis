@@ -91,6 +91,9 @@ plot((melNormedOne+melNormedTwo)/2, melNormedOne-melNormedTwo, 'o')
 hold on
 line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) + testRetestRepeatability/2) (mean(melNormedOne-melNormedTwo) + testRetestRepeatability/2)]);
 line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) - testRetestRepeatability/2) (mean(melNormedOne-melNormedTwo) - testRetestRepeatability/2)]);
+% these lines would be the so-called limits of agreement -- there's a 95%
+% chance the difference between a second measurement and a first measurement 
+% will within this range
 
 title('Bland-Altman Plot')
 xlabel('Average of the Two Measures')
