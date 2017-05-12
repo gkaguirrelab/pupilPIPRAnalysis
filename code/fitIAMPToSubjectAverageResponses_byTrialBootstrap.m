@@ -1,4 +1,4 @@
-function [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+function [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
 
 % The main output will be an [ss x 3] matrix, called amplitude, which contains the results
 % from fitting the IAMP model to to average responses per subject. The
@@ -39,13 +39,11 @@ for session = 1:2;
     for timepoints = 1:length(averageLMSCombined{session});
         LMSKernel(1,timepoints) = nanmean(averageLMSCombined{1}(:,timepoints));
         MelKernel(1,timepoints) = nanmean(averageMelCombined{1}(:,timepoints));
-        PIPRKernel(1,timepoints) = nanmean(piprCombined{1}(:,timepoints));
         BlueKernel(1,timepoints) = nanmean(averageBlueCombined{1}(:,timepoints));
         RedKernel(1,timepoints) = nanmean(averageRedCombined{1}(:,timepoints));
     end
     LMSKernel = LMSKernel/abs(min(LMSKernel));
     MelKernel = MelKernel/abs(min(MelKernel));
-    PIPRKernel = PIPRKernel/abs(min(PIPRKernel));
     BlueKernel = BlueKernel/abs(min(BlueKernel));
     RedKernel = RedKernel/abs(min(RedKernel));
     
@@ -132,7 +130,7 @@ end % end loop over sessions
 
 %% now to do the bootstrapping:
 measures = {'lms' 'mel' 'blue' 'red' 'pipr' 'mel/lms' 'blue/red' 'lms+mel' 'blue+red'};
-nBootstraps = 1000;
+nBootstraps = 100000;
 
 for session = 1:2
     for ss = 1:size(goodSubjects{session}{1},1)
