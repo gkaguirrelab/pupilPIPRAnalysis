@@ -17,6 +17,10 @@ defaultParamsInfo.nInstances = 1;
 % Construct the model object
 temporalFit = tfeTPUP('verbosity','full');
 
+% set up boundaries for our fits
+initialValues=[200, 200, 10, -10, -25, -25];
+            vlb=[-500, 150, 1, -2000, -2000, -2000];
+            vub=[0, 750, 30, 0, 0, 0];
 
 %% now fit each subject
 for session = 1:2;
@@ -122,9 +126,7 @@ for session = 1:2;
             %vlb=[params{1}(1), params{1}(2), params{1}(3), -2000, -2000, -2000];
             %vub=[params{1}(1), params{1}(2), params{1}(3), 0, 0, 0];
             
-            initialValues=[200, 200, 10, -10, -25, -25];
-            vlb=[-500, 150, 1, -2000, -2000, -2000];
-            vub=[0, 750, 30, 0, 0, 0];
+            
             
             % do the actual fitting via TPUP
             [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub);
@@ -290,9 +292,7 @@ for session = 1:2;
         thePacket.metaData = [];
         
         
-        initialValues=[200, 200, 10, -10, -25, -25];
-        vlb=[-500, 150, 1, -2000, -2000, -2000];
-        vub=[0, 750, 30, 0, 0, 0];
+        
         
         % do the fitting on the group average data
         [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub); % with
