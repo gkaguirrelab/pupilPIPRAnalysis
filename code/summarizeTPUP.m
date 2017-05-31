@@ -27,8 +27,8 @@ for session = 1:2
     plotFig = figure;
     
     b = barwitherr(sem, amplitudes);
-    b(1).FaceColor = 'c';
-    b(2).FaceColor = 'm';
+    b(1).FaceColor = 'k';
+    b(2).FaceColor = 'c';
     b(3).FaceColor = 'b';
     b(4).FaceColor = 'r';
     set(gca,'XTickLabel',{'Transient', 'Sustained', 'Persistent'})
@@ -46,8 +46,8 @@ for session = 1:2
     
     plotFig = figure;
     b = barwitherr(semTemporalParameters, meanTemporalParameters);
-    b(1).FaceColor = 'c';
-    b(2).FaceColor = 'm';
+    b(1).FaceColor = 'k';
+    b(2).FaceColor = 'c';
     b(3).FaceColor = 'b';
     b(4).FaceColor = 'r';
     set(gca,'XTickLabel',{'Delay', 'Gamma Tau', 'Exponential Tau'})
@@ -87,7 +87,7 @@ for session = 1:2
     
     
     stimulusOrder = {'LMS' 'mel' 'blue' 'red'};
-    stimulusColor = {'c' 'm' 'b' 'r'};
+    stimulusColor = {'k' 'c' 'b' 'r'};
     
     % Transient Amplitude
     subplot(2,3,1)
@@ -100,11 +100,23 @@ for session = 1:2
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
-        plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation})
+        plotVariable{stimulation} = plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation});
+        hold on
+        plot(edgeMidpoint, h, 'o', 'Color', stimulusColor{stimulation})
+
     end
-    %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
+    legend([plotVariable{1} plotVariable{2} plotVariable{3} plotVariable{4}], 'LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
     title('Transient Amplitude')
+    ax = gca;
+    ylabel('Frequency')
+    
+    for xx = 1:length(edges)
+        line([edges(xx) edges(xx)], [ax.YLim(1) ax.YLim(2)],  'Color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.1)
+    end
+    ax.XTick = edges;
+    
     xlim([-70 0])
+    
     
     % Sustained Amplitude
     subplot(2,3,2)
@@ -118,11 +130,21 @@ for session = 1:2
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
         plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation})
+        hold on
+        plot(edgeMidpoint, h, 'o', 'Color', stimulusColor{stimulation})
     end
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
     title('Sustained Amplitude')
+    ax = gca;
+        ylabel('Frequency')
+
     
-    % Sustained Amplitude
+    for xx = 1:length(edges)
+        line([edges(xx) edges(xx)], [ax.YLim(1) ax.YLim(2)],  'Color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.1)
+    end
+    ax.XTick = edges;
+    
+    % Persistent Amplitude
     subplot(2,3,3)
     hold on
     edges = -300:50:0;
@@ -134,9 +156,19 @@ for session = 1:2
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
         plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation})
+        hold on
+        plot(edgeMidpoint, h, 'o', 'Color', stimulusColor{stimulation})
     end
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
     title('Persistent Amplitude')
+    ax = gca;
+        ylabel('Frequency')
+
+    
+    for xx = 1:length(edges)
+        line([edges(xx) edges(xx)], [ax.YLim(1) ax.YLim(2)],  'Color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.1)
+    end
+    ax.XTick = edges;
     
     % Delay
     subplot(2,3,4)
@@ -150,10 +182,20 @@ for session = 1:2
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
         plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation})
+        hold on
+        plot(edgeMidpoint, h, 'o', 'Color', stimulusColor{stimulation})
     end
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
     title('Delay')
     xlim([-500 0])
+    ax = gca;
+        ylabel('Frequency')
+
+    
+    for xx = 1:length(edges)
+        line([edges(xx) edges(xx)], [ax.YLim(1) ax.YLim(2)],  'Color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.1)
+    end
+    ax.XTick = edges;
     
     % Gamma
     subplot(2,3,5)
@@ -167,10 +209,20 @@ for session = 1:2
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
         plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation})
+        hold on
+        plot(edgeMidpoint, h, 'o', 'Color', stimulusColor{stimulation})
     end
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
     title('Gamma Tau')
     xlim([100 800])
+    ax = gca;
+        ylabel('Frequency')
+
+    
+    for xx = 1:length(edges)
+        line([edges(xx) edges(xx)], [ax.YLim(1) ax.YLim(2)],  'Color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.1)
+    end
+    ax.XTick = edges;
     
     % Exponential
     subplot(2,3,6)
@@ -184,10 +236,20 @@ for session = 1:2
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
         plot(edgeMidpoint, h, 'Color', stimulusColor{stimulation})
+        hold on
+        plot(edgeMidpoint, h, 'o', 'Color', stimulusColor{stimulation})
     end
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'NorthWest')
     title('Exponential Tau')
     xlim([0 50])
+    ax = gca;
+        ylabel('Frequency')
+
+    
+    for xx = 1:length(edges)
+        line([edges(xx) edges(xx)], [ax.YLim(1) ax.YLim(2)],  'Color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.1)
+    end
+    ax.XTick = edges;
     saveas(plotFig, fullfile(outDir, ['parameterDistribution.png']), 'png');
     close(plotFig);
     
@@ -211,11 +273,31 @@ for session = 1:2
     b = barwitherr(semPercentPersistent{session}, meanPercentPersistent{session});
     set(gca,'XTickLabel',{'LMS', 'Mel', 'Blue', 'Red'})
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
-    title('Mean Percent Persistent')
-    saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent.png']), 'png');
+    title('Mean Percent Persistent = P/(T+S+P)')
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent1.png']), 'png');
     close(plotFig);
     
+    % but also calculate percent persistent by just normalizing by the
+    % sustained and persistent components, with the logic being that the
+    % transient component is a simple "alerting" response to the stimulus
+    for ss = 1:size(TPUPAmplitudes{session}{1},1)
+        for stimulation = 1:length(stimulusOrder)
+            
+            percentPersistent{session}(ss, stimulation) = TPUPAmplitudes{session}{stimulation}(ss,3)/(TPUPAmplitudes{session}{stimulation}(ss,2) + TPUPAmplitudes{session}{stimulation}(ss,3)) * 100;
+        end
+    end
     
+    for stimulation = 1:length(stimulusOrder)
+        meanPercentPersistent{session}(stimulation) = mean(percentPersistent{session}(:, stimulation));
+        semPercentPersistent{session}(stimulation) = std((percentPersistent{session}(:, stimulation)))/sqrt(length((percentPersistent{session}(:, stimulation))));
+    end
+    plotFig = figure;
+    b = barwitherr(semPercentPersistent{session}, meanPercentPersistent{session});
+    set(gca,'XTickLabel',{'LMS', 'Mel', 'Blue', 'Red'})
+    %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
+    title('Mean Percent Persistent = P/(S+P)')
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent2.png']), 'png');
+    close(plotFig);
     
 end
 
