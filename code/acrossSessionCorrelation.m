@@ -1,4 +1,4 @@
-function [ rhoMel ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
+function [ rhoMel ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, TPUPAmplitudes, dropboxAnalysisDir)
 
 % We've shown that a meaningful representation of the pupil response to
 % melanopsin stimulation is the amplitude of the pupil constriction to
@@ -27,6 +27,10 @@ for ss = 1:size(subjects{2}{1},1) % loop over subjects that have completed both 
     semMelOverLMSOne(ss) = amplitudesSEM{1}(firstSessionIndex,6);
     semMelOverLMSTwo(ss) = amplitudesSEM{2}(secondSessionIndex,6);
     
+    percentPersistentOne(ss) = TPUPAmplitudes{1}{2}(firstSessionIndex,3)/(TPUPAmplitudes{1}{2}(firstSessionIndex,2) + TPUPAmplitudes{1}{2}(firstSessionIndex,3)) * 100;
+    percentPersistentTwo(ss) = TPUPAmplitudes{2}{2}(secondSessionIndex,3)/(TPUPAmplitudes{2}{2}(secondSessionIndex,2) + TPUPAmplitudes{2}{2}(secondSessionIndex,3)) * 100;
+    semPercentPersistentOne(ss) = 0;
+    semPercentPersistentTwo(ss) = 0;
     
     piprOne(ss) = amplitudes{1}(firstSessionIndex,5)*100;
     piprTwo(ss) = amplitudes{2}(secondSessionIndex,5)*100;
@@ -47,6 +51,8 @@ for ss = 1:size(subjects{2}{1},1) % loop over subjects that have completed both 
     blueToRedTwo(ss) = amplitudes{2}(secondSessionIndex,7);
     semBlueToRedOne(ss) = amplitudesSEM{1}(firstSessionIndex,7);
     semBlueToRedTwo(ss) = amplitudesSEM{2}(secondSessionIndex,7);
+    
+    
 end
 
 % now do some plotting
@@ -103,6 +109,8 @@ close(plotFig);
 
 
 prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ minValue maxValue ], 'yLim', [ minValue maxValue ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melNormedTestRetest_pretty.png']), 'saveType', 'png', 'plotOption', 'square')
+prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melNormedTestRetest_pretty.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+
 
 % plot blue response normed by response to red (that is blue/red amplitude
 % ratio)
@@ -164,6 +172,7 @@ axis square
 saveas(plotFig, fullfile(outDir, ['melPlusLMSTestRetest.png']), 'png');
 close(plotFig);
 prettyScatterplots(melPlusLMSOne, melPlusLMSTwo, semMelPlusLMSOne, semMelPlusLMSTwo, 'xLim', [ 0 60 ], 'yLim', [ 0 60 ], 'xLabel', '(Mel+LMS)/2 Session 1', 'yLabel', '(Mel+LMS)/2 Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['MelPlusLMSTestRetest_pretty.png']), 'saveType', 'png')
+prettyScatterplots(melPlusLMSOne, melPlusLMSTwo, semMelPlusLMSOne, semMelPlusLMSTwo, 'xLim', [ 0 60 ], 'yLim', [ 0 60 ], 'xLabel', '(Mel+LMS)/2 Session 1', 'yLabel', '(Mel+LMS)/2 Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['MelPlusLMSTestRetest_pretty.pdf']), 'saveType', 'pdf')
 
 
 % next blue+red response
@@ -186,5 +195,32 @@ saveas(plotFig, fullfile(outDir, ['bluePlusRedTestRetest.png']), 'png');
 close(plotFig);
 
 prettyScatterplots(bluePlusRedOne, bluePlusRedTwo, semBluePlusRedOne, semBluePlusRedTwo, 'xLim', [ 0 60 ], 'yLim', [ 0 60 ], 'xLabel', '(Blue+Red)/2 Session 1', 'yLabel', '(Blue+Red)/2 Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['BluePlusRedTestRetest_pretty.png']), 'saveType', 'png')
+
+% next % persistent response
+plotFig = figure;
+hold on
+errorbar(percentPersistentOne, percentPersistentTwo, percentPersistentTwo*0, 'bo')
+herrorbar(percentPersistentOne, percentPersistentTwo, percentPersistentTwo*0, 'bo')
+plot(-100:100,-100:100,'-')
+xlabel('(Blue+Red)/2 (%) Session 1')
+ylabel('(Blue+Red)/2 (%) Session 2')
+maxValue = max(max(percentPersistentOne,percentPersistentTwo));
+minValue = min(min(percentPersistentOne,percentPersistentTwo));
+xlim([ 0 60 ]);
+ylim([ 0 60 ]);
+axis square
+% determine spearman correlation:
+rho = corr(percentPersistentOne', percentPersistentTwo', 'type', 'Spearman');
+legend(['rho = ', num2str(rho)])
+
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRanalysis/TPUP/testRetest');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+saveas(plotFig, fullfile(outDir, ['percentPersistent.png']), 'png');
+close(plotFig);
+prettyScatterplots(percentPersistentOne, percentPersistentTwo, percentPersistentOne*0, percentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['percentPersistent.png']), 'saveType', 'png')
+prettyScatterplots(percentPersistentOne, percentPersistentTwo, percentPersistentOne*0, percentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['percentPersistent.pdf']), 'saveType', 'pdf')
+
 
 end % end function
