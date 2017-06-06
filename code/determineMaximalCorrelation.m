@@ -210,6 +210,10 @@ for nn = 1:1000
     % simulate second session of data collection, here being identical to the
     % first to provide perfect test-retest
     melToLMS(2,:) = melToLMS(1,:);
+    prettyScatterplots(melToLMS(1,:), melToLMS(2,:), melToLMS(1,:)*0, melToLMS(1,:)*0, 'xLim', [ 0 1 ], 'yLim', [ 0 1 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['perfectTestRetest_figure.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+    error = amplitudesSEM{2}(:,6);
+    prettyScatterplots(melToLMS(1,:), melToLMS(2,:), error(randperm(length(error))), error(randperm(length(error))), 'xLim', [ 0 1 ], 'yLim', [ 0 1 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['perfectTestRetest_withError_figure.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+
     
     rho(nn) = corr(melToLMS(1,:)', melToLMS(2,:)', 'type', 'Spearman');
     
@@ -223,6 +227,8 @@ for nn = 1:1000
         melToLMSWithMeasurementError(2,ss) = melToLMS(2, ss) + amplitudesSEM{2}(randomIndex,6).*randn(1);
     end
     
+    prettyScatterplots(melToLMSWithMeasurementError(1,:), melToLMSWithMeasurementError(2,:), 0*error(randperm(length(error))), 0*error(randperm(length(error))), 'xLim', [ 0 1 ], 'yLim', [ 0 1 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['perfectTestRetest_withError_adjusted_figure.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+
     
     rhoWithMeasurementError(nn) = corr(melToLMSWithMeasurementError(1,:)', melToLMSWithMeasurementError(2,:)', 'type', 'Spearman');
     
@@ -235,6 +241,8 @@ ylabel('Frequency')
 line([rhoMel rhoMel], [0 max(h.Values)])
 mean(rhoWithMeasurementError)
 saveas(plotFig, fullfile(outDir, ['perfectTestRetestHistogram.png']), 'png');
+saveas(plotFig, fullfile(outDir, ['perfectTestRetestHistogram.pdf']), 'pdf');
+
 close(plotFig);
 
 end % end function
