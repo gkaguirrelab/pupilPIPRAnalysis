@@ -1,4 +1,4 @@
-function [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(subjects, amplitudes, amplitudesSEM, dropboxAnalysisDir)
+function [ sustainedAmplitudes, pipr, netPipr ] = calculatePIPR(subjects, amplitudes, amplitudesSEM, averageBlueCombined, averageRedCombined, dropboxAnalysisDir)
 
 % The purpose of this function is to calculate the PIPR a list of subjects
 % by following the protocol laid out by Kankipati 2010
@@ -55,7 +55,7 @@ for session = 1:2;
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
         
         date = subjects{session}{2}(ss,:);
-
+        
         blue = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRBlue_TimeSeries.csv']));
         red = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRRed_TimeSeries.csv']));
         for stimuli = 1:2;
@@ -129,6 +129,26 @@ for session = 1:2;
     ylabel('Melanopsin Silent Substitution Amplitude (%)')
     saveas(plotFig, fullfile(outDir, ['netPiprxMel_', num2str(sustainedOnsetTime), '.png']), 'png');
     close(plotFig);
+    
+    % plot correlation of 6s net PIPR with mel amplitude
+    sixSecondPIPR = [];
+    for ss = 1:size(subjects{session}{1},1)
+        
+        sixSecondPIPR(ss) = -(averageBlueCombined{session}(ss,500) - averageRedCombined{session}(ss,500));
+    end
+    plotFig = figure;
+    plot(amplitudes{session}(:,2)*100, sixSecondPIPR, 'o')
+    xlabel('Melanopsin Silent Substitution Amplitude (%)')
+    ylabel('Net PIPR (dR6 - dB6)')
+    saveas(plotFig, fullfile(outDir, ['netPipr6xMel_', '.png']), 'png');
+    saveas(plotFig, fullfile(outDir, ['netPipr6xMel_', '.pdf']), 'pdf');
+    
+    
+    close(plotFig);
+    prettyScatterplots(amplitudes{session}(:,2)*100, sixSecondPIPR'*100, sixSecondPIPR*0, sixSecondPIPR*0, 'xLabel', 'Melanopsin Silent Substitution Amplitude (%)', 'yLabel', 'Net PIPR (dR6 - dB6)', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['6sNetPIPRxMel.pdf']), 'saveType', 'pdf')
+
+    
+    
 end % end loop over sessions
 
 end % end function
