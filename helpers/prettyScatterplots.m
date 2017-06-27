@@ -80,8 +80,13 @@ end
 if strcmp(p.Results.xLim, 'none')
 else
     xlim([p.Results.xLim(1) p.Results.xLim(2)])
+end
+
+if strcmp(p.Results.yLim, 'none')
+else
     ylim([p.Results.yLim(1), p.Results.yLim(2)])
 end
+    
 
 
 if strcmp(p.Results.xLabel, 'none') && strcmp(p.Results.yLabel, 'none')
