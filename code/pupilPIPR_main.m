@@ -14,9 +14,11 @@ packetCacheBehavior='load';
 packetCacheTag='averageResponses';
 packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
-fitIAMPCacheBehavior='make';
+fitIAMPCacheBehavior='load';
 fitIAMPCacheTag='IAMPParameters';
-fitIAMPCacheHash='1cb86f142cea0cac341ada71fdc3e4e0'; % with 10000 bootstrap iterations
+fitIAMPCacheHash='606c239b41195df378b4d3adfb92d4f8'; % with 1,000,000 bootstrap iterations
+%fitIAMPCacheHash='73004795a6ed72b2a7d0125f0d717346'; % with 100,000 bootstrap iterations
+%fitIAMPCacheHash='1cb86f142cea0cac341ada71fdc3e4e0'; % with 10,000 bootstrap iterations
 %fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3'; % with 1000 bootstrap iterations
 %fitIAMPCacheHash='2c0fb7a2620551afe8d3a0849b368685'; % with 100 bootstrap iterations
 
