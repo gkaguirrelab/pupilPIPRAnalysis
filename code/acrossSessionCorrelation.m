@@ -1,4 +1,4 @@
-function [ rhoMel ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, TPUPAmplitudes, dropboxAnalysisDir)
+function [ rhoMel, melNormedOne, melNormedTwo ] = acrossSessionCorrelation(subjects, amplitudes, amplitudesSEM, TPUPAmplitudes, dropboxAnalysisDir)
 
 % We've shown that a meaningful representation of the pupil response to
 % melanopsin stimulation is the amplitude of the pupil constriction to
@@ -27,10 +27,25 @@ for ss = 1:size(subjects{2}{1},1) % loop over subjects that have completed both 
     semMelOverLMSOne(ss) = amplitudesSEM{1}(firstSessionIndex,6);
     semMelOverLMSTwo(ss) = amplitudesSEM{2}(secondSessionIndex,6);
     
-    percentPersistentOne(ss) = TPUPAmplitudes{1}{2}(firstSessionIndex,3)/(TPUPAmplitudes{1}{2}(firstSessionIndex,2) + TPUPAmplitudes{1}{2}(firstSessionIndex,3)) * 100;
-    percentPersistentTwo(ss) = TPUPAmplitudes{2}{2}(secondSessionIndex,3)/(TPUPAmplitudes{2}{2}(secondSessionIndex,2) + TPUPAmplitudes{2}{2}(secondSessionIndex,3)) * 100;
-    semPercentPersistentOne(ss) = 0;
-    semPercentPersistentTwo(ss) = 0;
+    melPercentPersistentOne(ss) = TPUPAmplitudes{1}{2}(firstSessionIndex,3)/(TPUPAmplitudes{1}{2}(firstSessionIndex,2) + TPUPAmplitudes{1}{2}(firstSessionIndex,3)) * 100;
+    melPercentPersistentTwo(ss) = TPUPAmplitudes{2}{2}(secondSessionIndex,3)/(TPUPAmplitudes{2}{2}(secondSessionIndex,2) + TPUPAmplitudes{2}{2}(secondSessionIndex,3)) * 100;
+    semMelPercentPersistentOne(ss) = 0;
+    semMelPercentPersistentTwo(ss) = 0;
+    
+    LMSPercentPersistentOne(ss) = TPUPAmplitudes{1}{1}(firstSessionIndex,3)/(TPUPAmplitudes{1}{1}(firstSessionIndex,2) + TPUPAmplitudes{1}{1}(firstSessionIndex,3)) * 100;
+    LMSPercentPersistentTwo(ss) = TPUPAmplitudes{2}{1}(secondSessionIndex,3)/(TPUPAmplitudes{2}{1}(secondSessionIndex,2) + TPUPAmplitudes{2}{1}(secondSessionIndex,3)) * 100;
+    semLMSPercentPersistentOne(ss) = 0;
+    semLMSPercentPersistentTwo(ss) = 0;
+    
+    redPercentPersistentOne(ss) = TPUPAmplitudes{1}{4}(firstSessionIndex,3)/(TPUPAmplitudes{1}{4}(firstSessionIndex,2) + TPUPAmplitudes{1}{4}(firstSessionIndex,3)) * 100;
+    redPercentPersistentTwo(ss) = TPUPAmplitudes{2}{4}(secondSessionIndex,3)/(TPUPAmplitudes{2}{4}(secondSessionIndex,2) + TPUPAmplitudes{2}{4}(secondSessionIndex,3)) * 100;
+    semRedPercentPersistentOne(ss) = 0;
+    semRedPercentPersistentTwo(ss) = 0;
+    
+    bluePercentPersistentOne(ss) = TPUPAmplitudes{1}{3}(firstSessionIndex,3)/(TPUPAmplitudes{1}{3}(firstSessionIndex,2) + TPUPAmplitudes{1}{3}(firstSessionIndex,3)) * 100;
+    bluePercentPersistentTwo(ss) = TPUPAmplitudes{2}{3}(secondSessionIndex,3)/(TPUPAmplitudes{2}{3}(secondSessionIndex,2) + TPUPAmplitudes{2}{3}(secondSessionIndex,3)) * 100;
+    semBluePercentPersistentOne(ss) = 0;
+    semBluePercentPersistentTwo(ss) = 0;
     
     piprOne(ss) = amplitudes{1}(firstSessionIndex,5)*100;
     piprTwo(ss) = amplitudes{2}(secondSessionIndex,5)*100;
@@ -87,16 +102,27 @@ close(plotFig);
 % compute the test-retest reliability mentioned in the Zhou paper
 for ss = 1:length(melNormedOne)
     squaredDifference(ss) = (melNormedOne(ss)-melNormedTwo(ss))^2;
+    difference(ss) = melNormedOne(ss)-melNormedTwo(ss);
 end
+
+% previous method of calculating within subject SD trying to replicate the
+% range dicussed by Zhou
 withinSubjectSD = sqrt(sum(squaredDifference)/(2*length(melNormedOne)));
 testRetestRepeatability = withinSubjectSD*2.77
+
+% the limits of agreement for a typical bland-altman plot, however, are
+% more simple
+
+differenceSD = std(difference)
 % the interval in within which we'd expect 95% of the differences between
 % measurements to lie
 plotFig = figure;
 plot((melNormedOne+melNormedTwo)/2, melNormedOne-melNormedTwo, 'o')
 hold on
-line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) + testRetestRepeatability/2) (mean(melNormedOne-melNormedTwo) + testRetestRepeatability/2)]);
-line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) - testRetestRepeatability/2) (mean(melNormedOne-melNormedTwo) - testRetestRepeatability/2)]);
+line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) + 1.96*differenceSD) (mean(melNormedOne-melNormedTwo) + 1.96*differenceSD)]);
+line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo) - 1.96*differenceSD) (mean(melNormedOne-melNormedTwo) - 1.96*differenceSD)]);
+line([min((melNormedOne+melNormedTwo)/2) max((melNormedOne+melNormedTwo)/2)], [(mean(melNormedOne-melNormedTwo)) mean(melNormedOne-melNormedTwo)], 'LineStyle', '--');
+
 % these lines would be the so-called limits of agreement -- there's a 95%
 % chance the difference between a second measurement and a first measurement 
 % will within this range
@@ -105,6 +131,8 @@ title('Bland-Altman Plot')
 xlabel('Average of the Two Measures')
 ylabel('Difference of the Two Measures')
 saveas(plotFig, fullfile(outDir, ['melNormed_Bland-AltmanPlot.png']), 'png');
+saveas(plotFig, fullfile(outDir, ['melNormed_Bland-AltmanPlot.pdf']), 'pdf');
+
 close(plotFig);
 
 
@@ -199,18 +227,18 @@ prettyScatterplots(bluePlusRedOne, bluePlusRedTwo, semBluePlusRedOne, semBluePlu
 % next % persistent response
 plotFig = figure;
 hold on
-errorbar(percentPersistentOne, percentPersistentTwo, percentPersistentTwo*0, 'bo')
-herrorbar(percentPersistentOne, percentPersistentTwo, percentPersistentTwo*0, 'bo')
+errorbar(melPercentPersistentOne, melPercentPersistentTwo, melPercentPersistentTwo*0, 'bo')
+herrorbar(melPercentPersistentOne, melPercentPersistentTwo, melPercentPersistentTwo*0, 'bo')
 plot(-100:100,-100:100,'-')
 xlabel('(Blue+Red)/2 (%) Session 1')
 ylabel('(Blue+Red)/2 (%) Session 2')
-maxValue = max(max(percentPersistentOne,percentPersistentTwo));
-minValue = min(min(percentPersistentOne,percentPersistentTwo));
+maxValue = max(max(melPercentPersistentOne,melPercentPersistentTwo));
+minValue = min(min(melPercentPersistentOne,melPercentPersistentTwo));
 xlim([ 0 60 ]);
 ylim([ 0 60 ]);
 axis square
 % determine spearman correlation:
-rho = corr(percentPersistentOne', percentPersistentTwo', 'type', 'Spearman');
+rho = corr(melPercentPersistentOne', melPercentPersistentTwo', 'type', 'Spearman');
 legend(['rho = ', num2str(rho)])
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRanalysis/TPUP/testRetest');
@@ -219,8 +247,15 @@ if ~exist(outDir, 'dir')
 end
 saveas(plotFig, fullfile(outDir, ['percentPersistent.png']), 'png');
 close(plotFig);
-prettyScatterplots(percentPersistentOne, percentPersistentTwo, percentPersistentOne*0, percentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['percentPersistent.png']), 'saveType', 'png')
-prettyScatterplots(percentPersistentOne, percentPersistentTwo, percentPersistentOne*0, percentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['percentPersistent.pdf']), 'saveType', 'pdf')
+prettyScatterplots(melPercentPersistentOne, melPercentPersistentTwo, melPercentPersistentOne*0, melPercentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melPercentPersistent.png']), 'saveType', 'png')
+prettyScatterplots(melPercentPersistentOne, melPercentPersistentTwo, melPercentPersistentOne*0, melPercentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melPercentPersistent.pdf']), 'saveType', 'pdf')
+
+prettyScatterplots(LMSPercentPersistentOne, LMSPercentPersistentTwo, LMSPercentPersistentOne*0, LMSPercentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['LMSPercentPersistent.pdf']), 'saveType', 'pdf')
+
+prettyScatterplots(bluePercentPersistentOne, bluePercentPersistentTwo, LMSPercentPersistentOne*0, LMSPercentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['bluePercentPersistent.pdf']), 'saveType', 'pdf')
+
+prettyScatterplots(redPercentPersistentOne, redPercentPersistentTwo, LMSPercentPersistentOne*0, LMSPercentPersistentOne*0, 'xLim', [ 0 100 ], 'yLim', [ 0 100 ],'xLabel', '% Persistent Session 1', 'yLabel', '% Persistent Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['redPercentPersistent.pdf']), 'saveType', 'pdf')
+
 
 
 end % end function
