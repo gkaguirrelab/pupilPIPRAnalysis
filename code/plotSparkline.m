@@ -60,7 +60,7 @@ for ss = 1:size(averageBlueCombined{2},1)
         plot(x, response1, 'Color', 'k')
         plot(x, response2, 'Color', 'b')
         
-
+        
         
         
         
@@ -125,7 +125,7 @@ end
 
 % now spruce it up to make it look nice
 % turn off the axes
-ax = gca; 
+ax = gca;
 set(ax, 'Visible', 'off')
 % add label so we know which plot is which
 text(315, 0.55, 'LMS')
@@ -136,17 +136,22 @@ text(2700, 0.55, 'Red')
 line([0 250], [0, 0])
 line([0 0], [0, -0.5])
 
-        
+
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/sparkLine');
 
-if ~exist(outDir, 'dir')
-    mkdir(outDir);
-end
 
 
 
 saveas(plotFig, fullfile(outDir, ['sparkLine.pdf']), 'pdf');
+
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
+saveas(plotFig, fullfile(outDir, ['2a.pdf']), 'pdf');
+
+
 close(plotFig);
 
 end
