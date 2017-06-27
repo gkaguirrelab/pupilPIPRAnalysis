@@ -1,6 +1,6 @@
 function [ ] = prettyScatterPlots(x, y, xError, yError, varargin)
 
-close all
+%close all
 
 p = inputParser; p.KeepUnmatched = true;
 
@@ -16,6 +16,8 @@ p.addParameter('xLim','none',@isnumeric);
 p.addParameter('yLim','none',@isnumeric);
 p.addParameter('significance','none',@ischar);
 p.addParameter('close','none',@ischar);
+p.addParameter('subplot','none',@isvector);
+
 
 
 
@@ -27,6 +29,10 @@ p.addParameter('close','none',@ischar);
 
 p.parse(varargin{:});
 
+if strcmp(p.Results.subplot, 'none')
+else
+    subplot(p.Results.subplot(1), p.Results.subplot(2), p.Results.subplot(3))
+end
 
 if strcmp(p.Results.stimulation, 'greyScale')
     
@@ -72,6 +78,8 @@ set(scatterPlot                            , ...
     'Marker'          , 'o'         , ...
     'MarkerSize'      , 8           , ...
     'MarkerEdgeColor' , markerEdgeColor  );
+
+
 
 if strcmp(p.Results.unity, 'on')
     plot(-100:100, -100:100, '-.', 'Color', errorBarColor)
@@ -157,7 +165,7 @@ elseif strcmp(p.Results.significance, 'rho')
     string = (sprintf(['rho = ', num2str(rho)]));
     text(xpos, ypos, string, 'fontsize',12)
 elseif strcmp(p.Results.significance, 'spearman')
-    rho = corr(x', y', 'type', 'Spearman');
+    rho = corr(x, y, 'type', 'Spearman');
     xlims=get(gca,'xlim');
     ylims=get(gca,'ylim');
     xrange = xlims(2)-xlims(1);
