@@ -37,6 +37,37 @@ for session = 1:2
     saveas(plotFig, fullfile(outDir, ['compareStimuli_amplitudes.png']), 'png');
     close(plotFig);
     
+    % now for median values
+    amplitudes = [];
+    sem = [];
+    iqrAmplitudes = [];
+    for stimulus = 1:length(stimulusOrder)
+        for measure = 1:3 % we have three measures of amplitude: transient, sustained, persistent as well as three temporal parameters
+            amplitudes(measure,stimulus) = median(TPUPAmplitudes{session}{stimulus}(:,measure));
+            iqrAmplitudes(measure,stimulus) = iqr(TPUPAmplitudes{session}{stimulus}(:,measure));
+            meanTemporalParameters(measure,stimulus) = mean(temporalParameters{session}{stimulus}(:,measure));
+            semTemporalParameters(measure,stimulus) = std(temporalParameters{session}{stimulus}(:,measure))/sqrt(length(temporalParameters{session}{stimulus}));
+            
+        end
+    end
+    
+    outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/TPUP/summarizeTPUP', num2str(session));
+    
+    if ~exist(outDir, 'dir')
+        mkdir(outDir);
+    end
+    plotFig = figure;
+    
+    b = barwitherr(1/2*iqrAmplitudes, amplitudes);
+    b(1).FaceColor = 'k';
+    b(2).FaceColor = 'c';
+    b(3).FaceColor = 'b';
+    b(4).FaceColor = 'r';
+    set(gca,'XTickLabel',{'Transient', 'Sustained', 'Persistent'})
+    title('Median TPUP Amplitudes')
+    legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_amplitudes_median.png']), 'png');
+    close(plotFig);
     
     % now compare the temporal parameters
     % first set the delay to positive
