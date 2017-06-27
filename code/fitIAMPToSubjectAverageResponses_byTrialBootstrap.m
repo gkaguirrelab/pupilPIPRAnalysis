@@ -130,7 +130,7 @@ end % end loop over sessions
 
 %% now to do the bootstrapping:
 measures = {'lms' 'mel' 'blue' 'red' 'pipr' 'mel/lms' 'blue/red' 'lms+mel' 'blue+red'};
-nBootstraps = 100000;
+nBootstraps = 1000000;
 
 for session = 1:2
     for ss = 1:size(goodSubjects{session}{1},1)
