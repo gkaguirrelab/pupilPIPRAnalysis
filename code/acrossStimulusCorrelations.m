@@ -48,7 +48,7 @@ for session = 1:2
     saveas(plotFig, fullfile(outDir, ['correlateLMSxMel.png']), 'png');
     close(plotFig);
     
-    prettyScatterplots(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,1), 100*amplitudesSEM{session}(:,2), 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'r', 'save', fullfile(outDir, ['correlateLMSxMel_pretty.png']), 'saveType', 'png')
+    prettyScatterplots(amplitudes{session}(:,1)*100, amplitudes{session}(:,2)*100, 100*amplitudesSEM{session}(:,1), 100*amplitudesSEM{session}(:,2), 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman', 'save', fullfile(outDir, ['correlateLMSxMel_pretty.png']), 'saveType', 'png')
     
     
     % plot correlation of Mel and PIPR
