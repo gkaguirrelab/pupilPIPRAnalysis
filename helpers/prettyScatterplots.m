@@ -25,7 +25,14 @@ p.addParameter('subplot','none',@isvector);
 
 
 
-
+% fmake sure the data vectors are oriented the correct way. this is to
+% correct there error where i would be transposing individual arrays to get the correlations to run right
+if size(x,1) == 1
+    x = x';
+end
+if size(y,1) == 1
+    y = y';
+end
 
 p.parse(varargin{:});
 
@@ -155,7 +162,7 @@ elseif strcmp(p.Results.significance, 'pearson')
     string = (sprintf(['r = ', num2str(r)]));
     text(xpos, ypos, string, 'fontsize',12)
 elseif strcmp(p.Results.significance, 'rho')
-    rho = corr(x', y', 'type', 'Spearman');
+    rho = corr(x, y, 'type', 'Spearman');
     xlims=get(gca,'xlim');
     ylims=get(gca,'ylim');
     xrange = xlims(2)-xlims(1);
