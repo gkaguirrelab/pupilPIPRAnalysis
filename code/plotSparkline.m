@@ -88,18 +88,18 @@ end
 for ss = 1:length(notScannedTwice)
     for stimulus = 1:length(stimulusOrder)
         if stimulus == 1 % LMS
-            response1 = averageLMSCombined{1}(ss,:);
+            response1 = averageLMSCombined{1}(notScannedTwice(ss),:);
             error = semLMS;
         elseif stimulus == 2 % mel
-            response1 = averageMelCombined{1}(ss,:);
+            response1 = averageMelCombined{1}(notScannedTwice(ss),:);
             
             error = semMel;
         elseif stimulus == 3 % blue
-            response1 = averageBlueCombined{1}(ss,:);
+            response1 = averageBlueCombined{1}(notScannedTwice(ss),:);
             
             error = semBlue;
         elseif stimulus == 4 % red
-            response1 = averageRedCombined{1}(ss,:);
+            response1 = averageRedCombined{1}(notScannedTwice(ss),:);
             
             error = semRed;
         end
