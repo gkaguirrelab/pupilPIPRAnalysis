@@ -1,4 +1,4 @@
-function figures(goodSubjects, amplitudes, amplitudesSEM, averageBlueCombined, averageLMSCombined, averageMelCombined, averageRedCombined, semBlue, semLMS, semMel, semRed, dropboxAnalysisDir)
+function figures(goodSubjects, amplitudes, amplitudesSEM, averageBlueCombined, averageLMSCombined, averageMelCombined, averageRedCombined, semBlue, semLMS, semMel, semRed, TPUPAmplitudes, temporalParameters, dropboxAnalysisDir)
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
 if ~exist(outDir, 'dir')
@@ -58,9 +58,17 @@ close(plotFig)
 plotFig = figure;
 hold on
 
-prettyScatterplots(amplitudes{1}(:,1)*100, amplitudes{1}(:,2)*100, 100*amplitudesSEM{1}(:,1), 100*amplitudesSEM{1}(:,2), 'subplot', [1, 3, 1], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
-prettyScatterplots(amplitudes{1}(:,3)*100, amplitudes{1}(:,4)*100, 100*amplitudesSEM{1}(:,3), 100*amplitudesSEM{1}(:,4), 'subplot', [1, 3, 2], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
-prettyScatterplots(amplitudes{1}(:,8)*100, amplitudes{1}(:,9)*100, 100*amplitudesSEM{1}(:,8), 100*amplitudesSEM{1}(:,9), 'subplot', [1, 3, 3], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,1), amplitudes{2}(:,1))
+[ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,2), amplitudes{2}(:,2))
+prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0, 'subplot', [1, 3, 1], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+
+[ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,3), amplitudes{2}(:,3))
+[ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,4), amplitudes{2}(:,4))
+prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'subplot', [1, 3, 2], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+
+[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8))
+[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9))
+prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'subplot', [1, 3, 3], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
@@ -81,8 +89,15 @@ close(plotFig)
 plotFig = figure;
 hold on
 
-prettyScatterplots(amplitudes{1}(:,6), amplitudes{1}(:,8)*100, amplitudesSEM{1}(:,6), 100*amplitudesSEM{1}(:,8), 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
-prettyScatterplots(amplitudes{1}(:,7), amplitudes{1}(:,9)*100, amplitudesSEM{1}(:,7), 100*amplitudesSEM{1}(:,9), 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ melNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6))
+[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8))
+prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*amplitudesSEM{1}(:,6), 0*amplitudesSEM{1}(:,8), 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+
+[ blueNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,7), amplitudes{2}(:,7))
+[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9))
+prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,7), 0*amplitudesSEM{1}(:,9), 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+
+
 saveas(plotFig, fullfile(outDir, ['3b.pdf']), 'pdf');
 close(plotFig)
 
@@ -187,14 +202,13 @@ thePacket.metaData = [];
 
 plotFig = figure;
 subplot(1,2,1)
-p1 = shadedErrorBar((1:700)*0.02, result*100, semMel{1}(3,:)*100, 'c', 1);
-p1.mainLine.DisplayName = 'Group Average Response';
+shadedErrorBar((1:700)*0.02, result*100, semMel{1}(3,:)*100, 'c', 1);
 hold on
+p1 = plot((1:700)*0.02, result*100, 'Color', 'c');
 p2 = plot((1:700)*0.02, modelResponseStruct.values, 'Color', 'k', 'DisplayName','Median Model Fit');
 
-legend('show');
+legend([p1, p2], 'Group Average', 'Median Model Fit');
 
-hLegend = legend('show');
 
 
 
@@ -264,13 +278,14 @@ thePacket.metaData = [];
 
 subplot(1,2,2)
 p1 = shadedErrorBar((1:700)*0.02, result*100, semLMS{1}(3,:)*100, 'm', 1);
-p1.mainLine.DisplayName = 'Group Average Response';
 hold on
+
+p1 = plot((1:700)*0.02, result*100, 'Color', 'm');
+
 p2 = plot((1:700)*0.02, modelResponseStruct.values, 'Color', 'k', 'DisplayName','Median Model Fit');
 
-legend('show');
+legend([p1, p2], 'Group Average', 'Median Model Fit');
 
-hLegend = legend('show');
 
 
 
