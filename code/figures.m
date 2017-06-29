@@ -15,13 +15,13 @@ plotSparkline(goodSubjects, averageBlueCombined, averageLMSCombined, averageMelC
 
 % make average responses
 for session = 1:2
-    for timepoints = 1:length(averageLMSCombined{session})
-        LMSAverage{session}(1,timepoints) = nanmean(averageLMSCombined{session}(:,timepoints));
-        MelAverage{session}(1,timepoints) = nanmean(averageMelCombined{session}(:,timepoints));
-        BlueAverage{session}(1,timepoints) = nanmean(averageBlueCombined{session}(:,timepoints));
-        RedAverage{session}(1,timepoints) = nanmean(averageRedCombined{session}(:,timepoints));
-    end
+    [ LMSAverage{session} ] = averageResultAcrossSubjects(averageLMSCombined{session});
+    [ MelAverage{session} ] = averageResultAcrossSubjects(averageMelCombined{session});
+    [ BlueAverage{session} ] = averageResultAcrossSubjects(averageBlueCombined{session});
+    [ RedAverage{session} ] = averageResultAcrossSubjects(averageRedCombined{session});
 end
+
+
 
 stimulusOrder = {'LMS' 'Melanopsin' 'Blue' 'Red'};
 plotFig = figure;
