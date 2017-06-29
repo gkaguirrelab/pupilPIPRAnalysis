@@ -104,26 +104,13 @@ close(plotFig)
 %% Figure 4: test-retest reliability
 % a. demonstrate test-retest reliability of mel/lms ratio
 
-% the code below is ripped out from acrossSessionCorrelations.m
-for ss = 1:size(goodSubjects{2}{1},1) % loop over subjects that have completed both sessions
-    subject = goodSubjects{2}{1}(ss,:);
-    
-    secondSessionIndex = ss;
-    % determine the index corresponding to the same subject in the list of
-    % subjects having successfully completed the first session
-    for x = 1:size(goodSubjects{1}{1},1)
-        if strcmp(goodSubjects{1}{1}(x,:),subject);
-            firstSessionIndex = x;
-        end
-    end
-    
-    melNormedOne(ss) = amplitudes{1}(firstSessionIndex,6);
-    melNormedTwo(ss) = amplitudes{2}(secondSessionIndex,6);
-    semMelOverLMSOne(ss) = amplitudesSEM{1}(firstSessionIndex,6);
-    semMelOverLMSTwo(ss) = amplitudesSEM{2}(secondSessionIndex,6);
-end
+% first maked paired results variable so we can compare the mel/lms ratio
+% from the first session with the second session
+[melNormedCombined] = pairResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
+[melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesSEM{1}(:,6), amplitudesSEM{2}(:,6));
 
-prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['4a.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+
+prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['4a.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
 
 
 %% Figure 5: TPUP figure
