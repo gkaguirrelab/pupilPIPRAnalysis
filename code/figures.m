@@ -58,16 +58,16 @@ close(plotFig)
 plotFig = figure;
 hold on
 
-[ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,1), amplitudes{2}(:,1))
-[ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,2), amplitudes{2}(:,2))
+[ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,1), amplitudes{2}(:,1));
+[ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,2), amplitudes{2}(:,2));
 prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0, 'subplot', [1, 3, 1], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
-[ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,3), amplitudes{2}(:,3))
-[ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,4), amplitudes{2}(:,4))
+[ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,3), amplitudes{2}(:,3));
+[ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,4), amplitudes{2}(:,4));
 prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'subplot', [1, 3, 2], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
-[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8))
-[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9))
+[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
+[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
 prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'subplot', [1, 3, 3], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
 
@@ -132,6 +132,25 @@ for session = 1:2;
     end
 end
 
+% first make the average results. here the group average time series is
+% combined across sessions
+for tt = 1:size(averageBlueCombined{1},2)
+    
+    % combine results across sessions
+    blueCombined = combineResultAcrossSessions(goodSubjects, averageBlueCombined{1}(:,tt), averageBlueCombined{2}(:,tt));
+    averageBlue(tt) = averageResultAcrossSubjects(blueCombined');
+    
+    redCombined = combineResultAcrossSessions(goodSubjects, averageRedCombined{1}(:,tt), averageRedCombined{2}(:,tt));
+    averageRed(tt) = averageResultAcrossSubjects(redCombined');
+    
+    LMSCombined = combineResultAcrossSessions(goodSubjects, averageLMSCombined{1}(:,tt), averageLMSCombined{2}(:,tt));
+    averageLMS(tt) = averageResultAcrossSubjects(LMSCombined');
+    
+    melCombined = combineResultAcrossSessions(goodSubjects, averageMelCombined{1}(:,tt), averageMelCombined{2}(:,tt));
+    averageMel(tt) = averageResultAcrossSubjects(melCombined');
+end
+
+
 % first plot the average melanopsin response with the median TPUP fit
 % first create the stimulus structure
 defaultParamsInfo.nInstances = 1;
@@ -140,9 +159,9 @@ defaultParamsInfo.nInstances = 1;
 temporalFit = tfeTPUP('verbosity','full');
 
 % set up boundaries for our fits
-initialValues=[median(temporalParameters{1}{2}(:,1)), median(temporalParameters{1}{2}(:,2)), median(temporalParameters{1}{2}(:,3)), median(TPUPAmplitudes{1}{2}(:,1)), median(TPUPAmplitudes{1}{2}(:,2)), median(TPUPAmplitudes{1}{2}(:,3))];
-vlb=[median(temporalParameters{1}{2}(:,1)), median(temporalParameters{1}{2}(:,2)), median(temporalParameters{1}{2}(:,3)), median(TPUPAmplitudes{1}{2}(:,1)), median(TPUPAmplitudes{1}{2}(:,2)), median(TPUPAmplitudes{1}{2}(:,3))];
-vub=[median(temporalParameters{1}{2}(:,1)), median(temporalParameters{1}{2}(:,2)), median(temporalParameters{1}{2}(:,3)), median(TPUPAmplitudes{1}{2}(:,1)), median(TPUPAmplitudes{1}{2}(:,2)), median(TPUPAmplitudes{1}{2}(:,3))];
+initialValues=[median([temporalParameters{1}{2}(:,1); temporalParameters{2}{2}(:,1)]), median([temporalParameters{1}{2}(:,2); temporalParameters{2}{2}(:,2)]), median([temporalParameters{1}{2}(:,3); temporalParameters{2}{2}(:,3)]), median([TPUPAmplitudes{1}{2}(:,1); TPUPAmplitudes{2}{2}(:,1)]), median([TPUPAmplitudes{1}{2}(:,2); TPUPAmplitudes{2}{2}(:,2)]), median([TPUPAmplitudes{1}{2}(:,3); TPUPAmplitudes{2}{2}(:,3)])];
+vlb=[median([temporalParameters{1}{2}(:,1); temporalParameters{2}{2}(:,1)]), median([temporalParameters{1}{2}(:,2); temporalParameters{2}{2}(:,2)]), median([temporalParameters{1}{2}(:,3); temporalParameters{2}{2}(:,3)]), median([TPUPAmplitudes{1}{2}(:,1); TPUPAmplitudes{2}{2}(:,1)]), median([TPUPAmplitudes{1}{2}(:,2); TPUPAmplitudes{2}{2}(:,2)]), median([TPUPAmplitudes{1}{2}(:,3); TPUPAmplitudes{2}{2}(:,3)])];
+vub=[median([temporalParameters{1}{2}(:,1); temporalParameters{2}{2}(:,1)]), median([temporalParameters{1}{2}(:,2); temporalParameters{2}{2}(:,2)]), median([temporalParameters{1}{2}(:,3); temporalParameters{2}{2}(:,3)]), median([TPUPAmplitudes{1}{2}(:,1); TPUPAmplitudes{2}{2}(:,1)]), median([TPUPAmplitudes{1}{2}(:,2); TPUPAmplitudes{2}{2}(:,2)]), median([TPUPAmplitudes{1}{2}(:,3); TPUPAmplitudes{2}{2}(:,3)])];
 
 timebase = (0:20:13998);
 
@@ -177,7 +196,7 @@ thePacket.stimulus.timebase = timebase;
 % now kernel needed for tpup
 thePacket.kernel = [];
 
-result = averageMelCollapsed{1};
+result = averageMel;
 
 
 thePacket.response.timebase = timebase;
@@ -189,7 +208,7 @@ thePacket.metaData = [];
 
 plotFig = figure;
 subplot(1,2,1)
-shadedErrorBar((1:700)*0.02, result*100, semMel{1}(3,:)*100, 'c', 1);
+%shadedErrorBar((1:700)*0.02, result*100, semMel{1}(3,:)*100, 'c', 1);
 hold on
 p1 = plot((1:700)*0.02, result*100, 'Color', 'c');
 p2 = plot((1:700)*0.02, modelResponseStruct.values, 'Color', 'k', 'DisplayName','Median Model Fit');
@@ -216,9 +235,9 @@ defaultParamsInfo.nInstances = 1;
 temporalFit = tfeTPUP('verbosity','full');
 
 % set up boundaries for our fits
-initialValues=[median(temporalParameters{1}{1}(:,1)), median(temporalParameters{1}{1}(:,2)), median(temporalParameters{1}{1}(:,3)), median(TPUPAmplitudes{1}{1}(:,1)), median(TPUPAmplitudes{1}{1}(:,2)), median(TPUPAmplitudes{1}{1}(:,3))];
-vlb=[median(temporalParameters{1}{1}(:,1)), median(temporalParameters{1}{1}(:,2)), median(temporalParameters{1}{1}(:,3)), median(TPUPAmplitudes{1}{1}(:,1)), median(TPUPAmplitudes{1}{1}(:,2)), median(TPUPAmplitudes{1}{1}(:,3))];
-vub=[median(temporalParameters{1}{1}(:,1)), median(temporalParameters{1}{1}(:,2)), median(temporalParameters{1}{1}(:,3)), median(TPUPAmplitudes{1}{1}(:,1)), median(TPUPAmplitudes{1}{1}(:,2)), median(TPUPAmplitudes{1}{1}(:,3))];
+initialValues=[median([temporalParameters{1}{1}(:,1); temporalParameters{2}{1}(:,1)]), median([temporalParameters{1}{1}(:,2); temporalParameters{2}{1}(:,2)]), median([temporalParameters{1}{1}(:,3); temporalParameters{2}{1}(:,3)]), median([TPUPAmplitudes{1}{1}(:,1); TPUPAmplitudes{2}{1}(:,1)]), median([TPUPAmplitudes{1}{1}(:,2); TPUPAmplitudes{2}{1}(:,2)]), median([TPUPAmplitudes{1}{1}(:,3); TPUPAmplitudes{2}{1}(:,3)])];
+vlb=[median([temporalParameters{1}{1}(:,1); temporalParameters{2}{1}(:,1)]), median([temporalParameters{1}{1}(:,2); temporalParameters{2}{1}(:,2)]), median([temporalParameters{1}{1}(:,3); temporalParameters{2}{1}(:,3)]), median([TPUPAmplitudes{1}{1}(:,1); TPUPAmplitudes{2}{1}(:,1)]), median([TPUPAmplitudes{1}{1}(:,2); TPUPAmplitudes{2}{1}(:,2)]), median([TPUPAmplitudes{1}{1}(:,3); TPUPAmplitudes{2}{1}(:,3)])];
+vub=[median([temporalParameters{1}{1}(:,1); temporalParameters{2}{1}(:,1)]), median([temporalParameters{1}{1}(:,2); temporalParameters{2}{1}(:,2)]), median([temporalParameters{1}{1}(:,3); temporalParameters{2}{1}(:,3)]), median([TPUPAmplitudes{1}{1}(:,1); TPUPAmplitudes{2}{1}(:,1)]), median([TPUPAmplitudes{1}{1}(:,2); TPUPAmplitudes{2}{1}(:,2)]), median([TPUPAmplitudes{1}{1}(:,3); TPUPAmplitudes{2}{1}(:,3)])];
 
 timebase = (0:20:13998);
 
@@ -253,7 +272,7 @@ thePacket.stimulus.timebase = timebase;
 % now kernel needed for tpup
 thePacket.kernel = [];
 
-result = averageLMSCollapsed{1};
+result = averageLMS;
 
 
 thePacket.response.timebase = timebase;
@@ -264,7 +283,7 @@ thePacket.metaData = [];
 [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub); % with
 
 subplot(1,2,2)
-p1 = shadedErrorBar((1:700)*0.02, result*100, semLMS{1}(3,:)*100, 'm', 1);
+%p1 = shadedErrorBar((1:700)*0.02, result*100, semLMS{1}(3,:)*100, 'm', 1);
 hold on
 
 p1 = plot((1:700)*0.02, result*100, 'Color', 'm');
