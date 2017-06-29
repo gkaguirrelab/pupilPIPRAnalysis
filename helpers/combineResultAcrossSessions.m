@@ -1,5 +1,9 @@
 function [ combinedResult ] = combineResultAcrossSessions(goodSubjects, sessionOneResult, sessionTwoResult)
 
+% method for combining results across sessions
+% - for subjects that have been scanned twice, the combined result is the average of those two measurements
+% - for subjects that have been scanned once, the combined result is simply that single value
+
 
 % first average datapoints for subjects who have been studied twice
 for ss = 1:size(goodSubjects{2}{1},1) % loop over subjects that have completed both sessions
