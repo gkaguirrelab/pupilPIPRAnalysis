@@ -11,9 +11,12 @@ p.addParameter('plotOption','none',@ischar);
 p.addParameter('lineOfBestFit','none',@ischar);
 p.addParameter('xLabel','none',@ischar);
 p.addParameter('unity','none',@ischar);
+p.addParameter('grid','none',@ischar);
+p.addParameter('axes','none',@ischar);
 p.addParameter('yLabel','none',@ischar);
 p.addParameter('xLim','none',@isnumeric);
 p.addParameter('yLim','none',@isnumeric);
+p.addParameter('dotSize',8,@isnumeric);
 p.addParameter('significance','none',@ischar);
 p.addParameter('close','none',@ischar);
 p.addParameter('subplot','none',@isvector);
@@ -74,7 +77,7 @@ scatterPlot = plot(x,y, 'o');
 set(scatterPlot                            , ...
     'LineWidth'       , 0.5           , ...
     'Marker'          , 'o'         , ...
-    'MarkerSize'      , 8           , ...
+    'MarkerSize'      , p.Results.dotSize           , ...
     'MarkerEdgeColor' , markerEdgeColor  , ...
     'MarkerFaceColor' , markerFaceColor  );
 
@@ -83,7 +86,7 @@ scatterPlot = plot(x,y, 'o');
 set(scatterPlot                            , ...
     'LineWidth'       , 0.5           , ...
     'Marker'          , 'o'         , ...
-    'MarkerSize'      , 8           , ...
+    'MarkerSize'      , p.Results.dotSize           , ...
     'MarkerEdgeColor' , markerEdgeColor  );
 
 
@@ -185,6 +188,22 @@ end
 
 
 
+if strcmp(p.Results.axes, 'off')
+    ax1 = gca;
+    yruler = ax1.YRuler;
+    yruler.Axle.Visible = 'off';
+    xruler = ax1.XRuler;
+    xruler.Axle.Visible = 'off';
+    %set(gca, 'xtick', []);
+    %set(gca, 'ytick', []);
+    set(gca, 'Ticklength', [0 0])
+
+end
+
+if strcmp(p.Results.grid, 'on')
+    grid on
+end
+
 %'lineOfBestFit', square, statistic, squareFromZero
 
 
@@ -206,3 +225,5 @@ end
 if strcmp(p.Results.close, 'on')
     close
 end
+
+
