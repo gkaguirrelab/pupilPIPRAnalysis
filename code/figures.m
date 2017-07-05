@@ -41,6 +41,8 @@ for stimulus = 1:size(stimulusOrder,2)
     plot((1:size(response{1},2))*0.02, response{1}, 'Color', 'k')
     hold on
     plot((1:size(response{1},2))*0.02, response{2}, 'Color', 'b')
+    
+    % now adjust the plot a bit
     if stimulus == 1
         legend('First Session', 'Second Session', 'Location', 'SouthEast')
     end
@@ -48,7 +50,16 @@ for stimulus = 1:size(stimulusOrder,2)
     ylabel('Pupil Diameter (% Change)')
     ylim([-0.5 0.1])
     title([stimulusOrder{stimulus}])
+    ax1 = gca;
+    yruler = ax1.YRuler;
+    yruler.Axle.Visible = 'off';
+    xruler = ax1.XRuler;
+    xruler.Axle.Visible = 'off';
+    set(gca, 'Ticklength', [0 0])
+    grid on
 end
+
+set(gcf,'Renderer','painters')
 saveas(plotFig, fullfile(outDir, ['2b.pdf']), 'pdf');
 close(plotFig)
 
@@ -60,15 +71,15 @@ hold on
 
 [ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,1), amplitudes{2}(:,1));
 [ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,2), amplitudes{2}(:,2));
-prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0, 'subplot', [1, 3, 1], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0, 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'subplot', [1, 3, 1], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
 [ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,3), amplitudes{2}(:,3));
 [ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,4), amplitudes{2}(:,4));
-prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'subplot', [1, 3, 2], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'subplot', [1, 3, 2], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
 [ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
 [ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
-prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'subplot', [1, 3, 3], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'subplot', [1, 3, 3], 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
@@ -76,6 +87,7 @@ if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
 
+set(gcf,'Renderer','painters')
 saveas(plotFig, fullfile(outDir, ['3a.pdf']), 'pdf');
 close(plotFig)
 
@@ -89,15 +101,15 @@ close(plotFig)
 plotFig = figure;
 hold on
 
-[ melNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6))
-[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8))
-prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*amplitudesSEM{1}(:,6), 0*amplitudesSEM{1}(:,8), 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ melNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
+[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
+prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*amplitudesSEM{1}(:,6), 0*amplitudesSEM{1}(:,8), 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
-[ blueNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,7), amplitudes{2}(:,7))
-[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9))
-prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,7), 0*amplitudesSEM{1}(:,9), 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ blueNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,7), amplitudes{2}(:,7));
+[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
+prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,7), 0*amplitudesSEM{1}(:,9), 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 
-
+set(gcf,'Renderer','painters')
 saveas(plotFig, fullfile(outDir, ['3b.pdf']), 'pdf');
 close(plotFig)
 
@@ -110,7 +122,7 @@ close(plotFig)
 [melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesSEM{1}(:,6), amplitudesSEM{2}(:,6));
 
 
-prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['4a.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'grid', 'on', 'axes', 'off', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['4a.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
 
 
 %% Figure 5: TPUP figure
@@ -125,7 +137,6 @@ for session = 1:2;
         semRedCollapsed{session}(1,timepoints) = nanstd(averageRedCombined{session}(:,timepoints))/sqrt(size(averageRedCombined{session},1));
         averageMelCollapsed{session}(1,timepoints) = nanmean(averageMelCombined{session}(:,timepoints));
         semMelCollapsed{session}(1,timepoints) = nanstd(averageMelCombined{session}(:,timepoints))/sqrt(size(averageMelCombined{session},1));
-        
         averageLMSCollapsed{session}(1,timepoints) = nanmean(averageLMSCombined{session}(:,timepoints));
         semLMSCollapsed{session}(1,timepoints) = nanstd(averageLMSCombined{session}(:,timepoints))/sqrt(size(averageLMSCombined{session},1));
         
