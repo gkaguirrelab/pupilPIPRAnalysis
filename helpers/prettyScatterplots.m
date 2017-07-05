@@ -75,7 +75,7 @@ errbar(x, y, xError, 'horiz', 'Color', errorBarColor)
 scatterPlot = plot(x,y, 'o');
 
 set(scatterPlot                            , ...
-    'LineWidth'       , 0.5           , ...
+    'LineWidth'       , 0.2           , ...
     'Marker'          , 'o'         , ...
     'MarkerSize'      , p.Results.dotSize           , ...
     'MarkerEdgeColor' , markerEdgeColor  , ...
@@ -84,7 +84,7 @@ set(scatterPlot                            , ...
 scatterPlot = plot(x,y, 'o');
 
 set(scatterPlot                            , ...
-    'LineWidth'       , 0.5           , ...
+    'LineWidth'       , 0.2           , ...
     'Marker'          , 'o'         , ...
     'MarkerSize'      , p.Results.dotSize           , ...
     'MarkerEdgeColor' , markerEdgeColor  );
@@ -104,7 +104,7 @@ if strcmp(p.Results.yLim, 'none')
 else
     ylim([p.Results.yLim(1), p.Results.yLim(2)])
 end
-    
+
 
 
 if strcmp(p.Results.xLabel, 'none') && strcmp(p.Results.yLabel, 'none')
@@ -189,6 +189,7 @@ end
 
 
 if strcmp(p.Results.axes, 'off')
+  
     ax1 = gca;
     yruler = ax1.YRuler;
     yruler.Axle.Visible = 'off';
@@ -197,8 +198,10 @@ if strcmp(p.Results.axes, 'off')
     %set(gca, 'xtick', []);
     %set(gca, 'ytick', []);
     set(gca, 'Ticklength', [0 0])
-
+    
 end
+
+
 
 if strcmp(p.Results.grid, 'on')
     grid on
