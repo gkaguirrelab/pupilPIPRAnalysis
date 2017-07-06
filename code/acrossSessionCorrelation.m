@@ -92,7 +92,7 @@ ylim([ 0 maxValue ]);
 % determine spearman correlation:
 rho = corr(melNormedOne', melNormedTwo', 'type', 'Spearman');
 rhoMel = rho;
-legend(['rho = ', num2str(rho)])
+legend(['rho = ', sprintf('%.2f', rho)])
 
 saveas(plotFig, fullfile(outDir, ['melNormedTestRetest.png']), 'png');
 close(plotFig);
@@ -137,7 +137,12 @@ close(plotFig);
 
 
 prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ minValue maxValue ], 'yLim', [ minValue maxValue ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melNormedTestRetest_pretty.png']), 'saveType', 'png', 'plotOption', 'square')
-prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['melNormedTestRetest_pretty.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+
+plotFig = figure;
+prettyScatterplots(melNormedOne, melNormedTwo, semMelOverLMSOne, semMelOverLMSTwo, 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
+
+saveas(plotFig, fullfile(outDir, ['melNormedTestRetest_pretty.pdf']), 'pdf');
+close(plotFig);
 
 
 % plot blue response normed by response to red (that is blue/red amplitude
