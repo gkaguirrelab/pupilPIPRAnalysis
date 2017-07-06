@@ -8,7 +8,7 @@ function [ pipr, netPipr ] = calculatePIPR(subjects, amplitudes, dropboxAnalysis
 % light-offset while the pupil is still constricted relative to baseline.
 % When the sustained window occurs can be specified in calling the
 % function, either by picking a single instant in time or picking a window
-% of time. For some references about certain sustained windows to chose:
+% of time. For some references about certain sustained windows to choose:
 
 % The purpose of this function is to calculate the PIPR a list of subjects
 % by following the protocol laid out by Kankipati 2010
