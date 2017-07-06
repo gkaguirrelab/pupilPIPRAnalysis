@@ -172,7 +172,7 @@ elseif strcmp(p.Results.significance, 'rho')
     yrange = ylims(2) - ylims(1);
     xpos = xlims(1)+0.20*xrange;
     ypos = ylims(1)+0.80*yrange;
-    string = (sprintf(['rho = ', num2str(rho)]));
+    string = (sprintf(['rho = ', sprintf('%.2f', rho)]));
     text(xpos, ypos, string, 'fontsize',12)
 elseif strcmp(p.Results.significance, 'spearman')
     rho = corr(x, y, 'type', 'Spearman');
@@ -182,7 +182,7 @@ elseif strcmp(p.Results.significance, 'spearman')
     yrange = ylims(2) - ylims(1);
     xpos = xlims(1)+0.20*xrange;
     ypos = ylims(1)+0.80*yrange;
-    string = (sprintf(['rho = ', num2str(rho)]));
+    string = (sprintf(['rho = ', sprintf('%.2f', rho)]));
     text(xpos, ypos, string, 'fontsize',12)
 end
 
