@@ -121,9 +121,23 @@ close(plotFig)
 [melNormedCombined] = pairResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
 [melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesSEM{1}(:,6), amplitudesSEM{2}(:,6));
 
+plotFig = figure;
+prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'grid', 'on', 'axes', 'off', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
 
-prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'grid', 'on', 'axes', 'off', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'close', 'on', 'significance', 'rho', 'save', fullfile(outDir, ['4a.pdf']), 'saveType', 'pdf', 'plotOption', 'square')
+% now add confidence interval to plot
+[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudes);
 
+xlims=get(gca,'xlim');
+ylims=get(gca,'ylim');
+xrange = xlims(2)-xlims(1);
+yrange = ylims(2) - ylims(1);
+xpos = xlims(1)+0.20*xrange;
+ypos = ylims(1)+0.75*yrange;
+string = (sprintf(['CI = ', sprintf('%.2f', confidenceInterval(1)), ' - ', sprintf('%.2f', confidenceInterval(2))]));
+text(xpos, ypos, string, 'fontsize',12)
+
+saveas(plotFig, fullfile(outDir, ['4a.pdf']), 'pdf');
+close(plotFig)
 
 %% Figure 5: TPUP figure
 % a. example model fit to average data
@@ -302,7 +316,6 @@ p1 = plot((1:700)*0.02, result*100, 'Color', 'm');
 p2 = plot((1:700)*0.02, modelResponseStruct.values, 'Color', 'k', 'DisplayName','Median Model Fit');
 
 legend([p1, p2], 'Group Average', 'Median Model Fit');
-
 
 
 
