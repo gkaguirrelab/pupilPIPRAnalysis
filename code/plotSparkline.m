@@ -149,7 +149,7 @@ outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
-saveas(plotFig, fullfile(outDir, ['2a.pdf']), 'pdf');
+saveas(plotFig, fullfile(outDir, ['2b.pdf']), 'pdf');
 
 
 close(plotFig);
