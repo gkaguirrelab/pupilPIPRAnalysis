@@ -74,7 +74,7 @@ hold on
 subplot(1,3,1)
 [ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,1), amplitudes{2}(:,1));
 [ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,2), amplitudes{2}(:,2));
-prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0, 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0,'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 % change the y-ticks (without changing, it was different from this x axis
 % -- this step keeps them consistent)
 ax = gca;
@@ -93,7 +93,7 @@ text(xpos, ypos, string, 'fontsize',12)
 subplot(1,3,2)
 [ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,3), amplitudes{2}(:,3));
 [ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,4), amplitudes{2}(:,4));
-prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 ax = gca;
 ax.YTick = [0 20 40 60];
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, blueAmplitudes, redAmplitudes);
@@ -109,7 +109,7 @@ text(xpos, ypos, string, 'fontsize',12)
 subplot(1,3,3)
 [ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
 [ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
-prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 ax = gca;
 ax.YTick = [0 20 40 60];
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, SSAmplitudes, PIPRAmplitudes);
@@ -144,7 +144,7 @@ hold on
 
 [ melNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
 [ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
-prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*amplitudesSEM{1}(:,6), 0*amplitudesSEM{1}(:,8), 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*amplitudesSEM{1}(:,6), 0*amplitudesSEM{1}(:,8), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, melNormedAmplitudes, SSAmplitudes);
 xlims=get(gca,'xlim');
 ylims=get(gca,'ylim');
@@ -158,7 +158,7 @@ text(xpos, ypos, string, 'fontsize',12)
 
 [ blueNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,7), amplitudes{2}(:,7));
 [ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
-prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,7), 0*amplitudesSEM{1}(:,9), 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,7), 0*amplitudesSEM{1}(:,9), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, blueNormedAmplitudes, PIPRAmplitudes);
 xlims=get(gca,'xlim');
 ylims=get(gca,'ylim');
@@ -182,7 +182,7 @@ close(plotFig)
 [melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesSEM{1}(:,6), amplitudesSEM{2}(:,6));
 
 plotFig = figure;
-prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'grid', 'on', 'axes', 'off', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
+prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'stimulation', 'gray', 'grid', 'off', 'axes', 'on', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
 
 % now add confidence interval to plot
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
@@ -199,6 +199,9 @@ text(xpos, ypos, string, 'fontsize',12)
 saveas(plotFig, fullfile(outDir, ['4a.pdf']), 'pdf');
 close(plotFig)
 
+% b. Bland-Altman plot
+% another nice way to show test-retest reliability
+plotBlandAltman(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6), dropboxAnalysisDir);
 %% Figure 5: TPUP figure
 % a. example model fit to average data
 % first get the average response by averaging time series across subjects
@@ -244,9 +247,22 @@ defaultParamsInfo.nInstances = 1;
 temporalFit = tfeTPUP('verbosity','full');
 
 % set up boundaries for our fits
-initialValues=[median([temporalParameters{1}{2}(:,1); temporalParameters{2}{2}(:,1)]), median([temporalParameters{1}{2}(:,2); temporalParameters{2}{2}(:,2)]), median([temporalParameters{1}{2}(:,3); temporalParameters{2}{2}(:,3)]), median([TPUPAmplitudes{1}{2}(:,1); TPUPAmplitudes{2}{2}(:,1)]), median([TPUPAmplitudes{1}{2}(:,2); TPUPAmplitudes{2}{2}(:,2)]), median([TPUPAmplitudes{1}{2}(:,3); TPUPAmplitudes{2}{2}(:,3)])];
-vlb=[median([temporalParameters{1}{2}(:,1); temporalParameters{2}{2}(:,1)]), median([temporalParameters{1}{2}(:,2); temporalParameters{2}{2}(:,2)]), median([temporalParameters{1}{2}(:,3); temporalParameters{2}{2}(:,3)]), median([TPUPAmplitudes{1}{2}(:,1); TPUPAmplitudes{2}{2}(:,1)]), median([TPUPAmplitudes{1}{2}(:,2); TPUPAmplitudes{2}{2}(:,2)]), median([TPUPAmplitudes{1}{2}(:,3); TPUPAmplitudes{2}{2}(:,3)])];
-vub=[median([temporalParameters{1}{2}(:,1); temporalParameters{2}{2}(:,1)]), median([temporalParameters{1}{2}(:,2); temporalParameters{2}{2}(:,2)]), median([temporalParameters{1}{2}(:,3); temporalParameters{2}{2}(:,3)]), median([TPUPAmplitudes{1}{2}(:,1); TPUPAmplitudes{2}{2}(:,1)]), median([TPUPAmplitudes{1}{2}(:,2); TPUPAmplitudes{2}{2}(:,2)]), median([TPUPAmplitudes{1}{2}(:,3); TPUPAmplitudes{2}{2}(:,3)])];
+delayCombined = combineResultAcrossSessions(goodSubjects, temporalParameters{1}{2}(:,1), temporalParameters{2}{2}(:,1));
+delayParameter = median(delayCombined);
+gammaCombined = combineResultAcrossSessions(goodSubjects, temporalParameters{1}{2}(:,2), temporalParameters{2}{2}(:,2));
+gammaParameter = median(gammaCombined);
+exponentialCombined = combineResultAcrossSessions(goodSubjects, temporalParameters{1}{2}(:,3), temporalParameters{2}{2}(:,3));
+exponentialParameter = median(exponentialCombined);
+transientCombined = combineResultAcrossSessions(goodSubjects, TPUPAmplitudes{1}{2}(:,1), TPUPAmplitudes{2}{2}(:,1));
+transientParameter = median(transientCombined);
+sustainedCombined = combineResultAcrossSessions(goodSubjects, TPUPAmplitudes{1}{2}(:,2), TPUPAmplitudes{2}{2}(:,2));
+sustainedParameter = median(sustainedCombined);
+persistentCombined = combineResultAcrossSessions(goodSubjects, TPUPAmplitudes{1}{2}(:,3), TPUPAmplitudes{2}{2}(:,3));
+persistentParameter = median(persistentCombined);
+
+initialValues = [delayParameter, gammaParameter, exponentialParameter, transientParameter, sustainedParameter, persistentParameter];
+vlb = [delayParameter, gammaParameter, exponentialParameter, transientParameter, sustainedParameter, persistentParameter];
+vub = [delayParameter, gammaParameter, exponentialParameter, transientParameter, sustainedParameter, persistentParameter];
 
 timebase = (0:20:13998);
 
