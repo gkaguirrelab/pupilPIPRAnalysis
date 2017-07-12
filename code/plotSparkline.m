@@ -57,7 +57,7 @@ for ss = 1:size(averageBlueCombined{2},1)
         response1 = response1 - offset*(ss - 1);
         response2 = response2 - offset*(ss - 1);
         
-        plot(x, response1, 'Color', 'k')
+        plot(x, response1, '-.', 'Color', [0.5, 0.5, 0.5], 'LineWidth', 2)
         plot(x, response2, 'Color', 'b')
         
         
@@ -119,7 +119,7 @@ for ss = 1:length(notScannedTwice)
         
         response1 = response1 - offset*(ss + 25 - 1);
         
-        plot(x, response1, 'Color', 'k')
+        plot(x, response1, '-.', 'Color', [0.5, 0.5, 0.5], 'LineWidth', 2)
     end
 end
 
