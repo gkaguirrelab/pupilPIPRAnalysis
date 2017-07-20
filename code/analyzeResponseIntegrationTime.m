@@ -155,7 +155,8 @@ for session = 1:2;
         ypos = ylims(1)+0.20*yrange;
         string = (sprintf(['Mel RIT = ', sprintf('%.2f', responseIntegrationTimes{session}(ss,2)), '\nLMS RIT = ', sprintf('%.2f', responseIntegrationTimes{session}(ss,1))]));
         text(xpos, ypos, string, 'fontsize',12)
-        outDir = ['~/Desktop/responseIntegrationTime/dataOverview/', num2str(session)];
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/responseIntegrationTime/dataOverview/', num2str(session));
+
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
@@ -176,7 +177,7 @@ for session = 1:2;
         ypos = ylims(1)+0.20*yrange;
         string = (sprintf(['Blue RIT = ', sprintf('%.2f', responseIntegrationTimes{session}(ss,3)), '\nRed RIT = ', sprintf('%.2f', responseIntegrationTimes{session}(ss,4))]));
         text(xpos, ypos, string, 'fontsize',12)
-        outDir = ['~/Desktop/responseIntegrationTime/dataOverview/', num2str(session)];
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/responseIntegrationTime/dataOverview/', num2str(session));
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
@@ -188,7 +189,7 @@ end
 
 
 %% Summarize how temporal integration varies as a function of stimulus
-outDir = '~/Desktop/responseIntegrationTime';
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/responseIntegrationTime/');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
