@@ -1,5 +1,5 @@
 % the TPUP model continues to struggle to fit some of the mel responses. In
-% particular, the model frequently returns fits where the transient (and 
+% particular, the model frequently returns fits where the transient (and
 % frequently the sustained) amplitudes are 0, making the fit entirely out
 % of the persistent component
 % This script is intended to demonstrate this problem. First a general
@@ -13,6 +13,9 @@ userName = strtrim(userName);
 dropboxAnalysisDir = ...
     fullfile('/Users', userName, ...
     '/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/');
+subAnalysisDirectory = 'pupilPIPRAnalysis';
+packetCacheTag='averageResponses';
+packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
 %% Set up the basic packet
 % make stimulus structure
@@ -40,7 +43,8 @@ temporalFit = tfeTPUP('verbosity','full'); % Construct the model object
 % piece ought to go
 
 % first load up that data
-load('/Users/harrisonmcadams/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/pupilPIPRAnalysis/cache/averageResponses_33d1c25008a78f521ec22d5ac8b90c45.mat') % load the relevant cache data
+packetCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [packetCacheTag '_' packetCacheHash '.mat']);
+load(packetCacheFileName);
 
 % load up the subject list
 [ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir);
