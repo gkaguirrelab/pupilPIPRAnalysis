@@ -2,9 +2,17 @@
 % particular, the model frequently returns fits where the transient (and 
 % frequently the sustained) amplitudes are 0, making the fit entirely out
 % of the persistent component
-% This script is intended to demonstrate this problem. First A general
+% This script is intended to demonstrate this problem. First a general
 % packet for TPUP model fitting is created. Then we fit the model to two
 % represented subjects (MELA_0074 and MELA_0077 from the first session)
+
+%% load basic variables
+% Discover user name and set Dropbox path
+[~, userName] = system('whoami');
+userName = strtrim(userName);
+dropboxAnalysisDir = ...
+    fullfile('/Users', userName, ...
+    '/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/');
 
 %% Set up the basic packet
 % make stimulus structure
@@ -22,6 +30,9 @@ thePacket.metaData = []; % both elements are needed to make a complete packet, b
 defaultParamsInfo.nInstances = 1;
 temporalFit = tfeTPUP('verbosity','full'); % Construct the model object
 
+%%
+
+
 %% first look at fit with one representative subject
 % this subject, MELA_0074 from session 1, was chosen because despite having
 % reasonable data quality, the TPUP fit is poor, especially in its
@@ -30,7 +41,18 @@ temporalFit = tfeTPUP('verbosity','full'); % Construct the model object
 
 % first load up that data
 load('/Users/harrisonmcadams/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/pupilPIPRAnalysis/cache/averageResponses_33d1c25008a78f521ec22d5ac8b90c45.mat') % load the relevant cache data
-thePacket.response.values = 100*averageMelCombined{1}(11,:); % subject index 11 from the first session corresponds to MELA_0074
+
+% load up the subject list
+[ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir);
+
+% determine subject index of the relevant subject
+for ss = 1:1:size(goodSubjects{1}{1},1)
+    if goodSubjects{1}{1}(ss,:) == 'MELA_0074'
+        subjectIndex = ss;
+    end
+end
+
+thePacket.response.values = 100*averageMelCombined{1}(subjectIndex,:); % subject index 11 from the first session corresponds to MELA_0074
 % one additional note is that not multiplying by 100 produces an
 % entirely different fit
 thePacket.response.timebase = timebase; % same as the stimulus struct
@@ -39,7 +61,6 @@ thePacket.response.timebase = timebase; % same as the stimulus struct
 vlb=[-500, 150, 1, -2000, -2000, -2000]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right)
 vub=[0, 750, 30, 0, 0, 0];
 [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'vlb', vlb, 'vub',vub);
-paramsFit.paramMainMatrix
 
 % now do some plotting to summarize
 plotFig = figure;
@@ -64,7 +85,15 @@ title('MELA_0074');
 %% one more example subject
 % subject MELA_0077 from the first session also fails to fit any transient
 % piece
-thePacket.response.values = 100*averageMelCombined{1}(13,:); % subject index 11 from the first session corresponds to MELA_0074
+
+% determine the relevant subject index
+for ss = 1:1:size(goodSubjects{1}{1},1)
+    if goodSubjects{1}{1}(ss,:) == 'MELA_0077'
+        subjectIndex = ss;
+    end
+end
+
+thePacket.response.values = 100*averageMelCombined{1}(subjectIndex,:); % subject index 11 from the first session corresponds to MELA_0074
 % one additional note is that not multiplying by 100 produces an
 % entirely different fit
 thePacket.response.timebase = timebase; % same as the stimulus struct
@@ -73,7 +102,6 @@ thePacket.response.timebase = timebase; % same as the stimulus struct
 vlb=[-500, 150, 1, -2000, -2000, -2000]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right)
 vub=[0, 750, 30, 0, 0, 0];
 [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'vlb', vlb, 'vub',vub);
-paramsFit.paramMainMatrix
 
 % now do some plotting to summarize
 plotFig = figure;
