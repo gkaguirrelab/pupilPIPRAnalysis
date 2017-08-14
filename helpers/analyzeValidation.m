@@ -1,15 +1,17 @@
-function [ validation ] = analyzeValidation(subject, date, dropboxAnalysisDir, varargin)
+function [ passStatus, validation ] = analyzeValidation(subject, date, dropboxAnalysisDir, varargin)
 
 % date option
 % default is third session, but i need a way to look up other subjects
 % by date (for my exclude subjecgts scripts
 
 %% Parse input
-%p = inputParser; p.KeepUnmatched = true;
+p = inputParser; p.KeepUnmatched = true;
 
-%p.addParameter('date','noneSpecified',@ischar);
+p.addParameter('whichValidation','combined',@ischar);
+p.addParameter('plot','on',@ischar);
 
-%p.parse(varargin{:});
+
+p.parse(varargin{:});
 
 %% Figure out where the relevant session folder lives
 
@@ -23,13 +25,23 @@ else
     return
 end
 
+% basedon the 'whichValidation' key-value pair, determine which validation
+% measurements we care about
+if strcmp(p.Results.whichValidation, 'pre')
+    firstValidationIndex = 1;
+    lastValidationIndex = 5;
+elseif strcmp(p.Results.whichValidation, 'post')
+    firstValidationIndex = 6;
+    lastValidationIndex = 10;
+elseif strcmp(p.Results.whichValidation, 'combined')
+    firstValidationIndex = 1;
+    lastValidationIndex = 10;
+end
+
 %% Now start collecting the stats
 % set up some variables
 stimuli = {'Melanopsin', 'LMS', 'Blue', 'Red'};
-%validation.MelanopsinStimulation = [];
-%validation.LMSStimulation = [];
-%validation.BlueStimulation = [];
-%validation.RedStimulation = [];
+
 
 
 for stimulus = 1:length(stimuli)
@@ -51,13 +63,18 @@ for stimulus = 1:length(stimuli)
         
     end
     
+    
+    
     availableValidations = dir(fullfile(dropboxAnalysisDir, subdir, date, validationFolder));
     availableValidations = availableValidations(arrayfun(@(x) x.name(1), availableValidations) ~='.'); % discard the . .. and .DSStore dirs
     numberValidations = size(availableValidations,1);
+    if stimulus == 1;
+        sprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
+    end
     
     if strcmp(stimuli(stimulus), 'Melanopsin') || strcmp(stimuli(stimulus), 'LMS')
         
-        for ii = 1:10
+        for ii = firstValidationIndex:lastValidationIndex
             validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
             validationResultsFile = {validationResultsFile.name};
             fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
@@ -80,7 +97,7 @@ for stimulus = 1:length(stimuli)
     end
     if strcmp(stimuli(stimulus), 'Blue') || strcmp(stimuli(stimulus), 'Red')
         
-        for ii = 1:10
+        for ii = firstValidationIndex:lastValidationIndex
             validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
             validationResultsFile = {validationResultsFile.name};
             fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
@@ -97,40 +114,205 @@ for stimulus = 1:length(stimuli)
 end % end loop over stimuli
 
 %% Determine if subject meets inclusion criteria
+
+failStatus = 0;
+
 for stimulus = 1:length(stimuli)
     if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
         SConeContrastVector = cell2mat({validation.(stimuli{stimulus}).SConeContrast});
         LMSContrastVector = cell2mat({validation.(stimuli{stimulus}).LMSContrast});
         LMinusMContrastVector = cell2mat({validation.(stimuli{stimulus}).LMinusMContrast});
         MelanopsinContrastVector = cell2mat({validation.(stimuli{stimulus}).MelanopsinContrast});
+        if strcmp(stimuli(stimulus), 'LMS')
+            if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
+                if median(LMSContrastVector(1:5)) < 3.5
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-LMS contrast for LMS stimulation too low')
+                end
+                if median(SConeContrastVector(1:5)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-SCone contrast for LMS stimulation too high')
+                end
+                if median(LMinusMContrastVector(1:5)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-L-M contrast for LMS stimulation too high')
+                end
+                if median(MelanopsinContrastVector(1:5)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-Melanopsin contrast for LMS stimulation too high')
+                end
+            end
+            if strcmp(p.Results.whichValidation, 'post') || strcmp(p.Results.whichValidation, 'combined')
+                if median(LMSContrastVector(6:10)) < 3.5
+                    failStatus = failStatus + 1;
+                    sprintf('Post-LMS contrast for LMS stimulation too low')
+                end
+                if median(SConeContrastVector(6:10)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Post-SCone contrast for LMS stimulation too high')
+                end
+                if median(LMinusMContrastVector(6:10)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-L-M contrast for LMS stimulation too high')
+                end
+                if median(MelanopsinContrastVector(6:10)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Post-Melanopsin contrast for LMS stimulation too high')
+                    
+                end
+            end
+            
+            
+            
+            
+            
+            
+            
+        end
         
         
+        if strcmp(stimuli(stimulus), 'Melanopsin')
+            if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
+                
+                if median(MelanopsinContrastVector(1:5)) < 3.5
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-Melanopsin contrast for Melanopsin stimulation too low')
+                end
+                if median(SConeContrastVector(1:5)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-SCone contrast for Melanopsin stimulation too high')
+                    
+                end
+                if median(LMinusMContrastVector(1:5)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-L-M contrast for Melanopsin stimulation too high')
+                    
+                end
+                if median(LMSContrastVector(1:5)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Pre-LMS contrast for Melanopsin stimulation too high')
+                    
+                end
+            end
+            if strcmp(p.Results.whichValidation, 'post') || strcmp(p.Results.whichValidation, 'combined')
+                if median(MelanopsinContrastVector(6:10)) < 3.5
+                    failStatus = failStatus + 1;
+                    sprintf('Post-Melanopsin contrast for Melanopsin stimulation too low')
+                end
+                if median(SConeContrastVector(6:10)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Post-SCone contrast for Melanopsin stimulation too high')
+                    
+                end
+                if median(LMinusMContrastVector(6:10)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Post-L-M contrast for Melanopsin stimulation too high')
+                    
+                end
+                if median(LMSContrastVector(6:10)) > 0.2
+                    failStatus = failStatus + 1;
+                    sprintf('Post-LMS contrast for Melanopsin stimulation too high')
+                    
+                end
+            end % end loop over post/combined
+        end % end loop over melanopsin
+    end % end loop over melanopsin or LMS
+end % end loop over all stimuli
+
+if failStatus > 0
+    passStatus = 0;
+else
+    passStatus = 1;
+end
+
 
 %% plot to summarize results
-for stimulus = 1:length(stimuli)
-    if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
-        SConeContrastVector = cell2mat({validation.(stimuli{stimulus}).SConeContrast});
-        LMSContrastVector = cell2mat({validation.(stimuli{stimulus}).LMSContrast});
-        LMinusMContrastVector = cell2mat({validation.(stimuli{stimulus}).LMinusMContrast});
-        MelanopsinContrastVector = cell2mat({validation.(stimuli{stimulus}).MelanopsinContrast});
-        
-        plotFig = figure;
-        title(stimuli(stimulus))
-        hold on
-        
-        
-        onesVector = ones(1,length(SConeContrastVector));
-        plot(ones, 100*SConeContrastVector, 'o', 'Color', 'k')
-        plot(2*ones, 100*LMSContrastVector, 'o', 'Color', 'k')
-        plot(3*ones, 100*LMinusMContrastVector, 'o', 'Color', 'k')
-        plot(4*ones, 100*MelanopsinContrastVector, 'o', 'Color', 'k')
-        
-        set(gca,'XTick',1:4);
-        set(gca,'XTickLabel',{'S Cone' 'LMS' 'L-M' 'Melanopsin'});
-        xlim([0.5 4.5])
-        xlabel('Contrast Type')
-        ylabel('Contrast (%)')
-        
+if strcmp(p.Results.plot, 'on')
+    plotFig = figure;
+    for stimulus = 1:length(stimuli)
+        if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
+            SConeContrastVector = cell2mat({validation.(stimuli{stimulus}).SConeContrast});
+            LMSContrastVector = cell2mat({validation.(stimuli{stimulus}).LMSContrast});
+            LMinusMContrastVector = cell2mat({validation.(stimuli{stimulus}).LMinusMContrast});
+            MelanopsinContrastVector = cell2mat({validation.(stimuli{stimulus}).MelanopsinContrast});
+            
+            subplot(1,2,stimulus)
+            
+            title(stimuli(stimulus));
+            
+            
+            
+            % determine the appropriate y-axis limits
+            if strcmp(stimuli(stimulus), 'LMS')
+                intendedContrastVector = LMSContrastVector;
+                splatterVectors = [SConeContrastVector LMinusMContrastVector MelanopsinContrastVector];
+            elseif strcmp(stimuli(stimulus), 'Melanopsin')
+                intendedContrastVector = MelanopsinContrastVector;
+                splatterVectors = [SConeContrastVector LMinusMContrastVector LMSContrastVector];
+            end
+            
+            if min(intendedContrastVector*100) < 350
+                yIntendedMin = min(intendedContrastVector*100) - 5;
+                
+            else
+                yIntendedMin = 390;
+            end
+            if max(intendedContrastVector*100) > 410
+                yIntendedMax = max(intendedContrastVector*100) + 5;
+            else
+                yIntendedMax = 410;
+            end
+            
+            if min(splatterVectors*100) < -20
+                ySplatterMin = min(splatterVectors*100) - 5;
+                
+            else
+                ySplatterMin = -10;
+            end
+            if max(splatterVectors*100) > 20
+                ySplatterMax = max(splatterVectors*100) + 5;
+            else
+                ySplatterMax = 10;
+            end
+            
+            hold on;
+            line([0.5 4.5], [350 350], 'Color', 'r', 'LineStyle', '--');
+            line([0.5 4.5], [20 20], 'Color', 'r', 'LineStyle', '--');
+            line([0.5 4.5], [-20 -20], 'Color', 'r', 'LineStyle', '--');
+            
+            ylim([ySplatterMin yIntendedMax]);
+            
+            %data = {100*SConeContrastVector, 100*LMinusMContrastVector, 100*LMSContrastVector, 100*MelanopsinContrastVector};
+            %plotSpread(data,'xNames', {'S Cone', 'L-M', 'LMS', 'Melanopsin'}, 'distributionMarkers', {'o', 'o', 'o', 'o'});
+            %breakyaxis([ySplatterMax yIntendedMin], 0.01, 0.1);
+            
+            
+            
+            data = horzcat({100*SConeContrastVector', 100*LMinusMContrastVector', 100*LMSContrastVector', 100*MelanopsinContrastVector'});
+            
+            if strcmp(p.Results.whichValidation, 'pre')
+                catIdxInstance = zeros(1,5);
+                catIdx = horzcat(catIdxInstance, catIdxInstance, catIdxInstance, catIdxInstance)';
+                [test] = plotSpread(data, 'distributionMarkers', 'o', 'xNames', {'S Cone', 'L-M', 'LMS', 'Melanopsin'});
+                text(0.25, (yIntendedMax+yIntendedMin)/2, sprintf('o: Pre-Experiment \n+: Post-Experiment'))
+            elseif strcmp(p.Results.whichValidation, 'post')
+                catIdxInstance = ones(1,5);
+                catIdx = horzcat(catIdxInstance, catIdxInstance, catIdxInstance, catIdxInstance)';
+                [test] = plotSpread(data, 'distributionMarkers', '+', 'xNames', {'S Cone', 'L-M', 'LMS', 'Melanopsin'});
+                text(0.25, (yIntendedMax+yIntendedMin)/2, sprintf('o: Pre-Experiment \n+: Post-Experiment'))
+            elseif strcmp(p.Results.whichValidation, 'combined')
+                catIdxInstance = horzcat(zeros(1,5), ones(1,5));
+                catIdx = horzcat(catIdxInstance, catIdxInstance, catIdxInstance, catIdxInstance)';
+                [test] = plotSpread(data, 'categoryIdx', catIdx, 'categoryMarkers', {'o', '+'}, 'categoryLabels', {'Pre-Experiment', 'Post-Experiment'}, 'xNames', {'S Cone', 'L-M', 'LMS', 'Melanopsin'}, 'showMM', 3);
+                text(0.25, (yIntendedMax+yIntendedMin)/2, sprintf('o: Pre-Experiment \n+: Post-Experiment'))
+            end
+            if yIntendedMin - ySplatterMax < 100
+            else
+                
+                [test] = breakyaxis([ySplatterMax yIntendedMin], 0.01, 0.1);
+            end
+            
+        end
     end
 end
 
