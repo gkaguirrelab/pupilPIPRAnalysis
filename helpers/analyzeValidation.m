@@ -69,7 +69,7 @@ for stimulus = 1:length(stimuli)
     availableValidations = availableValidations(arrayfun(@(x) x.name(1), availableValidations) ~='.'); % discard the . .. and .DSStore dirs
     numberValidations = size(availableValidations,1);
     if stimulus == 1;
-        sprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
+        fprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
     end
     
     if strcmp(stimuli(stimulus), 'Melanopsin') || strcmp(stimuli(stimulus), 'LMS')
@@ -229,6 +229,7 @@ end
 %% plot to summarize results
 if strcmp(p.Results.plot, 'on')
     plotFig = figure;
+    set(gcf,'un','n','pos',[.05,.05,.7,.6])
     for stimulus = 1:length(stimuli)
         if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
             SConeContrastVector = cell2mat({validation.(stimuli{stimulus}).SConeContrast});
