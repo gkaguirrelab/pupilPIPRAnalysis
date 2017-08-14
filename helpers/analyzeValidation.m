@@ -1,4 +1,4 @@
-function [ passStatus, validation ] = analyzeValidation(subject, date, dropboxAnalysisDir, varargin)
+function [ passStatus, validation, medianMelanopsinBackgroundLuminance ] = analyzeValidation(subject, date, dropboxAnalysisDir, varargin)
 
 % date option
 % default is third session, but i need a way to look up other subjects
@@ -224,6 +224,23 @@ if failStatus > 0
 else
     passStatus = 1;
 end
+
+%% summarize background light intensity
+% we're going to keep track of melanopsin background light intensity as
+% some proxy of overall light bulb output
+melanopsinBackgroundLuminanceVector = cell2mat({validation.Melanopsin.backgroundLuminance});
+medianMelanopsinBackgroundLuminance = median(melanopsinBackgroundLuminanceVector);
+% at the start of the experiment, with a 0.2 ND filter in, we had a
+% background luminance of around 270 cd/m2. we plan to switch to a 0.1 ND filter
+% when the background luminance hits 215 with the 0.2 ND filter. That way
+% when we switch to the 0.1 ND filter, our background luminance should go
+% back up to where we started, ~270 cd/m2.
+if medianMelanopsinBackgroundLuminance < 215
+    sprintf('Median background luminance for melanopsin is %s. Time to change ND filter', medianMelanopsinBackgroundLuminance)
+elseif medianMelanopsinBackgroundLuminance < 225
+    sprintf('Median background luminance for melanopsin is %s. Probably need to change ND filter soon', medianMelanopsinBackgroundLuminance)
+end
+
 
 
 %% plot to summarize results
