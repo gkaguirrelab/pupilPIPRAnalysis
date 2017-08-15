@@ -43,6 +43,7 @@ end
 % set up some variables
 stimuli = {'Melanopsin', 'LMS', 'Blue', 'Red'};
 
+failStatus = 0;
 
 
 for stimulus = 1:length(stimuli)
@@ -69,57 +70,61 @@ for stimulus = 1:length(stimuli)
     availableValidations = dir(fullfile(dropboxAnalysisDir, subdir, date, validationFolder));
     availableValidations = availableValidations(arrayfun(@(x) x.name(1), availableValidations) ~='.'); % discard the . .. and .DSStore dirs
     numberValidations = size(availableValidations,1);
-    if stimulus == 1;
-        if strcmp(p.Results.verbose, 'on')
-            sprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
+    if lastValidationIndex - firstValidationIndex+1 > numberValidations
+        failStatus = failStatus + 1; % if we're trying to analyze more validation files than are available, that's a fail
+        passStatus = 0;
+        return
+    else
+        if stimulus == 1;
+            if strcmp(p.Results.verbose, 'on')
+                sprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
+            end
         end
-    end
-    
-    if strcmp(stimuli(stimulus), 'Melanopsin') || strcmp(stimuli(stimulus), 'LMS')
         
-        for ii = firstValidationIndex:lastValidationIndex
-            validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
-            validationResultsFile = {validationResultsFile.name};
-            fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
+        if strcmp(stimuli(stimulus), 'Melanopsin') || strcmp(stimuli(stimulus), 'LMS')
             
-            fileID = fopen(fullValidationResultsFile);
-            textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
+            for ii = firstValidationIndex:lastValidationIndex
+                validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
+                validationResultsFile = {validationResultsFile.name};
+                fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
+                
+                fileID = fopen(fullValidationResultsFile);
+                textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
+                fclose('all');
+                
+                backgroundLuminance = str2num(textFileContents{1}{4});
+                SConeContrast = str2num(textFileContents{1}{60});
+                LMinusMContrast = str2num(textFileContents{1}{53});
+                LMSContrast = str2num(textFileContents{1}{44});
+                MelanopsinContrast = str2num(textFileContents{1}{67});
+                
+                validation.(stimuli{stimulus})(ii).SConeContrast = SConeContrast;
+                validation.(stimuli{stimulus})(ii).LMinusMContrast = LMinusMContrast;
+                validation.(stimuli{stimulus})(ii).LMSContrast = LMSContrast;
+                validation.(stimuli{stimulus})(ii).MelanopsinContrast = MelanopsinContrast;
+                validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
+            end
+        end
+        if strcmp(stimuli(stimulus), 'Blue') || strcmp(stimuli(stimulus), 'Red')
             
-            backgroundLuminance = str2num(textFileContents{1}{4});
-            SConeContrast = str2num(textFileContents{1}{60});
-            LMinusMContrast = str2num(textFileContents{1}{53});
-            LMSContrast = str2num(textFileContents{1}{44});
-            MelanopsinContrast = str2num(textFileContents{1}{67});
-            
-            validation.(stimuli{stimulus})(ii).SConeContrast = SConeContrast;
-            validation.(stimuli{stimulus})(ii).LMinusMContrast = LMinusMContrast;
-            validation.(stimuli{stimulus})(ii).LMSContrast = LMSContrast;
-            validation.(stimuli{stimulus})(ii).MelanopsinContrast = MelanopsinContrast;
-            validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
+            for ii = firstValidationIndex:lastValidationIndex
+                validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
+                validationResultsFile = {validationResultsFile.name};
+                fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
+                
+                fileID = fopen(fullValidationResultsFile);
+                textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
+                
+                backgroundLuminance = str2num(textFileContents{1}{4});
+                
+                validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
+            end
         end
     end
-    if strcmp(stimuli(stimulus), 'Blue') || strcmp(stimuli(stimulus), 'Red')
-        
-        for ii = firstValidationIndex:lastValidationIndex
-            validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
-            validationResultsFile = {validationResultsFile.name};
-            fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
-            
-            fileID = fopen(fullValidationResultsFile);
-            textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
-            
-            backgroundLuminance = str2num(textFileContents{1}{4});
-            
-            validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
-        end
-    end
-    
 end % end loop over stimuli
 
 %% Determine if subject meets inclusion criteria
-
-failStatus = 0;
-
+ 
 for stimulus = 1:length(stimuli)
     if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
         SConeContrastVector = cell2mat({validation.(stimuli{stimulus}).SConeContrast});
