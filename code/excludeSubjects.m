@@ -1,6 +1,6 @@
 function [ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
 
-
+dbstop if error
 
 % Obtain list of subjects. Dynanmically figures out who the subjects are
 % based on the contents of the PIPRMaxPulse_PulsePIPR folder
@@ -17,12 +17,6 @@ for ss = 1:length(dirSubjectList);
     end
 end
 
-% run script to determine splatter results
-dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDir,' ','\\ ');
-dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ' (', ' \\(');
-dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ')', '\\)');
-
-[testOne, testTwo] = system(['bash ', pwd,  '/helpers/averageValidation.sh ', dropboxAnalysisDirCleaned, '..']);
 
 %% First, determine which subjects had data of high enough quality to avoid exclusion criteria
 % For each subject, we're going to read in the subject's corresponding
@@ -31,8 +25,6 @@ dropboxAnalysisDirCleaned = regexprep(dropboxAnalysisDirCleaned, ')', '\\)');
 % Exclusion criteria, from the pre-registration document:
 % ?	If, over all trials (PIPR, Mel, LMS), more than 50% of trials are identified as ?incomplete?
 % ?	If, within a given trial block (PIPR, Mel, or LMS) more than 75% of trials are identified as ?incomplete?.
-
-blockTypes = {'PIPR', 'Mel', 'LMS'};
 
 % output will be a goodSubjects, which is a 1x2 cell array. The first cell
 % is the first session, the second cell is the second session. Within each
@@ -66,77 +58,22 @@ for ss = 1:length(subjectList);
         
         date = dateList(numberSessions - session + 1).name;
         
-        % create a counter for each subject so we know how many good
-        % sessions they have. This will be used to organize a given "good
-        % session" as either the first or second session for that subject
+        % we don't have the same validation procedure prior to 092916, so
+        % assume everyone has good splatter prior to this date
+        if datenum(date, 'mmddyy') > datenum('092916', 'mmddyy')
+            [ passStatusSplatter ] = analyzeValidation(subject, date, dropboxAnalysisDir, 'verbose', 'off', 'plot', 'off');
+        else
+            passStatusSplatter = 1;
+        end
         
-        failurePotential = 0;
-        totalFailedTrials = 0;
-        totalTrials = 0;
-        for bb = 1:length(blockTypes)
-            blockFailedTrials = 0;
-            blockTotalTrials = 0;
-            dataQualityCSV = importdata(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse', blockTypes{bb}], subject, date, [subject, '_PupilPulseData_DataQuality.csv']));
-            trialTypes = size(dataQualityCSV.data,1)-1;
-            
-            % apply exclusion criteria based on splatter
-            if bb == 2 || bb == 3
-                if datenum(date, 'mmddyy') > datenum('092916', 'mmddyy')
-                    if exist(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 'file') % for mel and LMS, we also have to check to makes sure the splatter results are reasonable
-                        preSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'preSessionSplatterValidationStats.txt'), 1);
-                        postSplatterValues = csvread(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse',blockTypes{bb}], subject, date, 'postSessionSplatterValidationStats.txt'), 1);
-                        if bb == 3
-                            for xx = 4:6
-                                if preSplatterValues(xx) > 0.2
-                                    failurePotential = failurePotential + 1;
-                                end
-                                if postSplatterValues(xx) > 0.2
-                                    failurePotential = failurePotential + 1;
-                                end
-                            end
-                            if preSplatterValues(3) < 3.5
-                                failurePotential = failurePotential + 1;
-                            end
-                        end
-                        if bb == 2
-                            for xx = 3:5
-                                if preSplatterValues(xx) > 0.2
-                                    failurePotential = failurePotential + 1;
-                                end
-                                if postSplatterValues(xx) > 0.2
-                                    failurePotential = failurePotential + 1;
-                                end
-                            end
-                            if preSplatterValues(6) < 3.5
-                                failurePotential = failurePotential + 1;
-                            end
-                        end
-                    else % if you don't have the splatter values past a certain date, you fail
-                        failurePotential = failurePotential + 1;
-                    end
-                end
-            end
-            
-            
-            
-            for tt = 1:trialTypes;
-                % keep track of total number of trials
-                totalTrials = totalTrials + dataQualityCSV.data(tt,2);
-                % keep track of total number of trials within a given block
-                blockTotalTrials = blockTotalTrials + dataQualityCSV.data(tt,2);
-                % keep track of total number of failed trials
-                totalFailedTrials = totalFailedTrials + dataQualityCSV.data(tt,1);
-                % keep track of total number of failed trials within a given
-                % block
-                blockFailedTrials = blockFailedTrials + dataQualityCSV.data(tt,1);
-            end
-            if blockFailedTrials/blockTotalTrials > 0.75;
-                failurePotential = failurePotential + 1;
-            end
+        [ passStatusDataQuality ] = analyzeDataQuality(subject, date, dropboxAnalysisDir, 'verbose', 'off');
+        
+        if passStatusSplatter == 1 && passStatusDataQuality == 1
+            failurePotential = 0;
+        else
+            failurePotential = 1;
         end
-        if totalFailedTrials/totalTrials > 0.50;
-            failurePotential = failurePotential +1;
-        end
+        
         if failurePotential == 0;
             if numberGoodSessions == 0;
                 goodSubjects{1}{1} = [goodSubjects{1}{1}; subject];
@@ -153,8 +90,13 @@ for ss = 1:length(subjectList);
             badSubjects{1} = [badSubjects{1}; subject];
             badSubjects{2} = [badSubjects{2}; date];
         end
-    end
-end
+        
+        
+        
+        
+    end % end loop over sessions
+    
+end % end loop over subjects
 
 % addendum until we figure out a more elegant way to code this piece:
 % -MELA_0037 on 12/06/2016: post experiment, both LMS and mel have very high splatter (200%) for just the first of 5 post-experiment validations -> but the other ones look great
@@ -162,12 +104,12 @@ end
 % so since these scans look like they're actually good, we'll just manually
 % add them
 
-goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0037'];
-goodSubjects{2}{2} = [goodSubjects{2}{2}; '120616'];
+%goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0037'];
+%goodSubjects{2}{2} = [goodSubjects{2}{2}; '120616'];
 
 
-goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0038'];
-goodSubjects{2}{2} = [goodSubjects{2}{2}; '020217'];
+%goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0038'];
+%goodSubjects{2}{2} = [goodSubjects{2}{2}; '020217'];
 
 
 
