@@ -30,12 +30,17 @@ end
 % is the first session, the second cell is the second session. Within each
 % session is also a 1x2 cell array. The first cell array will be all of the
 % subject IDs, while the second cell array will be the corresponding dates
-for session = 1:2;
-    goodSubjects{session}{1} = [];
-    goodSubjects{session}{2} = [];
+for session = 1:3;
+    goodSubjects_oldSchool{session}{1} = [];
+    goodSubjects_oldSchool{session}{2} = [];
+    goodSubjects{session}.ID = [];
+    goodSubjects{session}.date = [];
     
-    badSubjects{session} = [];
-    badSubjects{session} = [];
+    badSubjects.ID = [];
+    badSubjects.date = [];
+    
+    badSubjects_oldSchool{session} = [];
+    badSubjects_oldSchool{session} = [];
 end
 
 
@@ -76,19 +81,18 @@ for ss = 1:length(subjectList);
         
         if failurePotential == 0;
             if numberGoodSessions == 0;
-                goodSubjects{1}{1} = [goodSubjects{1}{1}; subject];
-                goodSubjects{1}{2} = [goodSubjects{1}{2}; date];
-                
+                goodSubjects{1}.ID = [goodSubjects{1}.ID cellstr(subject)];
+                goodSubjects{1}.date = [goodSubjects{1}.date cellstr(date)];
             end
             if numberGoodSessions == 1;
-                goodSubjects{2}{1} = [goodSubjects{2}{1}; subject];
-                goodSubjects{2}{2} = [goodSubjects{2}{2}; date];
+                goodSubjects{2}.ID = [goodSubjects{2}.ID cellstr(subject)];
+                goodSubjects{2}.date = [goodSubjects{2}.date cellstr(date)];
             end
             numberGoodSessions = numberGoodSessions + 1;
         end
         if failurePotential ~= 0;
-            badSubjects{1} = [badSubjects{1}; subject];
-            badSubjects{2} = [badSubjects{2}; date];
+            badSubjects.ID = [badSubjects.ID cellstr(subject)];
+            badSubjects.date = [badSubjects.date cellstr(date)];
         end
         
         
@@ -97,21 +101,5 @@ for ss = 1:length(subjectList);
     end % end loop over sessions
     
 end % end loop over subjects
-
-% addendum until we figure out a more elegant way to code this piece:
-% -MELA_0037 on 12/06/2016: post experiment, both LMS and mel have very high splatter (200%) for just the first of 5 post-experiment validations -> but the other ones look great
-% -MELA_0038 on 2/02/2017: for the mel validation, the first validation post-experiment also has very high S-splatter (-150%) -> but again, the other values look great
-% so since these scans look like they're actually good, we'll just manually
-% add them
-
-%goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0037'];
-%goodSubjects{2}{2} = [goodSubjects{2}{2}; '120616'];
-
-
-%goodSubjects{2}{1} = [goodSubjects{2}{1}; 'MELA_0038'];
-%goodSubjects{2}{2} = [goodSubjects{2}{2}; '020217'];
-
-
-
 
 end % end function
