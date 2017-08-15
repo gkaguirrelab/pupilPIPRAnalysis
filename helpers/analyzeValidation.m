@@ -9,6 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 
 p.addParameter('whichValidation','combined',@ischar);
 p.addParameter('plot','on',@ischar);
+p.addParameter('verbose','off',@ischar);
 
 
 p.parse(varargin{:});
@@ -69,7 +70,9 @@ for stimulus = 1:length(stimuli)
     availableValidations = availableValidations(arrayfun(@(x) x.name(1), availableValidations) ~='.'); % discard the . .. and .DSStore dirs
     numberValidations = size(availableValidations,1);
     if stimulus == 1;
-        fprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
+        if strcmp(p.Results.verbose, 'on')
+            sprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
+        end
     end
     
     if strcmp(stimuli(stimulus), 'Melanopsin') || strcmp(stimuli(stimulus), 'LMS')
@@ -127,37 +130,61 @@ for stimulus = 1:length(stimuli)
             if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
                 if median(LMSContrastVector(1:5)) < 3.5
                     failStatus = failStatus + 1;
-                    sprintf('Pre-LMS contrast for LMS stimulation too low')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-LMS contrast for LMS stimulation too low')
+                    end
                 end
                 if median(SConeContrastVector(1:5)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-SCone contrast for LMS stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-SCone contrast for LMS stimulation too high')
+                    end
                 end
                 if median(LMinusMContrastVector(1:5)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-L-M contrast for LMS stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-L-M contrast for LMS stimulation too high')
+                    end
                 end
                 if median(MelanopsinContrastVector(1:5)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-Melanopsin contrast for LMS stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-Melanopsin contrast for LMS stimulation too high')
+                    end
                 end
             end
             if strcmp(p.Results.whichValidation, 'post') || strcmp(p.Results.whichValidation, 'combined')
                 if median(LMSContrastVector(6:10)) < 3.5
                     failStatus = failStatus + 1;
-                    sprintf('Post-LMS contrast for LMS stimulation too low')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-LMS contrast for LMS stimulation too low')
+                    end
                 end
                 if median(SConeContrastVector(6:10)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Post-SCone contrast for LMS stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-SCone contrast for LMS stimulation too high')
+                    end
                 end
                 if median(LMinusMContrastVector(6:10)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-L-M contrast for LMS stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-L-M contrast for LMS stimulation too high')
+                    end
                 end
                 if median(MelanopsinContrastVector(6:10)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Post-Melanopsin contrast for LMS stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-Melanopsin contrast for LMS stimulation too high')
+                    end
                     
                 end
             end
@@ -176,42 +203,66 @@ for stimulus = 1:length(stimuli)
                 
                 if median(MelanopsinContrastVector(1:5)) < 3.5
                     failStatus = failStatus + 1;
-                    sprintf('Pre-Melanopsin contrast for Melanopsin stimulation too low')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-Melanopsin contrast for Melanopsin stimulation too low')
+                    end
                 end
                 if median(SConeContrastVector(1:5)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-SCone contrast for Melanopsin stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-SCone contrast for Melanopsin stimulation too high')
+                    end
                     
                 end
                 if median(LMinusMContrastVector(1:5)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-L-M contrast for Melanopsin stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-L-M contrast for Melanopsin stimulation too high')
+                    end
                     
                 end
                 if median(LMSContrastVector(1:5)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Pre-LMS contrast for Melanopsin stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Pre-LMS contrast for Melanopsin stimulation too high')
+                    end
                     
                 end
             end
             if strcmp(p.Results.whichValidation, 'post') || strcmp(p.Results.whichValidation, 'combined')
                 if median(MelanopsinContrastVector(6:10)) < 3.5
                     failStatus = failStatus + 1;
-                    sprintf('Post-Melanopsin contrast for Melanopsin stimulation too low')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-Melanopsin contrast for Melanopsin stimulation too low')
+                    end
                 end
                 if median(SConeContrastVector(6:10)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Post-SCone contrast for Melanopsin stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-SCone contrast for Melanopsin stimulation too high')
+                    end
                     
                 end
                 if median(LMinusMContrastVector(6:10)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Post-L-M contrast for Melanopsin stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-L-M contrast for Melanopsin stimulation too high')
+                    end
                     
                 end
                 if median(LMSContrastVector(6:10)) > 0.2
                     failStatus = failStatus + 1;
-                    sprintf('Post-LMS contrast for Melanopsin stimulation too high')
+                    if strcmp(p.Results.verbose, 'on')
+                        
+                        sprintf('Post-LMS contrast for Melanopsin stimulation too high')
+                    end
                     
                 end
             end % end loop over post/combined
