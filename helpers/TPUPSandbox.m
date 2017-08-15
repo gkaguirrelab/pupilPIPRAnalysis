@@ -55,44 +55,41 @@ load(packetCacheFileName);
 %% Loop through the demo subjects
 
 for ii = 1:length(demoSubjects)
-
-% determine subject index of the relevant subject
-%% LET'S REPLACE THIS WITH A CELLFUN OPERATION UPON A STUCTURE with CELLARRAYS
-% e.g.: cellfun(@(x) strcmp(x,demoSubjects{ii}), goodSubjects.ID)
-for ss = 1:1:size(goodSubjects{1}{1},1)
-    if goodSubjects{1}{1}(ss,:) == demoSubjects{ii}
-        subjectIndex = ss;
-    end
-end
-
-thePacket.response.values = 100*averageMelCombined{1}(subjectIndex,:); % subject index 11 from the first session corresponds to MELA_0074
-% one additional note is that not multiplying by 100 produces an
-% entirely different fit
-thePacket.response.timebase = timebase; % same as the stimulus struct
-
-% now do the fit
-vlb=[-500, 150, 1, -2000, -2000, -2000]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right)
-vub=[0, 750, 30, 0, 0, 0];
-[paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'vlb', vlb, 'vub',vub);
-
-% now do some plotting to summarize
-plotFig = figure;
-hold on
-plot(thePacket.response.timebase, thePacket.response.values)
-plot(modelResponseStruct.timebase, modelResponseStruct.values)
-xlabel('Time (s)')
-ylabel('Pupil Diameter (% Change)')
-legend('Data', 'TPUP Fit')
-xlims=get(gca,'xlim');
-ylims=get(gca,'ylim');
-xrange = xlims(2)-xlims(1);
-yrange = ylims(2) - ylims(1);
-xpos = xlims(1)+0.75*xrange;
-ypos = ylims(1)+0.20*yrange;
-mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
-rSquared = mdl.Rsquared.Ordinary;
-string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
-text(xpos, ypos, string)
-title(demoSubjects{ii});
-
+    
+    % determine subject index of the relevant subject
+    %% LET'S REPLACE THIS WITH A CELLFUN OPERATION UPON A STUCTURE with CELLARRAYS
+    % e.g.: cellfun(@(x) strcmp(x,demoSubjects{ii}), goodSubjects.ID)
+    whichSubject = cellfun(@(x) strcmp(x, demoSubjects{ii}), goodSubjects{1}.ID);
+    [maxValue, subjectIndex] = max(whichSubject);
+    
+    thePacket.response.values = 100*averageMelCombined{1}(subjectIndex,:); % subject index 11 from the first session corresponds to MELA_0074
+    % one additional note is that not multiplying by 100 produces an
+    % entirely different fit
+    thePacket.response.timebase = timebase; % same as the stimulus struct
+    
+    % now do the fit
+    vlb=[-500, 150, 1, -2000, -2000, -2000]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right)
+    vub=[0, 750, 30, 0, 0, 0];
+    [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'vlb', vlb, 'vub',vub);
+    
+    % now do some plotting to summarize
+    plotFig = figure;
+    hold on
+    plot(thePacket.response.timebase, thePacket.response.values)
+    plot(modelResponseStruct.timebase, modelResponseStruct.values)
+    xlabel('Time (s)')
+    ylabel('Pupil Diameter (% Change)')
+    legend('Data', 'TPUP Fit')
+    xlims=get(gca,'xlim');
+    ylims=get(gca,'ylim');
+    xrange = xlims(2)-xlims(1);
+    yrange = ylims(2) - ylims(1);
+    xpos = xlims(1)+0.75*xrange;
+    ypos = ylims(1)+0.20*yrange;
+    mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
+    rSquared = mdl.Rsquared.Ordinary;
+    string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+    text(xpos, ypos, string)
+    title(demoSubjects{ii});
+    
 end % loop over demoSubjects
