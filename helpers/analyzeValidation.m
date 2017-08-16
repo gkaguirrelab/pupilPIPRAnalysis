@@ -291,10 +291,12 @@ medianMelanopsinBackgroundLuminance = median(melanopsinBackgroundLuminanceVector
 % when the background luminance hits 215 with the 0.2 ND filter. That way
 % when we switch to the 0.1 ND filter, our background luminance should go
 % back up to where we started, ~270 cd/m2.
-if medianMelanopsinBackgroundLuminance < 215
-    sprintf('Median background luminance for melanopsin is %s. Time to change ND filter', medianMelanopsinBackgroundLuminance)
-elseif medianMelanopsinBackgroundLuminance < 225
-    sprintf('Median background luminance for melanopsin is %s. Probably need to change ND filter soon', medianMelanopsinBackgroundLuminance)
+if strcmp(p.Results.verbose, 'on')
+    if medianMelanopsinBackgroundLuminance < 215
+        sprintf('Median background luminance for melanopsin is %s. Time to change ND filter', medianMelanopsinBackgroundLuminance)
+    elseif medianMelanopsinBackgroundLuminance < 225
+        sprintf('Median background luminance for melanopsin is %s. Probably need to change ND filter soon', medianMelanopsinBackgroundLuminance)
+    end
 end
 
 
