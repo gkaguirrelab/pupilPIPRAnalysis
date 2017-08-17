@@ -339,13 +339,13 @@ if strcmp(p.Results.plot, 'on')
                 yIntendedMax = 410;
             end
             
-            if min(splatterVectors*100) < -20
+            if min(splatterVectors*100) < -10
                 ySplatterMin = min(splatterVectors*100) - 5;
                 
             else
                 ySplatterMin = -10;
             end
-            if max(splatterVectors*100) > 20
+            if max(splatterVectors*100) > 10
                 ySplatterMax = max(splatterVectors*100) + 5;
             else
                 ySplatterMax = 10;
