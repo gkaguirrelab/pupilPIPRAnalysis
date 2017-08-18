@@ -1,8 +1,8 @@
 function [] = summarizeBackgroundMelLuminance(goodSubjects, dropboxAnalysisDir)
 
-pilotSubjects = {'HERO_HMM', 'HERO_NoFocus', 'HERO_HMM', 'HERO_postMove', 'MELA_0003', 'MELA_0038'};
-pilotDates = {'072817', '080217', '080417', '080817', '081517', '081617'};
-pilotWhichValidationList = {'pre', 'pre', 'combined', 'pre', 'pre', 'pre'};
+pilotSubjects = {'HERO_HMM', 'HERO_NoFocus', 'HERO_HMM', 'HERO_postMove', 'MELA_0003', 'MELA_0038', 'newCodeTest'};
+pilotDates = {'072817', '080217', '080417', '080817', '081517', '081617', '081717'};
+pilotWhichValidationList = {'pre', 'pre', 'combined', 'pre', 'pre', 'pre', 'pre'};
     
 combinedSubjects = horzcat(goodSubjects{3}.ID, pilotSubjects);
 combinedDates = horzcat(goodSubjects{3}.date, pilotDates);
@@ -24,7 +24,7 @@ hold on
 
 plot(cellfun(@(x) datenum(x, 'mmddyy'), combinedDates(1:length(goodSubjects{3}.ID))), backgroundMelLuminances(1:length(goodSubjects{3}.ID)), 'o', 'Color', 'b')
 plot(cellfun(@(x) datenum(x, 'mmddyy'), combinedDates(length(goodSubjects{3}.ID)+1:length(goodSubjects{3}.ID)+length(pilotSubjects))), backgroundMelLuminances(length(goodSubjects{3}.ID)+1:length(goodSubjects{3}.ID)+length(pilotSubjects)), '+', 'Color', 'b')
-legend('Pilot/Test Data', 'Subjects')
+legend('Subjects', 'Pilot/Test Data')
 
 datetick('x', 'mmddyy')
 xlabel('Date of Measurement')
