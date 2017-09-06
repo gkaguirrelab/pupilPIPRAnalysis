@@ -303,7 +303,7 @@ end
 
 %% plot to summarize results
 if strcmp(p.Results.plot, 'on')
-    plotFig = figure;
+    %plotFig = figure;
     set(gcf,'un','n','pos',[.05,.05,.7,.6])
     for stimulus = 1:length(stimuli)
         if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
@@ -327,7 +327,7 @@ if strcmp(p.Results.plot, 'on')
                 splatterVectors = [SConeContrastVector LMinusMContrastVector LMSContrastVector];
             end
             
-            if min(intendedContrastVector*100) < 350
+            if min(intendedContrastVector*100) < 390
                 yIntendedMin = min(intendedContrastVector*100) - 5;
                 
             else
