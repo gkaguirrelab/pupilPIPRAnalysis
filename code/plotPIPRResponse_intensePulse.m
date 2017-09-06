@@ -17,7 +17,7 @@ function [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombi
 
 
 % Pre-allocate space for results variables
-for session = 1:2;
+for session = 3:3;
     averageBlue{session} = [];
     semBlue{session} = [];
     averageBlueCombined{session} = [];
@@ -32,12 +32,11 @@ for session = 1:2;
   
 end
 
-for session = 1:1;
-    
-    for ss = 1:size(goodSubjects{session}{1},1);
+for session = 3:3    
+    for ss = 1:length(goodSubjects{session}.ID);
         ss
         session
-        subject = goodSubjects{session}{1}(ss,:);
+        subject = goodSubjects{session}.ID{ss};
         numberSessions = dir(fullfile(dropboxAnalysisDir, 'Legacy/PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
         
@@ -45,7 +44,7 @@ for session = 1:1;
         dateList = dir(fullfile(dropboxAnalysisDir, 'Legacy/PIPRMaxPulse_PulsePIPR', subject));
         dateList = dateList(~ismember({dateList.name},{'.','..', '.DS_Store'}));
         
-        date = goodSubjects{session}{2}(ss,:);
+        date = goodSubjects{session}.date{ss};
         
         blue = importdata(fullfile(dropboxAnalysisDir, 'Legacy/PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRBlue_TimeSeries.csv']));
         red = importdata(fullfile(dropboxAnalysisDir, 'Legacy/PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRRed_TimeSeries.csv']));
@@ -82,25 +81,25 @@ for session = 1:1;
         errBar(1,:) = semBlue{session}(1:(length(averageBlue{session})));
         errBar(2,:) = semBlue{session}(1:(length(averageBlue{session})));
         
-        shadedErrorBar((1:length(averageBlue{session}))*0.02,averageBlue{session}*100, errBar*100, 'b', 1);
+        shadedErrorBar((1:length(averageBlue{session}))*0.02,averageBlue{session}*100, errBar*100, 'lineProps', '-b');
         hold on
         line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
         
         errBar(1,:) = semRed{session}(1:(length(averageRed{session})));
         errBar(2,:) = semRed{session}(1:(length(averageRed{session})));
         
-        shadedErrorBar((1:length(averageRed{session}))*0.02,averageRed{session}*100, errBar*100, 'r', 1);
+        shadedErrorBar((1:length(averageRed{session}))*0.02,averageRed{session}*100, errBar*100, 'lineProps', '-r');
         
         errBar(1,:) = semPipr{session}(1:(length(pipr{session})));
         errBar(2,:) = semPipr{session}(1:(length(pipr{session})));
         
-        shadedErrorBar((1:length(pipr{session}))*0.02,pipr{session}*-100, errBar*100, 'k', 1);
+        shadedErrorBar((1:length(pipr{session}))*0.02,pipr{session}*-100, errBar*100, 'lineProps', '-k');
             plot((1:length(pipr{session}))*0.02, zeros(1,length(pipr{session})), '-.', 'Color', 'k')
 
         xlabel('Time (s)');
         ylabel('Percent Change (%)');
         ylim([-60 20]);
-        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/intensePulse');
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/PIPR/3');
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
@@ -110,7 +109,7 @@ for session = 1:1;
 end
 
 % Make group average plots
-for session = 1:2;
+for session = 3:3;
     for timepoints = 1:length(averageBlueCombined{session});
         averageBlueCollapsed{session}(1,timepoints) = nanmean(averageBlueCombined{session}(:,timepoints));
         semBlueCollapsed{session}(1,timepoints) = nanstd(averageBlueCombined{session}(:,timepoints))/sqrt(size(averageBlueCombined{session},1));
@@ -125,23 +124,23 @@ for session = 1:2;
     errBar(1,:) = semBlueCollapsed{session}(1:(length(averageBlueCollapsed{session})));
     errBar(2,:) = semBlueCollapsed{session}(1:(length(averageBlueCollapsed{session})));
     
-    shadedErrorBar((1:length(averageBlueCollapsed{session}))*0.02,averageBlueCollapsed{session}*100, errBar*100, 'b', 1);
+    shadedErrorBar((1:length(averageBlueCollapsed{session}))*0.02,averageBlueCollapsed{session}*100, errBar*100, 'lineProps', '-b');
     hold on
     line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
     errBar(1,:) = semRedCollapsed{session}(1:(length(averageRedCollapsed{session})));
     errBar(2,:) = semRedCollapsed{session}(1:(length(averageRedCollapsed{session})));
     
-    shadedErrorBar((1:length(averageRedCollapsed{session}))*0.02,averageRedCollapsed{session}*100, errBar*100, 'r', 1);
+    shadedErrorBar((1:length(averageRedCollapsed{session}))*0.02,averageRedCollapsed{session}*100, errBar*100, 'lineProps', '-r');
     
     errBar(1,:) = semPiprCollapsed{session}(1:(length(piprCollapsed{session})));
     errBar(2,:) = semPiprCollapsed{session}(1:(length(piprCollapsed{session})));
     
-    shadedErrorBar((1:length(piprCollapsed{session}))*0.02,piprCollapsed{session}*-100, errBar*100, 'k', 1);
+    shadedErrorBar((1:length(piprCollapsed{session}))*0.02,piprCollapsed{session}*-100, errBar*100, 'lineProps', '-k');
     line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
     xlabel('Time (s)');
     ylabel('Percent Change (%)');
     ylim([-60 20]);
-    outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_LongPulsePIPR/AverageResponse', num2str(session));
+    outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/PIPR/3');
     if ~exist(outDir, 'dir')
         mkdir(outDir);
     end
@@ -151,16 +150,16 @@ end
 
 
 %% Create plots across subjects that show the average response to the melanopsin and LMS stimuli
-for session = 1:2;
-    for ss = 1:size(goodSubjects{session}{1},1);
-        subject = goodSubjects{session}{1}(ss,:);
-        numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_LongPulsePIPR', subject));
+for session = 3:3;
+    for ss = 1:length(goodSubjects{session}.ID);
+        subject = goodSubjects{session}.ID{ss};
+        numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
         numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
         
-        date = goodSubjects{session}{2}(ss,:);
+        date = goodSubjects{session}.date{ss};
 
-        lms = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_LongPulseLMS', subject, date, [subject, '_PupilPulseData_MaxLMS_TimeSeries.csv']));
-        mel = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_LongPulseMel', subject, date, [subject, '_PupilPulseData_MaxMel_TimeSeries.csv']));
+        lms = importdata(fullfile(dropboxAnalysisDir, 'Legacy/PIPRMaxPulse_PulseLMS', subject, date, [subject, '_PupilPulseData_MaxLMS_TimeSeries.csv']));
+        mel = importdata(fullfile(dropboxAnalysisDir, 'Legacy/PIPRMaxPulse_PulseMel', subject, date, [subject, '_PupilPulseData_MaxMel_TimeSeries.csv']));
         % create average pupil response for a given subject to the red or blue
         % stimulus
         for stimuli = 1:2;
@@ -187,14 +186,14 @@ for session = 1:2;
         errBar(1,:) = semLMS{session}(1:(length(averageLMS{session})));
         errBar(2,:) = semLMS{session}(1:(length(averageLMS{session})));
         
-        shadedErrorBar((1:length(averageLMS{session}))*0.02,averageLMS{session}*100, errBar*100, 'b', 1);
+        shadedErrorBar((1:length(averageLMS{session}))*0.02,averageLMS{session}*100, errBar*100, 'lineProps', '-b');
         hold on
         line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
         
         xlabel('Time (s)');
         ylabel('Percent Change (%)');
         ylim([-60 20]);
-        outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_LongPulseLMS/AverageResponse', num2str(session));
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/LMS/3');
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
@@ -206,14 +205,14 @@ for session = 1:2;
         errBar(1,:) = semMel{session}(1:(length(averageMel{session})));
         errBar(2,:) = semMel{session}(1:(length(averageMel{session})));
         
-        shadedErrorBar((1:length(averageMel{session}))*0.02,averageMel{session}*100, errBar*100, 'b', 1);
+        shadedErrorBar((1:length(averageMel{session}))*0.02,averageMel{session}*100, errBar*100, 'lineProps', '-c');
         hold on
         
         
         xlabel('Time (s)');
         ylabel('Percent Change (%)');
         ylim([-60 20]);
-        outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_LongPulseMel/AverageResponse', num2str(session));
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/mel/3');
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
@@ -224,7 +223,7 @@ end % end loop over sessions
 
 
 % Make group average plots
-for session = 1:2;
+for session = 3:3;
 for timepoints = 1:length(averageLMSCombined{session});
     averageLMSCollapsed{session}(1,timepoints) = nanmean(averageLMSCombined{session}(:,timepoints));
     semLMSCollapsed{session}(1,timepoints) = nanstd(averageLMSCombined{session}(:,timepoints))/sqrt(size(averageLMSCombined{session},1));
@@ -238,14 +237,14 @@ plotFig = figure;
 errBar(1,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 errBar(2,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 
-shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'b', 1);
+shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'lineProps', '-b');
 hold on
 line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 
 xlabel('Time (s)');
 ylabel('Percent Change (%)');
 ylim([-60 20]);
-outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_LongPulseLMS/AverageResponse', num2str(session));
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/LMS/3');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -257,14 +256,14 @@ plotFig = figure;
 errBar(1,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 errBar(2,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 
-shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'b', 1);
+shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'lineProps', '-b');
 hold on
 line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 
 xlabel('Time (s)');
 ylabel('Percent Change (%)');
 ylim([-60 20]);
-outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_LongPulseMel/AverageResponse', num2str(session));
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/mel/3');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -276,7 +275,7 @@ plotFig = figure;
 errBar(1,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 errBar(2,:) = semLMSCollapsed{session}(1:(length(averageLMSCollapsed{session})));
 
-shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'm', 1);
+shadedErrorBar((1:length(averageLMSCollapsed{session}))*0.02,averageLMSCollapsed{session}*100, errBar*100, 'lineProps', '-m');
 
 
 xlabel('Time (s)');
@@ -287,13 +286,13 @@ line([1 4], [15 15], 'LineWidth', 4, 'Color', 'k');
 errBar(1,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 errBar(2,:) = semMelCollapsed{session}(1:(length(averageMelCollapsed{session})));
 
-shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'c', 1);
+shadedErrorBar((1:length(averageMelCollapsed{session}))*0.02,averageMelCollapsed{session}*100, errBar*100, 'lineProps', '-c');
 
 
 xlabel('Time (s)');
 ylabel('Percent Change (%)');
 ylim([-60 20]);
-outDir = fullfile(dropboxAnalysisDir,'PIPRMaxPulse_LongPulseLMS/AverageResponse', num2str(session));
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/averageResponse/mel/3');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
