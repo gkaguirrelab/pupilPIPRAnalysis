@@ -1,14 +1,11 @@
-function [ TPUPAmplitudes, temporalParameters, varianceExplained ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir)
+function [ TPUPParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir)
 
 % The main output will be an [ss x 3] matrix, called amplitude, which contains the results
 % from fitting the IAMP model to to average responses per subject. The
 % first column will be the amplitude of LMS stimulation, the second column
 % melanopsin stimulation, the third column pipr stimulation
 
-stimulusOrder = {'LMS' 'mel' 'blue' 'red'};
-
-paramLockMatrix = [];
-IAMPFitToData = [];
+stimuli = {'LMS' 'Mel' 'Blue' 'Red'};
 
 % We will fit each average response as a single stimulus in a packet, so
 % each packet therefore contains a single stimulus instance.
@@ -18,433 +15,113 @@ defaultParamsInfo.nInstances = 1;
 temporalFit = tfeTPUP('verbosity','full');
 
 % set up boundaries for our fits
-initialValues=[200, 200, 10, -10, -25, -25];
-            vlb=[-500, 150, 1, -2000, -2000, -2000];
-            vub=[0, 750, 30, 0, 0, 0];
+vlb=[-500, 150, 1, -400, -400, -400]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right). also the range of the amplitude parameters is probably much larger than we need
+vub=[0, 600, 30, 0, 0, 0];
+startingValues = [-100, 0];
+
+% build up common parts of the packet
+timebase = 0:20:13980; % in msec
+stepOnset = 1000; % in msec
+stepOffset = 4000; % in msec
+[stimulusStruct] = makeStepPulseStimulusStruct(timebase, stepOnset, stepOffset, 'rampDuration', 500);
+thePacket.stimulus = stimulusStruct; % add stimulusStruct to the packet
+thePacket.response.timebase = timebase;
+thePacket.kernel = [];
+thePacket.metaData = [];
 
 %% now fit each subject
-for session = 1:2;
-    for stimulation = 1:length(stimulusOrder)
-        TPUPAmplitudes{session}{stimulation} = [];
-        temporalParameters{session}{stimulation} = [];
-        varianceExplained{session}{stimulation} = [];
-        individualFits{session}{stimulation} = [];
-    end
-end
-
-
-
-
-for session = 1:2;
-    
-    
-    % assemble the packet
-    % first create the stimulus structure
-    
-    % create the timebase: events are 14 s long, and we're sampling every 20
-    % ms
-    timebase = (0:20:13998);
-    
-    
-    
-    
-    % Temporal domain of the stimulus
-    deltaT = 20; % in msecs
-    totalTime = 14000; % in msecs
-    stimulusStruct.timebase = linspace(0,totalTime-deltaT,totalTime/deltaT);
-    nTimeSamples = size(stimulusStruct.timebase,2);
-    
-    % Specify the stimulus struct.
-    % We create here a step function of neural activity, with half-cosine ramps
-    %  on and off
-    stepOnset=1000; % msecs
-    stepDuration=3000; % msecs
-    rampDuration=500; % msecs
-    
-    % the square wave step
-    stimulusStruct.values=zeros(1,nTimeSamples);
-    stimulusStruct.values(round(stepOnset/deltaT): ...
-        round(stepOnset/deltaT)+round(stepDuration/deltaT)-1)=1;
-    % half cosine ramp on
-    stimulusStruct.values(round(stepOnset/deltaT): ...
-        round(stepOnset/deltaT)+round(rampDuration/deltaT)-1)= ...
-        fliplr((cos(linspace(0,pi*2,round(rampDuration/deltaT))/2)+1)/2);
-    % half cosine ramp off
-    stimulusStruct.values(round(stepOnset/deltaT)+round(stepDuration/deltaT)-round(rampDuration/deltaT): ...
-        round(stepOnset/deltaT)+round(stepDuration/deltaT)-1)= ...
-        (cos(linspace(0,pi*2,round(rampDuration/deltaT))/2)+1)/2;
-    thePacket.stimulus.values = stimulusStruct.values;
-    thePacket.stimulus.timebase = timebase;
-    
-    % now kernel needed for tpup
-    thePacket.kernel = [];
-    
-    for ss = 1:size(goodSubjects{session}{1},1) % loop over subjects
-        subject = goodSubjects{session}{1}(ss,:);
-        
-        subDir = 'pupilPIPRAnalysis/TPUP/modelFits';
-        for stimulation = 1:length(stimulusOrder);
-            if stimulation == 1; % LMS condition
-                outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-                %params = LMSParams;
-                result = 100*averageLMSCombined{session}(ss, :);
-                
-            elseif stimulation == 2; % mel condition
-                %params = MelParams;
-                outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-                
-                result = 100*averageMelCombined{session}(ss, :);
-                
-                
-            elseif stimulation == 3; % blue condition
-                %params = blueParams;
-                outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-                
-                result = 100*averageBlueCombined{session}(ss, :);
-            elseif stimulation == 4; % red condition
-                %params = redParams;
-                outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-                
-                result = 100*averageRedCombined{session}(ss, :);
-                
+for session = 1:length(goodSubjects)
+    for ss = 1:length(goodSubjects{session}.ID)
+        for stimulus = 1:length(stimuli)
+            
+            rSquaredPooled = []; % for each subject, for each condition, we want to look at the R2 values of each fit
+            for initialTransient = 1:2
+                for initialSustained = 1:2
+                    for initialPersistent = 1:2
+                        % build the packet
+                        initialValues = [-200, 350, 5, startingValues(initialTransient), startingValues(initialSustained), startingValues(initialPersistent)];
+                        
+                        thePacket.response.values = averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:)*100;
+                        [paramsFit,fVal,modelResponseStruct] = ...
+                            temporalFit.fitResponse(thePacket, ...
+                            'defaultParamsInfo', defaultParamsInfo, ...
+                            'vlb', vlb, 'vub',vub,...
+                            'initialValues',initialValues,...
+                            'fminconAlgorithm','sqp'...
+                            );
+                        
+                        mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
+                        rSquared = mdl.Rsquared.Ordinary;
+                        
+                        rSquaredPooled(initialTransient, initialSustained, initialPersistent) = rSquared;
+                    end
+                end
             end
+            % determine which configuration gave the best fit, judged by
+            % rSquared value
+            [maxValue, maxIndex] = max(rSquaredPooled(:));
+            [index1, index2, index3] = ind2sub(size(rSquaredPooled), maxIndex);
+            bestInitialValues = [-200, 350, 5, startingValues(index1), startingValues(index2), startingValues(index3)];
+            
+            % do the fit with the best initialValues
+            thePacket.response.values = averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:)*100;
+            [paramsFit,fVal,modelResponseStruct] = ...
+                temporalFit.fitResponse(thePacket, ...
+                'defaultParamsInfo', defaultParamsInfo, ...
+                'vlb', vlb, 'vub',vub,...
+                'initialValues',bestInitialValues,...
+                'fminconAlgorithm','sqp'...
+                );
+            
+            % plot to summarize the fit
+            % now do some plotting to summarize
+            plotFig = figure;
+            hold on
+            plot(thePacket.response.timebase, thePacket.response.values)
+            plot(modelResponseStruct.timebase, modelResponseStruct.values)
+            xlabel('Time (s)')
+            ylabel('Pupil Diameter (% Change)')
+            legend('Data', 'TPUP Fit')
+            xlims=get(gca,'xlim');
+            ylims=get(gca,'ylim');
+            xrange = xlims(2)-xlims(1);
+            yrange = ylims(2) - ylims(1);
+            xpos = xlims(1)+0.75*xrange;
+            ypos = ylims(1)+0.20*yrange;
+            mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
+            rSquared = mdl.Rsquared.Ordinary;
+            
+            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
+            text(xpos, ypos, string)
+            title(goodSubjects{session}.ID(ss));
+            
+            outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/TPUP/modelFits/', stimuli{stimulus}, num2str(session));
             if ~exist(outDir, 'dir')
                 mkdir(outDir);
             end
-            
-            
-            
-            % create packet response values
-            thePacket.response.values = result;
-            thePacket.response.timebase = timebase;
-            
-            % create packet metaData
-            thePacket.metaData = [];
-            
-            % Set some initial values
-            %initialValues=[params{1}(1), params{1}(2), params{1}(3), -10, -25, -25];
-            %vlb=[params{1}(1), params{1}(2), params{1}(3), -2000, -2000, -2000];
-            %vub=[params{1}(1), params{1}(2), params{1}(3), 0, 0, 0];
-            
-            
-            
-            % do the actual fitting via TPUP
-            [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub);
-            %[paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo);
-            defaultVlb = [0 100 1 -2000 -2000 -2000];
-            defaultVub = [500 350 30 0 0 0];
-            
-            individualFits{session}{stimulation}(ss,:) = modelResponseStruct.values;
-            
-            TPUPAmplitudes{session}{stimulation}(ss,1) = paramsFit.paramMainMatrix(4);
-            TPUPAmplitudes{session}{stimulation}(ss,2) = paramsFit.paramMainMatrix(5);
-            TPUPAmplitudes{session}{stimulation}(ss,3) = paramsFit.paramMainMatrix(6);
-            temporalParameters{session}{stimulation}(ss,1) = paramsFit.paramMainMatrix(1);
-            temporalParameters{session}{stimulation}(ss,2) = paramsFit.paramMainMatrix(2);
-            temporalParameters{session}{stimulation}(ss,3) = paramsFit.paramMainMatrix(3);
-            
-            for pp = 1:3;
-                if paramsFit.paramMainMatrix(pp) == vlb(pp) || paramsFit.paramMainMatrix(pp) >= vub(pp)
-                    
-                    fprintf(['Subject: ', num2str(ss), ' Stimulation: ', stimulusOrder{stimulation}, ' Session: ', num2str(session), '\n Param ', num2str(pp), ': ', num2str(paramsFit.paramMainMatrix(pp)), '\n'])
-                end
-            end
-            
-            % determine variance explained
-            mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
-            rSquared = mdl.Rsquared.Ordinary;
-            varianceExplained{session}{stimulation}(ss,1) = rSquared;
-            
-            % save plot of model fits
-            plotFig = figure;
-            plot(thePacket.response.timebase/1000, thePacket.response.values)
-            hold on
-            plot(thePacket.response.timebase/1000, modelResponseStruct.values)
-            xlabel('Time (s)')
-            ylabel('Pupil Diameter (% Change)')
-            legend('Data', 'TPUP Fit')
-            xlims=get(gca,'xlim');
-            ylims=get(gca,'ylim');
-            xrange = xlims(2)-xlims(1);
-            yrange = ylims(2) - ylims(1);
-            xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.20*yrange;
-            
-            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
-            text(xpos, ypos, string)
-            
-            
-            
-            
-            
-            saveas(plotFig, fullfile(outDir, [subject, '_', stimulusOrder{stimulation}, '.png']), 'png');
-            close(plotFig);
-            
-        end
-    end
-end
-
-
-
-
-
-%% do some plotting to summarize the results
-% determine group averages
-for session = 1:2;
-    for timepoints = 1:length(averageBlueCombined{session});
-        averageLMSCollapsed{session}(1,timepoints) = nanmean(averageLMSCombined{session}(:,timepoints));
-        semLMSCollapsed{session}(1,timepoints) = nanstd(averageLMSCombined{session}(:,timepoints))/sqrt(size(averageLMSCombined{session},1));
-        averageMelCollapsed{session}(1,timepoints) = nanmean(averageMelCombined{session}(:,timepoints));
-        semMelCollapsed{session}(1,timepoints) = nanstd(averageMelCombined{session}(:,timepoints))/sqrt(size(averageMelCombined{session},1));
-        averageBlueCollapsed{session}(1,timepoints) = nanmean(averageBlueCombined{session}(:,timepoints));
-        semBlueCollapsed{session}(1,timepoints) = nanstd(averageBlueCombined{session}(:,timepoints))/sqrt(size(averageBlueCombined{session},1));
-        averageRedCollapsed{session}(1,timepoints) = nanmean(averageRedCombined{session}(:,timepoints));
-        semRedCollapsed{session}(1,timepoints) = nanstd(averageRedCombined{session}(:,timepoints))/sqrt(size(averageRedCombined{session},1));
-        
-        % also create average of the TPUP model fits to define the group
-        % average
-        
-        averageLMSFit{session}(1,timepoints) = nanmean(individualFits{session}{1}(:,timepoints));
-        averageMelFit{session}(1,timepoints) = nanmean(individualFits{session}{2}(:,timepoints));
-        averageBlueFit{session}(1,timepoints) = nanmean(individualFits{session}{3}(:,timepoints));
-        averageRedFit{session}(1,timepoints) = nanmean(individualFits{session}{4}(:,timepoints));
-        
-        semLMSFit{session}(1,timepoints) = nanstd(individualFits{session}{1}(:,timepoints))/sqrt(size(individualFits{session}{1},1));
-        semMelFit{session}(1,timepoints) = nanstd(individualFits{session}{2}(:,timepoints))/sqrt(size(individualFits{session}{2},1));
-        semBlueFit{session}(1,timepoints) = nanstd(individualFits{session}{3}(:,timepoints))/sqrt(size(individualFits{session}{3},1));
-        semRedFit{session}(1,timepoints) = nanstd(individualFits{session}{4}(:,timepoints))/sqrt(size(individualFits{session}{4},1));
-        
-    end
-    
-    
-end
-
-for session = 1:2;
-    
-    
-    % assemble the packet
-    % first create the stimulus structure
-    
-    % create the timebase: events are 14 s long, and we're sampling every 20
-    % ms
-    timebase = (0:20:13998);
-    
-    
-    
-    
-    % Temporal domain of the stimulus
-    deltaT = 20; % in msecs
-    totalTime = 14000; % in msecs
-    stimulusStruct.timebase = linspace(0,totalTime-deltaT,totalTime/deltaT);
-    nTimeSamples = size(stimulusStruct.timebase,2);
-    
-    % Specify the stimulus struct.
-    % We create here a step function of neural activity, with half-cosine ramps
-    %  on and off
-    stepOnset=1000; % msecs
-    stepDuration=3000; % msecs
-    rampDuration=500; % msecs
-    
-    % the square wave step
-    stimulusStruct.values=zeros(1,nTimeSamples);
-    stimulusStruct.values(round(stepOnset/deltaT): ...
-        round(stepOnset/deltaT)+round(stepDuration/deltaT)-1)=1;
-    % half cosine ramp on
-    stimulusStruct.values(round(stepOnset/deltaT): ...
-        round(stepOnset/deltaT)+round(rampDuration/deltaT)-1)= ...
-        fliplr((cos(linspace(0,pi*2,round(rampDuration/deltaT))/2)+1)/2);
-    % half cosine ramp off
-    stimulusStruct.values(round(stepOnset/deltaT)+round(stepDuration/deltaT)-round(rampDuration/deltaT): ...
-        round(stepOnset/deltaT)+round(stepDuration/deltaT)-1)= ...
-        (cos(linspace(0,pi*2,round(rampDuration/deltaT))/2)+1)/2;
-    thePacket.stimulus.values = stimulusStruct.values;
-    thePacket.stimulus.timebase = timebase;
-    
-    % now kernel needed for tpup
-    thePacket.kernel = [];
-    for stimulation = 1:length(stimulusOrder)
-        if stimulation == 1; % LMS condition
-            outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-            
-            result = averageLMSCollapsed{session};
-            
-        elseif stimulation == 2; % mel condition
-            outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-            
-            result = averageMelCollapsed{session};
-            
-            
-        elseif stimulation == 3; % blue condition
-            outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-            
-            result = averageBlueCollapsed{session};
-        elseif stimulation == 4; % red condition
-            outDir = fullfile(dropboxAnalysisDir, subDir, stimulusOrder{stimulation}, num2str(session));
-            
-            result = averageRedCollapsed{session};
-            
-        end
-        
-        
-        thePacket.response.timebase = timebase;
-        thePacket.response.values = result*100;
-        
-        thePacket.metaData = [];
-        
-        
-        
-        
-        % do the fitting on the group average data
-        [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'initialValues', initialValues, 'vlb', vlb, 'vub',vub); % with
-        %first three parameters fixed
-        %[paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo,'paramLockMatrix',paramLockMatrix);
-        
-        % create a model fit for the group average that is the result of
-        % the average parameters of the fits to individual subjects
-        params = temporalFit.defaultParams;
-        params.paramMainMatrix(1) = median(temporalParameters{session}{stimulation}(:,1));
-        params.paramMainMatrix(2) = median(temporalParameters{session}{stimulation}(:,2));
-        params.paramMainMatrix(3) = median(temporalParameters{session}{stimulation}(:,3));
-        params.paramMainMatrix(4) = median(TPUPAmplitudes{session}{stimulation}(:,1));
-        params.paramMainMatrix(5) = median(TPUPAmplitudes{session}{stimulation}(:,2));
-        params.paramMainMatrix(6) = median(TPUPAmplitudes{session}{stimulation}(:,3));
-        % kernel struct will be empty for TPUP
-        kernelStruct = [];
-        
-        
-        
-        averageFit = temporalFit.computeResponse(params,stimulusStruct,kernelStruct,'AddNoise',false);
-        
-        
-        
-        
-        if ~exist(outDir, 'dir')
-            mkdir(outDir);
-        end
-        
-        if stimulation == 1
-            % save params for fitting individual subjects
-            LMSParams{session} = paramsFit.paramMainMatrix;
-            
-            plotFig = figure;
-            plot(timebase/1000, thePacket.response.values)
-            hold on
-            plot(timebase/1000, modelResponseStruct.values)
-            plot(timebase/1000, averageFit.values)
-            xlabel('Time (s)')
-            ylabel('Pupil Diameter (% Change)')
-            legend('Group Data', 'TPUP Fit', 'Average Fit')
-            % determine variance explained
-            mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
-            rSquared = mdl.Rsquared.Ordinary;
-            
-            
-            
-            xlims=get(gca,'xlim');
-            ylims=get(gca,'ylim');
-            xrange = xlims(2)-xlims(1);
-            yrange = ylims(2) - ylims(1);
-            xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.20*yrange;
-            
-            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
-            text(xpos, ypos, string)
-            saveas(plotFig, fullfile(outDir, ['groupAverage.png']), 'png');
-            
-            close(plotFig);
-        elseif stimulation == 2
-            % save params for fitting individual subjects
-            MelParams{session} = paramsFit.paramMainMatrix;
-            
-            plotFig = figure;
-            plot(timebase/1000, thePacket.response.values)
-            hold on
-            plot(timebase/1000, modelResponseStruct.values)
-            plot(timebase/1000, averageFit.values)
-            
-            xlabel('Time (s)')
-            ylabel('Pupil Diameter (% Change)')
-            legend('Group Data', 'TPUP Fit', 'Average Fit')
-            % determine variance explained
-            mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
-            rSquared = mdl.Rsquared.Ordinary;
-            
-            
-            xlims=get(gca,'xlim');
-            ylims=get(gca,'ylim');
-            xrange = xlims(2)-xlims(1);
-            yrange = ylims(2) - ylims(1);
-            xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.20*yrange;
-            
-            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
-            text(xpos, ypos, string)
-            saveas(plotFig, fullfile(outDir, ['groupAverage.png']), 'png');
-            
-            close(plotFig);
-        elseif stimulation == 3
-            % save params for fitting individual subjects
-            blueParams{session} = paramsFit.paramMainMatrix;
-            plotFig = figure;
-            plot(timebase/1000, thePacket.response.values)
-            hold on
-            plot(timebase/1000, modelResponseStruct.values)
-            plot(timebase/1000, averageFit.values)
-            legend('Group Data', 'TPUP Fit', 'Average Fit')
-            
-            
-            xlabel('Time (s)')
-            ylabel('Pupil Diameter (% Change)')
-            % determine variance explained
-            mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
-            rSquared = mdl.Rsquared.Ordinary;
-            
-            
-            xlims=get(gca,'xlim');
-            ylims=get(gca,'ylim');
-            xrange = xlims(2)-xlims(1);
-            yrange = ylims(2) - ylims(1);
-            xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.20*yrange;
-            
-            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
-            text(xpos, ypos, string)
-            saveas(plotFig, fullfile(outDir, ['blueGroupAverage.png']), 'png');
+            saveas(plotFig, fullfile(outDir, [goodSubjects{session}.ID{ss}, '.png']), 'png');
             close(plotFig)
             
-            
-        elseif stimulation == 4
-            % save params for fitting individual subjects
-            redParams{session} = paramsFit.paramMainMatrix;
-            plotFig = figure;
-            plot(timebase/1000, thePacket.response.values)
-            hold on
-            plot(timebase/1000, modelResponseStruct.values)
-            plot(timebase/1000, averageFit.values)
-            legend('Group Data', 'TPUP Fit', 'Average Fit')
-            
-            % determine variance explained
-            mdl = fitlm(thePacket.response.values, modelResponseStruct.values);
-            rSquared = mdl.Rsquared.Ordinary;
+            % also save out the summary statistics of the model fit
+            TPUPParameters{session}.(stimuli{stimulus}).transientAmplitude(ss) = paramsFit.paramMainMatrix(4);
+            TPUPParameters{session}.(stimuli{stimulus}).sustainedAmplitude(ss) = paramsFit.paramMainMatrix(5);
+            TPUPParameters{session}.(stimuli{stimulus}).persistentAmplitude(ss) = paramsFit.paramMainMatrix(6);
+            TPUPParameters{session}.(stimuli{stimulus}).delay(ss) = paramsFit.paramMainMatrix(1);
+            TPUPParameters{session}.(stimuli{stimulus}).gammaTau(ss) = paramsFit.paramMainMatrix(2);
+            TPUPParameters{session}.(stimuli{stimulus}).exponentialTau(ss) = paramsFit.paramMainMatrix(3);
+            TPUPParameters{session}.(stimuli{stimulus}).rSquared(ss) = rSquared;
             
             
-            xlabel('Time (s)')
-            ylabel('Pupil Diameter (% Change)')
-            legend('Data', 'TPUP Fit')
-            xlims=get(gca,'xlim');
-            ylims=get(gca,'ylim');
-            xrange = xlims(2)-xlims(1);
-            yrange = ylims(2) - ylims(1);
-            xpos = xlims(1)+0.75*xrange;
-            ypos = ylims(1)+0.20*yrange;
             
-            string = (sprintf(['Delay: ', num2str(paramsFit.paramMainMatrix(1)), '\nGamma Tau: ', num2str(paramsFit.paramMainMatrix(2)), '\nExponential Tau: ', num2str(paramsFit.paramMainMatrix(3)), '\n\nTransient: ', num2str(paramsFit.paramMainMatrix(4)), '\nSustained: ', num2str(paramsFit.paramMainMatrix(5)), '\nPersistent: ', num2str(paramsFit.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
-            text(xpos, ypos, string)
-            saveas(plotFig, fullfile(outDir, ['redGroupAverage.png']), 'png');
-            close(plotFig);
-        end
-    end
-end
+            
+            
+        end % end loop over stimuli
+        
+        
+    end % end loop over subjects
+end % end loop over sessions
+
+
 
 
 end % end function
