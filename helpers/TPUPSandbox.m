@@ -16,7 +16,7 @@ close all
 % reasonable data quality, the TPUP fit is poor, especially in its
 % inability to fit a transient component to where it looks like a transient
 % piece ought to go
-demoSubjects = {'MELA_0074' 'MELA_0077'};
+demoSubjects = {'MELA_0003' 'MELA_0074' 'MELA_0077' 'MELA_0097'};
 
 %% load basic variables
 % Discover user name and set Dropbox path
@@ -68,9 +68,17 @@ for ii = 1:length(demoSubjects)
     thePacket.response.timebase = timebase; % same as the stimulus struct
     
     % now do the fit
-    vlb=[-500, 150, 1, -2000, -2000, -2000]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right)
+    vlb=[-500, 150, 1, -400, -400, -400]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right)
     vub=[0, 750, 30, 0, 0, 0];
-    [paramsFit,fVal,modelResponseStruct] = temporalFit.fitResponse(thePacket, 'defaultParamsInfo', defaultParamsInfo, 'vlb', vlb, 'vub',vub);
+    initialValues = [-200,350,5,-100,0,-100];
+    [paramsFit,fVal,modelResponseStruct] = ...
+        temporalFit.fitResponse(thePacket, ...
+        'defaultParamsInfo', defaultParamsInfo, ...
+        'vlb', vlb, 'vub',vub,...
+        'initialValues',initialValues,...
+        'fminconAlgorithm','sqp'...
+        );
+    
     
     % now do some plotting to summarize
     plotFig = figure;
