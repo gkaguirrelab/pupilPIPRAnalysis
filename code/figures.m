@@ -182,7 +182,7 @@ close(plotFig)
 [melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesSEM{1}(:,6), amplitudesSEM{2}(:,6));
 
 plotFig = figure;
-prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'stimulation', 'gray', 'grid', 'off', 'axes', 'on', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
+prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'stimulation', 'gray', 'grid', 'on', 'axes', 'on', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
 
 % now add confidence interval to plot
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
@@ -196,7 +196,7 @@ ypos = ylims(1)+0.75*yrange;
 string = (sprintf(['CI = ', sprintf('%.2f', confidenceInterval(1)), ' - ', sprintf('%.2f', confidenceInterval(2))]));
 text(xpos, ypos, string, 'fontsize',12)
 
-saveas(plotFig, fullfile(outDir, ['4a.pdf']), 'pdf');
+saveas(plotFig, fullfile('~/Desktop', ['4a.pdf']), 'pdf');
 close(plotFig)
 
 % b. Bland-Altman plot
