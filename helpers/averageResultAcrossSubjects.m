@@ -10,7 +10,7 @@ function [ averageResult ] = averageResultAcrossSubjects(result)
 
 
 for xx = 1:size(result,2) % looping over timepoints to be averaged over
-    averageResult(1,xx) = nanmean(result(:,xx));
+    averageResult(1,xx) = nanmedian(result(:,xx));
 end
 
 end
