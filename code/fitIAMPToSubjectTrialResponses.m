@@ -1,4 +1,4 @@
-function [ amplitudesPerSubject ] = fitIAMPToSubjectTrialResponses(goodSubjects, groupAverageResponse, dropboxAnalysisDir)
+function [ amplitudesPerSubject ] = fitIAMPToSubjectTrialResponses(goodSubjects, averageResponsePerSubject, groupAverageResponse, dropboxAnalysisDir)
 
 
 % set up some basics
@@ -144,7 +144,44 @@ for session = 1:length(goodSubjects)
     end % end loop over subjects
 end % end loop over sessions
 
+%% Plot summary
 
+subdir = 'pupilPIPRanalysis/IAMP/modelFits';
 
+for session = 1:length(goodSubjects)
+    for ss = 1:length(goodSubjects{session}.ID)
+        for stimulus = 1:length(stimuli)
+            plotFig = figure;
+            plot(timebase, averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:))
+            hold on
+            plot(timebase, groupAverageResponse{session}.(stimuli{stimulus})/abs(min(groupAverageResponse{session}.(stimuli{stimulus})))*amplitudesPerSubject{session}.(stimuli{stimulus})(ss));
+            legend('Averaged Data', 'Model Fit')
+            xlabel('Time (s)')
+            ylabel('Pupil Diameter (% Change)')
+            
+            % determine goodness of fit
+            mld = fitlm(averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:), groupAverageResponse{session}.(stimuli{stimulus})/abs(min(groupAverageResponse{session}.(stimuli{stimulus})))*amplitudesPerSubject{session}.(stimuli{stimulus})(ss));
+            rSquared = mdl.Rsquared.Ordinary;
+            
+            % print some summary info to the plot
+            xlims=get(gca,'xlim');
+            ylims=get(gca,'ylim');
+            xrange = xlims(2)-xlims(1);
+            yrange = ylims(2) - ylims(1);
+            xpos = xlims(1)+0.70*xrange;
+            ypos = ylims(1)+0.20*yrange;
+            
+            string = (sprintf(['Amplitude: ', num2str(amplitudesPerSubject{session}.(stimuli{stimulus})(ss)), '\nAmplitude SEM: ',  num2str(amplitudesPerSubject{session}.([stimuli{stimulus}, '_SEM'])(ss)), '\nR2: ', num2str(rSquared)]));
+            text(xpos, ypos, string)
+            
+            outDir = fullfile(dropboxAnalysisDir, subdir, stimuli{stimulus}, num2str(session));
+            if ~exist(outDir, 'dir')
+                mkdir(outDir);
+            end
+            saveas(plotFig, fullfile(outDir, [goodSubjects{session}.ID{ss},'.png']), 'png');
+            close(plotFig);
+        end
+    end
+end
 
 end % end function
