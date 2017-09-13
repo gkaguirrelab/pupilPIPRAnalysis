@@ -1,4 +1,4 @@
-function [ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
+function [ goodSubjects, badSubjects ] = excludeSubjects_old(dropboxAnalysisDir)
 
 dbstop if error
 
