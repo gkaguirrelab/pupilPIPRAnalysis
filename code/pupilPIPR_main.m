@@ -12,11 +12,13 @@ subAnalysisDirectory = 'pupilPIPRAnalysis';
 
 packetCacheBehavior='load';
 packetCacheTag='averageResponses';
-packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
+packetCacheHash='bb16f8bf6378d5d9c4d17a974ce8b50a'; %  averageResponsePerSubject format
+%packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
 fitIAMPCacheBehavior='load';
 fitIAMPCacheTag='IAMPParameters';
-fitIAMPCacheHash='606c239b41195df378b4d3adfb92d4f8'; % with 1,000,000 bootstrap iterations
+fitIAMPCacheHash='6419bead30977ae08fac174c0add6050'; % amplitudesPerSubject format, with 10,000 bootstrap iterations
+%fitIAMPCacheHash='606c239b41195df378b4d3adfb92d4f8'; % with 1,000,000 bootstrap iterations
 %fitIAMPCacheHash='73004795a6ed72b2a7d0125f0d717346'; % with 100,000 bootstrap iterations
 %fitIAMPCacheHash='1cb86f142cea0cac341ada71fdc3e4e0'; % with 10,000 bootstrap iterations
 %fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3'; % with 1000 bootstrap iterations
@@ -24,19 +26,21 @@ fitIAMPCacheHash='606c239b41195df378b4d3adfb92d4f8'; % with 1,000,000 bootstrap 
 
 fitTPUPCacheBehavior='load';
 fitTPUPCacheTag='TPUPParameters';
-fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff'; % with extended gamma range (150-700)
+fitTPUPCacheHash='3e8657fda425c1ff57c7eb9c939efef5'; % TPUPParameter format, maxGamma 400
+%fitTPUPCacheHash='328e576af3d9b937571b2166a7d44753'; % TPUPParameter format, maxGamma 600
+%fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff'; % with extended gamma range (150-700)
 
 
 % Create or load the packetCellArray
 switch packetCacheBehavior
     case 'make'  % If we are not to load the cache, then we must generate it
         % Make the average responses. 
-        [piprCombined, averageMelCombined, averageLMSCombined, averageBlueCombined, averageRedCombined, semLMS, semMel, semBlue, semRed] = makeAverageResponse(goodSubjects, dropboxAnalysisDir);
+        [ averageResponsePerSubject ] = makeAverageResponse(goodSubjects, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the packetCellArray
-        packetCacheHash = DataHash(averageBlueCombined);
+        packetCacheHash = DataHash(averageResponsePerSubject);
         % Set path to the packetCache and save it using the MD5 hash name
         packetCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [packetCacheTag '_' packetCacheHash '.mat']);
-        save(packetCacheFileName, 'averageMelCombined', 'averageLMSCombined', 'averageBlueCombined', 'averageRedCombined', 'semLMS', 'semMel', 'semBlue', 'semRed','-v7.3');
+        save(packetCacheFileName, 'averageResponsePerSubject','-v7.3');
         fprintf(['Saved the ' packetCacheTag ' with hash ID ' packetCacheHash '\n']);
     case 'load'  % load a cached packetCellArray
         fprintf('>> Loading cached packetCellArray\n');
@@ -49,12 +53,12 @@ end
 % Fit IAMP model to avg packets
 switch fitIAMPCacheBehavior    
     case 'make'
-        [ amplitudes, amplitudesSEM ] = fitIAMPToSubjectAverageResponses_byTrialBootstrap(goodSubjects, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
+        [ amplitudesPerSubject ] = fitIAMPToSubjectTrialResponses(goodSubjects, averageResponsePerSubject, groupAverageResponse, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the amplitudes result
-        fitIAMPCacheHash = DataHash(amplitudes);        
+        fitIAMPCacheHash = DataHash(amplitudesPerSubject);        
         % Set path to the packetCache and save it using the MD5 hash name
         fitIAMPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitIAMPCacheTag '_' fitIAMPCacheHash '.mat']);
-        save(fitIAMPCacheFileName,'amplitudes', 'amplitudesSEM','-v7.3');
+        save(fitIAMPCacheFileName,'amplitudesPerSubject','-v7.3');
         fprintf(['Saved the ' fitIAMPCacheTag ' with hash ID ' fitIAMPCacheHash '\n']);        
     case 'load'  % load a cached amplitude and amplitudeSEM variable        
         fprintf(['>> Loading cached ' fitIAMPCacheTag ' \n']);
@@ -67,12 +71,12 @@ end
 % Fit TPUP model to avg packets
 switch fitTPUPCacheBehavior    
     case 'make'
-        [ TPUPAmplitudes, temporalParameters, varianceExplained ] = fitTPUPToSubjectAverageResponses(goodSubjects, piprCombined, averageMelCombined, averageLMSCombined, averageRedCombined, averageBlueCombined, dropboxAnalysisDir);
+        [ TPUPParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir);
         % calculate the hex MD5 hash for the TPUP fits
-        fitTPUPCacheHash = DataHash(TPUPAmplitudes);        
+        fitTPUPCacheHash = DataHash(TPUPParameters);        
         % Set path to the packetCache and save it using the MD5 hash name
         fitTPUPCacheFileName=fullfile(dropboxAnalysisDir, subAnalysisDirectory, 'cache', [fitTPUPCacheTag '_' fitTPUPCacheHash '.mat']);
-        save(fitTPUPCacheFileName,'TPUPAmplitudes', 'temporalParameters', 'varianceExplained', '-v7.3');
+        save(fitTPUPCacheFileName,'TPUPParameters', '-v7.3');
         fprintf(['Saved the ' fitTPUPCacheTag ' with hash ID ' fitTPUPCacheHash '\n']);        
     case 'load'  % load a cached TPUP parameters        
         fprintf(['>> Loading cached ' fitTPUPCacheTag ' \n']);
