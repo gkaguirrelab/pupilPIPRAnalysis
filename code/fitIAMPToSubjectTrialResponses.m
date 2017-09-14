@@ -83,7 +83,7 @@ end % end loop over sessions
 %% now do the bootstrapping
 
 measures = {'LMS' 'Mel' 'Blue' 'Red' 'PIPR' 'MeltoLMS' 'BluetoRed' 'SilentSubstitionAverage' 'PIPRAverage'};
-nBootstraps = 10000;
+nBootstraps = 1000000;
 
 for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
@@ -160,7 +160,7 @@ for session = 1:length(goodSubjects)
             ylabel('Pupil Diameter (% Change)')
             
             % determine goodness of fit
-            mld = fitlm(averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:), groupAverageResponse{session}.(stimuli{stimulus})/abs(min(groupAverageResponse{session}.(stimuli{stimulus})))*amplitudesPerSubject{session}.(stimuli{stimulus})(ss));
+            mdl = fitlm(averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:), groupAverageResponse{session}.(stimuli{stimulus})/abs(min(groupAverageResponse{session}.(stimuli{stimulus})))*amplitudesPerSubject{session}.(stimuli{stimulus})(ss));
             rSquared = mdl.Rsquared.Ordinary;
             
             % print some summary info to the plot
