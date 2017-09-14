@@ -1,8 +1,8 @@
 function [] = summarizeBackgroundMelLuminance(goodSubjects, dropboxAnalysisDir)
 
-pilotSubjects = {'HERO_HMM', 'HERO_NoFocus', 'HERO_HMM', 'HERO_postMove', 'MELA_0003', 'MELA_0038', 'newCodeTest', 'MELA_0084', 'HERO_newCal00_redo'};
-pilotDates = {'072817', '080217', '080417', '080817', '081517', '081617', '081717', '082117', '082517'};
-pilotWhichValidationList = {'pre', 'pre', 'combined', 'pre', 'pre', 'pre', 'pre','pre', 'pre'};
+pilotSubjects = {'HERO_HMM', 'HERO_NoFocus', 'HERO_HMM', 'HERO_postMove', 'MELA_0003', 'MELA_0038', 'newCodeTest', 'MELA_0084', 'HERO_newCal00_redo', 'HERO_cableTest'};
+pilotDates = {'072817', '080217', '080417', '080817', '081517', '081617', '081717', '082117', '082517', '091317'};
+pilotWhichValidationList = {'pre', 'pre', 'combined', 'pre', 'pre', 'pre', 'pre','pre', 'pre', 'pre'};
     
 combinedSubjects = horzcat(goodSubjects{3}.ID, pilotSubjects);
 combinedDates = horzcat(goodSubjects{3}.date, pilotDates);
