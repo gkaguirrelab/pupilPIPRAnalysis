@@ -16,7 +16,7 @@ temporalFit = tfeTPUP('verbosity','full');
 
 % set up boundaries for our fits
 vlb=[-500, 150, 1, -400, -400, -400]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right). also the range of the amplitude parameters is probably much larger than we need
-vub=[0, 400, 30, 0, 0, 0];
+vub=[0, 750, 30, 0, 0, 0];
 startingValues = [-100, 0];
 
 % build up common parts of the packet
