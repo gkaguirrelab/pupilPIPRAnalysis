@@ -1,4 +1,4 @@
-function [ amplitudesPerSubject ] = fitIAMPToSubjectTrialResponses(goodSubjects, averageResponsePerSubject, groupAverageResponse, dropboxAnalysisDir)
+function [ amplitudesPerSubject, amplitudesPerTrial ] = fitIAMPToSubjectTrialResponses(goodSubjects, averageResponsePerSubject, groupAverageResponse, dropboxAnalysisDir)
 
 
 % set up some basics
@@ -75,6 +75,18 @@ for session = 1:length(goodSubjects)
                 
                 
             end % end loop over trials
+            
+            % fill out amplitudesPerTrial with NaN value for failed trials
+            if strcmp(stimuli{stimulus}, 'Red') || strcmp(stimuli{stimulus}, 'Blue')
+                totalNumberOfTrials = 12;
+            else
+                totalNumberOfTrials = 24;
+            end
+            numberFailedTrials = totalNumberOfTrials-length(packetCellArray);
+            if numberFailedTrials > 0
+                amplitudesPerTrial{session}.(stimuli{stimulus})(ss,(totalNumberOfTrials-numberFailedTrials+1):totalNumberOfTrials)=NaN;
+            end
+            
                 
         end % end loop over stimuli
     end % end loop over subjects
@@ -82,8 +94,8 @@ end % end loop over sessions
 
 %% now do the bootstrapping
 
-measures = {'LMS' 'Mel' 'Blue' 'Red' 'PIPR' 'MeltoLMS' 'BluetoRed' 'SilentSubstitionAverage' 'PIPRAverage'};
-nBootstraps = 1000000;
+measures = {'LMS' 'Mel' 'Blue' 'Red' 'PIPR' 'MeltoLMS' 'BluetoRed' 'SilentSubstitutionAverage' 'PIPRAverage'};
+nBootstraps = 1000;
 
 for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
@@ -93,46 +105,46 @@ for session = 1:length(goodSubjects)
             
             if strcmp(measures{mm}, 'LMS') || strcmp(measures{mm}, 'Mel') || strcmp(measures{mm}, 'Blue') || strcmp(measures{mm}, 'Red')
                 for bb = 1:nBootstraps
-                    nTrials = length(amplitudesPerTrial{session}.(measures{mm})(ss,:));
+                    nTrials = length(amplitudesPerTrial{session}.(measures{mm})(ss,:))-sum(isnan(amplitudesPerTrial{session}.(measures{mm})(ss,:)));
                     trialIdx = randsample(1:nTrials, nTrials, true);
                     result = [result, nanmean(amplitudesPerTrial{session}.(measures{mm})(ss,trialIdx))];
                 end
             elseif strcmp(measures{mm}, 'PIPR')
                 for bb = 1:nBootstraps
-                    nBlueTrials = length(amplitudesPerTrial{session}.Blue(ss,:));
-                    nRedTrials = length(amplitudesPerTrial{session}.Red(ss,:));
+                    nBlueTrials = length(amplitudesPerTrial{session}.Blue(ss,:))-sum(isnan(amplitudesPerTrial{session}.Blue(ss,:)));
+                    nRedTrials = length(amplitudesPerTrial{session}.Red(ss,:))-sum(isnan(amplitudesPerTrial{session}.Red(ss,:)));
                     blueTrialIdx = randsample(1:nBlueTrials, nBlueTrials, true);
                     redTrialIdx = randsample(1:nRedTrials, nRedTrials, true);
                     result = [result, (nanmean(amplitudesPerTrial{session}.Blue(ss,blueTrialIdx)) - nanmean(amplitudesPerTrial{session}.Red(ss,redTrialIdx)))];
                 end
             elseif strcmp(measures{mm}, 'MeltoLMS')
                 for bb = 1:nBootstraps
-                    nMelTrials = length(amplitudesPerTrial{session}.Mel(ss,:));
-                    nLMSTrials = length(amplitudesPerTrial{session}.LMS(ss,:));
+                    nMelTrials = length(amplitudesPerTrial{session}.Mel(ss,:))-sum(isnan(amplitudesPerTrial{session}.Mel(ss,:)));
+                    nLMSTrials = length(amplitudesPerTrial{session}.LMS(ss,:))-sum(isnan(amplitudesPerTrial{session}.LMS(ss,:)));
                     melTrialIdx = randsample(1:nMelTrials, nMelTrials, true);
                     LMSTrialIdx = randsample(1:nLMSTrials, nLMSTrials, true);
                     result = [result, nanmean(amplitudesPerTrial{session}.Mel(ss,melTrialIdx))/nanmean(amplitudesPerTrial{session}.LMS(ss,LMSTrialIdx))];
                 end
             elseif strcmp(measures{mm}, 'BluetoRed')
                 for bb = 1:nBootstraps
-                    nBlueTrials = length(amplitudesPerTrial{session}.Blue(ss,:));
-                    nRedTrials = length(amplitudesPerTrial{session}.Red(ss,:));
+                    nBlueTrials = length(amplitudesPerTrial{session}.Blue(ss,:))-sum(isnan(amplitudesPerTrial{session}.Blue(ss,:)));
+                    nRedTrials = length(amplitudesPerTrial{session}.Red(ss,:)-sum(isnan(amplitudesPerTrial{session}.Red(ss,:))));
                     blueTrialIdx = randsample(1:nBlueTrials, nBlueTrials, true);
                     redTrialIdx = randsample(1:nRedTrials, nRedTrials, true);
                     result = [result, (nanmean(amplitudesPerTrial{session}.Blue(ss,blueTrialIdx))/nanmean(amplitudesPerTrial{session}.Red(ss,redTrialIdx)))];
                 end
-            elseif strcmp(measures{mm}, 'SilentSubstitionAverage')
+            elseif strcmp(measures{mm}, 'SilentSubstitutionAverage')
                 for bb = 1:nBootstraps
-                    nMelTrials = length(amplitudesPerTrial{session}.Mel(ss,:));
-                    nLMSTrials = length(amplitudesPerTrial{session}.LMS(ss,:));
+                    nMelTrials = length(amplitudesPerTrial{session}.Mel(ss,:))-sum(isnan(amplitudesPerTrial{session}.Mel(ss,:)));
+                    nLMSTrials = length(amplitudesPerTrial{session}.LMS(ss,:))-sum(isnan(amplitudesPerTrial{session}.LMS(ss,:)));
                     melTrialIdx = randsample(1:nMelTrials, nMelTrials, true);
                     LMSTrialIdx = randsample(1:nLMSTrials, nLMSTrials, true);
                     result = [result, (nanmean(amplitudesPerTrial{session}.Mel(ss,melTrialIdx))+nanmean(amplitudesPerTrial{session}.LMS(ss,LMSTrialIdx)))/2];
                 end
             elseif strcmp(measures{mm}, 'PIPRAverage')
                 for bb = 1:nBootstraps
-                    nBlueTrials = length(amplitudesPerTrial{session}.Blue(ss,:));
-                    nRedTrials = length(amplitudesPerTrial{session}.Red(ss,:));
+                    nBlueTrials = length(amplitudesPerTrial{session}.Blue(ss,:))-sum(isnan(amplitudesPerTrial{session}.Blue(ss,:)));
+                    nRedTrials = length(amplitudesPerTrial{session}.Red(ss,:))-sum(isnan(amplitudesPerTrial{session}.Red(ss,:)));
                     blueTrialIdx = randsample(1:nBlueTrials, nBlueTrials, true);
                     redTrialIdx = randsample(1:nRedTrials, nRedTrials, true);
                     result = [result, (nanmean(amplitudesPerTrial{session}.Blue(ss,blueTrialIdx))+nanmean(amplitudesPerTrial{session}.Red(ss,redTrialIdx)))/2];
