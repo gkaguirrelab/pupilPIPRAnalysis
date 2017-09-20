@@ -95,7 +95,7 @@ end % end loop over sessions
 %% now do the bootstrapping
 
 measures = {'LMS' 'Mel' 'Blue' 'Red' 'PIPR' 'MeltoLMS' 'BluetoRed' 'SilentSubstitutionAverage' 'PIPRAverage'};
-nBootstraps = 1000;
+nBootstraps = 1000000;
 
 for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
