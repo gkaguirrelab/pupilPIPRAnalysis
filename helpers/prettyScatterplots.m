@@ -204,10 +204,12 @@ end
 if strcmp(p.Results.axes, 'off')
   
     ax1 = gca;
-    yruler = ax1.YRuler;
-    yruler.Axle.Visible = 'off';
-    xruler = ax1.XRuler;
-    xruler.Axle.Visible = 'off';
+    %yruler = ax1.YRuler;
+    %yruler.Axle.Visible = 'off';
+    %xruler = ax1.XRuler;
+    %xruler.Axle.Visible = 'off';
+    ax1.YGrid = 'off';
+    ax1.XGrid = 'off';
     %set(gca, 'xtick', []);
     %set(gca, 'ytick', []);
     set(gca, 'Ticklength', [0 0])

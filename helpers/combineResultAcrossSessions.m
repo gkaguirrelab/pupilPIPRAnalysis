@@ -6,17 +6,14 @@ function [ combinedResult ] = combineResultAcrossSessions(goodSubjects, sessionO
 
 
 % first average datapoints for subjects who have been studied twice
-for ss = 1:size(goodSubjects{2}{1},1) % loop over subjects that have completed both sessions
-    subject = goodSubjects{2}{1}(ss,:);
+for ss = 1:length(goodSubjects{2}.ID) % loop over subjects that have completed both sessions
+    subject = goodSubjects{2}.ID{ss};
     
     secondSessionIndex = ss;
     % determine the index corresponding to the same subject in the list of
     % subjects having successfully completed the first session
-    for x = 1:size(goodSubjects{1}{1},1)
-        if strcmp(goodSubjects{1}{1}(x,:),subject);
-            firstSessionIndex = x;
-        end
-    end
+    whichSubject = cellfun(@(x) strcmp(x, subject), goodSubjects{1}.ID);
+    [maxValue, firstSessionIndex] = max(whichSubject);
     
     % actually do the averaging
     combinedResult(ss) = (sessionOneResult(firstSessionIndex) + sessionTwoResult(secondSessionIndex))/2;
@@ -27,10 +24,10 @@ end
 % variable for subject indices not scanned twice
 notScannedTwice = [];
 
-for ss = 1:size(goodSubjects{1}{1},1)
+for ss = 1:length(goodSubjects{1}.ID)
     scannedTwice = 0;
-    for ss2 = 1:size(goodSubjects{2}{1},1)
-        if strcmp(goodSubjects{1}{1}(ss,:), goodSubjects{2}{1}(ss2,:))
+    for ss2 = 1:length(goodSubjects{2}.ID)
+        if strcmp(goodSubjects{1}.ID{ss}, goodSubjects{2}.ID{ss2})
             scannedTwice = 1;
         end
     end
@@ -40,5 +37,5 @@ for ss = 1:size(goodSubjects{1}{1},1)
 end
 
 for ss = 1:size(notScannedTwice,2)
-    combinedResult(size(goodSubjects{2}{1},1)+ss) = sessionOneResult(notScannedTwice(ss));
+    combinedResult(length(goodSubjects{2}.ID)+ss) = sessionOneResult(notScannedTwice(ss));
 end

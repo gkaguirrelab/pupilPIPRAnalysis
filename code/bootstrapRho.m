@@ -6,8 +6,8 @@ function [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubject
 if length(firstSessionResult) ~= length(secondSessionResult)
     [resultCombined] = pairResultAcrossSessions(goodSubjects, firstSessionResult, secondSessionResult);
 else
-    resultCombined{1} = firstSessionResult;
-    resultCombined{2} = secondSessionResult;
+    resultCombined.sessionOne = firstSessionResult;
+    resultCombined.sessionTwo = secondSessionResult;
 end
 
 % do the bootstrapping
@@ -18,7 +18,7 @@ for bb = 1:nBootstraps
     nSubjects = 25;
     randomSubjects = randsample(1:nSubjects, nSubjects, true);
     
-    rho = corr(resultCombined{1}(randomSubjects)', resultCombined{2}(randomSubjects)', 'type', 'Spearman');
+    rho = corr(resultCombined.sessionOne(randomSubjects)', resultCombined.sessionTwo(randomSubjects)', 'type', 'Spearman');
     rhoCombined(bb) = rho;
 end
 

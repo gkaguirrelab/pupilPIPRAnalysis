@@ -1,6 +1,6 @@
-function plotSparkline(subjects, averageBlueCombined, averageLMSCombined, averageMelCombined, averageRedCombined, semBlue, semLMS, semMel, semRed, dropboxAnalysisDir)
+function plotSparkline(subjects, averageResponsePerSubject, dropboxAnalysisDir)
 
-stimulusOrder = {'LMS' 'Melanopsin' 'Blue' 'Red'};
+stimuli = {'LMS' 'Mel' 'Blue' 'Red'};
 
 
 plotFig = figure;
@@ -8,39 +8,20 @@ hold on
 
 
 
-for ss = 1:size(averageBlueCombined{2},1)
+for ss = 1:length(subjects{2}.ID)
     secondSessionIndex = ss;
-    subject = subjects{2}{1}(ss,:);
+    subject = subjects{2}.ID{ss};
     % determine the index corresponding to the same subject in the list of
     % subjects having successfully completed the first session
-    for x = 1:size(subjects{1}{1},1)
-        if strcmp(subjects{1}{1}(x,:),subject);
-            firstSessionIndex = x;
-        end
-    end
+    whichSubject = cellfun(@(x) strcmp(x, subject), subjects{1}.ID);
+    [maxValue, firstSessionIndex] = max(whichSubject);
     
-    for stimulus = 1:length(stimulusOrder)
-        if stimulus == 1 % LMS
-            response1 = averageLMSCombined{1}(firstSessionIndex,:);
-            response2 = averageLMSCombined{2}(secondSessionIndex,:);
-            error = semLMS;
-        elseif stimulus == 2 % mel
-            response1 = averageMelCombined{1}(firstSessionIndex,:);
-            response2 = averageMelCombined{2}(secondSessionIndex,:);
-            
-            error = semMel;
-        elseif stimulus == 3 % blue
-            response1 = averageBlueCombined{1}(firstSessionIndex,:);
-            response2 = averageBlueCombined{2}(secondSessionIndex,:);
-            
-            error = semBlue;
-        elseif stimulus == 4 % red
-            response1 = averageRedCombined{1}(firstSessionIndex,:);
-            response2 = averageRedCombined{2}(secondSessionIndex,:);
-            
-            error = semRed;
-        end
+    for stimulus = 1:length(stimuli)
         
+        
+        response1 = averageResponsePerSubject{1}.(stimuli{stimulus})(firstSessionIndex,:);
+        response2 = averageResponsePerSubject{2}.(stimuli{stimulus})(secondSessionIndex,:);
+
         % rather than subplotting, to plot all of the time series on the
         % same plot we're just going to be shifting the different
         % constriction curves over in x and y
@@ -73,10 +54,10 @@ end
 % variable for subject indices not scanned twice
 notScannedTwice = [];
 
-for ss = 1:size(subjects{1}{1},1)
+for ss = 1:length(subjects{1}.ID)
     scannedTwice = 0;
-    for ss2 = 1:size(subjects{2}{1},1)
-        if strcmp(subjects{1}{1}(ss,:), subjects{2}{1}(ss2,:))
+    for ss2 = 1:length(subjects{2}.ID)
+        if strcmp(subjects{1}.ID{ss}, subjects{2}.ID{ss2})
             scannedTwice = 1;
         end
     end
@@ -86,23 +67,9 @@ for ss = 1:size(subjects{1}{1},1)
 end
 
 for ss = 1:length(notScannedTwice)
-    for stimulus = 1:length(stimulusOrder)
-        if stimulus == 1 % LMS
-            response1 = averageLMSCombined{1}(notScannedTwice(ss),:);
-            error = semLMS;
-        elseif stimulus == 2 % mel
-            response1 = averageMelCombined{1}(notScannedTwice(ss),:);
-            
-            error = semMel;
-        elseif stimulus == 3 % blue
-            response1 = averageBlueCombined{1}(notScannedTwice(ss),:);
-            
-            error = semBlue;
-        elseif stimulus == 4 % red
-            response1 = averageRedCombined{1}(notScannedTwice(ss),:);
-            
-            error = semRed;
-        end
+    for stimulus = 1:length(stimuli)
+        response1 = averageResponsePerSubject{1}.(stimuli{stimulus})(notScannedTwice(ss),:);
+        
         
         % rather than subplotting, to plot all of the time series on the
         % same plot we're just going to be shifting the different
@@ -140,7 +107,9 @@ line([0 0], [0, -0.5])
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/dataOverview/sparkLine');
 
-
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
 
 
 saveas(plotFig, fullfile(outDir, ['sparkLine.pdf']), 'pdf');

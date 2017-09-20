@@ -1,6 +1,8 @@
-function figures(goodSubjects, amplitudes, amplitudesSEM, averageBlueCombined, averageLMSCombined, averageMelCombined, averageRedCombined, semBlue, semLMS, semMel, semRed, TPUPAmplitudes, temporalParameters, dropboxAnalysisDir)
+function figures(goodSubjects, averageResponsePerSubject, groupAverageResponse, amplitudesPerSubject, TPUPAmplitudes, temporalParameters, dropboxAnalysisDir)
 
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
+outDir = fullfile('~/Desktop/pupilPIPRAnalysis/figures');
+
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -11,40 +13,25 @@ end
 
 % a. group average responses for each stimulus type for each session
 
-% make average responses
-for session = 1:2
-    [ LMSAverage{session} ] = averageResultAcrossSubjects(averageLMSCombined{session});
-    [ MelAverage{session} ] = averageResultAcrossSubjects(averageMelCombined{session});
-    [ BlueAverage{session} ] = averageResultAcrossSubjects(averageBlueCombined{session});
-    [ RedAverage{session} ] = averageResultAcrossSubjects(averageRedCombined{session});
-end
 
-
-
-stimulusOrder = {'LMS' 'Melanopsin' 'Blue' 'Red'};
+stimuli = {'LMS' 'Mel' 'Blue' 'Red'};
 plotFig = figure;
 
 
-for stimulus = 1:size(stimulusOrder,2)
+for stimulus = 1:length(stimulusOrder)
     subplot(2,2,stimulus)
-    if stimulus == 1 % LMS
-        response = LMSAverage;
-    elseif stimulus == 2 % mel
-        response = MelAverage;
-    elseif stimulus == 3 % blue
-        response = BlueAverage;
-    elseif stimulus == 4 % red
-        response = RedAverage;
-    end
-    plot((1:size(response{1},2))*0.02, response{1}, '-.', 'Color', [0.5, 0.5, 0.5], 'LineWidth', 3)
+    
+    timebase = 0:20:13980;
+
+    plot(timebase, groupAverageResponse{1}.(stimuli{stimulus}), '-.', 'Color', [0.5, 0.5, 0.5], 'LineWidth', 3)
     hold on
-    plot((1:size(response{1},2))*0.02, response{2}, 'Color', 'b')
+    plot(timebase, groupAverageResponse{2}.(stimuli{stimulus}), 'Color', 'b')
     
     % now adjust the plot a bit
     if stimulus == 1
         legend('First Session', 'Second Session', 'Location', 'SouthEast')
     end
-    xlabel('Time (s)')
+    xlabel('Time (ms)')
     ylabel('Pupil Diameter (% Change)')
     ylim([-0.5 0.1])
     title([stimulusOrder{stimulus}])
@@ -62,7 +49,7 @@ saveas(plotFig, fullfile(outDir, ['2a.pdf']), 'pdf');
 close(plotFig)
 
 % b. Sparkline of individual subjects
-plotSparkline(goodSubjects, averageBlueCombined, averageLMSCombined, averageMelCombined, averageRedCombined, semBlue, semLMS, semMel, semRed, dropboxAnalysisDir)
+plotSparkline(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir)
 
 
 %% Figure 3: overall scaling of the amplitude response
@@ -72,8 +59,8 @@ plotFig = figure;
 hold on
 
 subplot(1,3,1)
-[ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,1), amplitudes{2}(:,1));
-[ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,2), amplitudes{2}(:,2));
+[ LMSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.LMS, amplitudesPerSubject{2}.LMS);
+[ melAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.Mel, amplitudesPerSubject{2}.Mel);
 prettyScatterplots(LMSAmplitudes*100, melAmplitudes*100, LMSAmplitudes*0, LMSAmplitudes*0,'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'LMS Amplitude (%)', 'yLabel', 'Melanopsin Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 % change the y-ticks (without changing, it was different from this x axis
 % -- this step keeps them consistent)
@@ -91,9 +78,9 @@ string = (sprintf(['CI = ', sprintf('%.2f', confidenceInterval(1)), ' - ', sprin
 text(xpos, ypos, string, 'fontsize',12)
 
 subplot(1,3,2)
-[ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,3), amplitudes{2}(:,3));
-[ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,4), amplitudes{2}(:,4));
-prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*amplitudesSEM{1}(:,3), 0*amplitudesSEM{1}(:,4), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ blueAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.Blue, amplitudesPerSubject{2}.Blue);
+[ redAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.Red, amplitudesPerSubject{2}.Red);
+prettyScatterplots(blueAmplitudes*100, redAmplitudes*100, 0*redAmplitudes, 0*redAmplitudes, 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Blue Amplitude (%)', 'yLabel', 'Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 ax = gca;
 ax.YTick = [0 20 40 60];
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, blueAmplitudes, redAmplitudes);
@@ -107,9 +94,9 @@ string = (sprintf(['CI = ', sprintf('%.2f', confidenceInterval(1)), ' - ', sprin
 text(xpos, ypos, string, 'fontsize',12)
 
 subplot(1,3,3)
-[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
-[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
-prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,8), 0*amplitudesSEM{1}(:,9), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.SilentSubstitionAverage, amplitudesPerSubject{2}.SilentSubstitionAverage);
+[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.PIPRAverage, amplitudesPerSubject{2}.PIPRAverage);
+prettyScatterplots(SSAmplitudes*100, PIPRAmplitudes*100, 0*PIPRAmplitudes, 0*PIPRAmplitudes, 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 5, 'xLim', [0 60], 'yLim', [0 60], 'unity', 'on', 'plotOption', 'square', 'xLabel', 'Mel+LMS Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 ax = gca;
 ax.YTick = [0 20 40 60];
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, SSAmplitudes, PIPRAmplitudes);
@@ -142,9 +129,9 @@ close(plotFig)
 plotFig = figure;
 hold on
 
-[ melNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
-[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,8), amplitudes{2}(:,8));
-prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*amplitudesSEM{1}(:,6), 0*amplitudesSEM{1}(:,8), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ melNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS);
+[ SSAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.SilentSubstitionAverage, amplitudesPerSubject{2}.SilentSubstitionAverage);
+prettyScatterplots(melNormedAmplitudes, SSAmplitudes*100, 0*SSAmplitudes, 0*SSAmplitudes, 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 1], 'yLim', [0 60], 'xLim', [0 1.2], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Mel/LMS Amplitude (%)', 'yLabel', 'Mel+LMS Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, melNormedAmplitudes, SSAmplitudes);
 xlims=get(gca,'xlim');
 ylims=get(gca,'ylim');
@@ -156,9 +143,9 @@ string = (sprintf(['CI = ', sprintf('%.2f', confidenceInterval(1)), ' - ', sprin
 text(xpos, ypos, string, 'fontsize',12)
 
 
-[ blueNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,7), amplitudes{2}(:,7));
-[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudes{1}(:,9), amplitudes{2}(:,9));
-prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*amplitudesSEM{1}(:,7), 0*amplitudesSEM{1}(:,9), 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
+[ blueNormedAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.BluetoRed, amplitudesPerSubject{2}.BluetoRed);
+[ PIPRAmplitudes ] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.PIPRAverage, amplitudesPerSubject{2}.PIPRAverage);
+prettyScatterplots(blueNormedAmplitudes, PIPRAmplitudes*100, 0*PIPRAmplitudes, 0*PIPRAmplitudes, 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'subplot', [1, 2, 2], 'yLim', [0 60], 'xLim', [0.8 1.6], 'unity', 'off', 'plotOption', 'square', 'xLabel', 'Blue/Red Amplitude (%)', 'yLabel', 'Blue+Red Amplitude (%)', 'lineOfBestFit', 'on', 'significance', 'spearman')
 [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, blueNormedAmplitudes, PIPRAmplitudes);
 xlims=get(gca,'xlim');
 ylims=get(gca,'ylim');
@@ -178,14 +165,14 @@ close(plotFig)
 
 % first maked paired results variable so we can compare the mel/lms ratio
 % from the first session with the second session
-[melNormedCombined] = pairResultAcrossSessions(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
-[melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesSEM{1}(:,6), amplitudesSEM{2}(:,6));
+[melNormedCombined] = pairResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS);
+[melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.MeltoLMS_SEM, amplitudesPerSubject{2}.MeltoLMS_SEM);
 
 plotFig = figure;
-prettyScatterplots(melNormedCombined{1}, melNormedCombined{2}, melNormedSEMCombined{1}, melNormedSEMCombined{2}, 'stimulation', 'gray', 'grid', 'on', 'axes', 'on', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
+prettyScatterplots(melNormedCombined.sessionOne, melNormedCombined.sessionTwo, melNormedSEMCombined.sessionOne, melNormedSEMCombined.sessionTwo, 'stimulation', 'gray', 'grid', 'on', 'axes', 'on', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
 
 % now add confidence interval to plot
-[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6));
+[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS);
 
 xlims=get(gca,'xlim');
 ylims=get(gca,'ylim');
@@ -196,12 +183,12 @@ ypos = ylims(1)+0.75*yrange;
 string = (sprintf(['CI = ', sprintf('%.2f', confidenceInterval(1)), ' - ', sprintf('%.2f', confidenceInterval(2))]));
 text(xpos, ypos, string, 'fontsize',12)
 
-saveas(plotFig, fullfile('~/Desktop', ['4a.pdf']), 'pdf');
+saveas(plotFig, fullfile(outDir, ['4a.pdf']), 'pdf');
 close(plotFig)
 
 % b. Bland-Altman plot
 % another nice way to show test-retest reliability
-plotBlandAltman(goodSubjects, amplitudes{1}(:,6), amplitudes{2}(:,6), dropboxAnalysisDir);
+plotBlandAltman(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS, dropboxAnalysisDir);
 %% Figure 5: TPUP figure
 % a. example model fit to average data
 % first get the average response by averaging time series across subjects

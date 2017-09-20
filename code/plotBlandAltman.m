@@ -3,8 +3,8 @@ function plotBlandAltman(goodSubjects, firstSessionResult, secondSessionResult, 
 [ melNormed ] = pairResultAcrossSessions(goodSubjects, firstSessionResult, secondSessionResult);
 
 
-for ss = 1:length(melNormed{1})
-    difference(ss) = melNormed{1}(ss)-melNormed{2}(ss);
+for ss = 1:length(melNormed.sessionOne)
+    difference(ss) = melNormed.sessionOne(ss)-melNormed.sessionTwo(ss);
 end
 
 
@@ -17,10 +17,10 @@ differenceSD = std(difference);
 plotFig = figure;
 hold on
 
-prettyScatterplots((melNormed{1}+melNormed{2})/2, melNormed{1}-melNormed{2}, (melNormed{1}-melNormed{2})*0, (melNormed{1}-melNormed{2})*0, 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 7, 'xLim', [-0.2 1.4], 'yLim', [-1 1], 'unity', 'off', 'plotOption', 'square')
-line([min((melNormed{1}+melNormed{2})/2) max((melNormed{1}+melNormed{2})/2)], [(mean(melNormed{1}-melNormed{2}) + 1.96*differenceSD) (mean(melNormed{1}-melNormed{2}) + 1.96*differenceSD)], 'Color', 'k');
-line([min((melNormed{1}+melNormed{2})/2) max((melNormed{1}+melNormed{2})/2)], [(mean(melNormed{1}-melNormed{2}) - 1.96*differenceSD) (mean(melNormed{1}-melNormed{2}) - 1.96*differenceSD)], 'Color', 'k');
-line([min((melNormed{1}+melNormed{2})/2) max((melNormed{1}+melNormed{2})/2)], [(mean(melNormed{1}-melNormed{2})) mean(melNormed{1}-melNormed{2})], 'LineStyle', '--', 'Color', 'k');
+prettyScatterplots((melNormed.sessionOne+melNormed.sessionTwo)/2, melNormed.sessionOne-melNormed.sessionTwo, (melNormed.sessionOne-melNormed.sessionTwo)*0, (melNormed.sessionOne-melNormed.sessionTwo)*0, 'stimulation', 'gray', 'grid', 'on', 'axes', 'off', 'dotSize', 7, 'xLim', [-0.2 1.4], 'yLim', [-1 1], 'unity', 'off', 'plotOption', 'square')
+line([min((melNormed.sessionOne+melNormed.sessionTwo)/2) max((melNormed.sessionOne+melNormed.sessionTwo)/2)], [(mean(melNormed.sessionOne-melNormed.sessionTwo) + 1.96*differenceSD) (mean(melNormed.sessionOne-melNormed.sessionTwo) + 1.96*differenceSD)], 'Color', 'k');
+line([min((melNormed.sessionOne+melNormed.sessionTwo)/2) max((melNormed.sessionOne+melNormed.sessionTwo)/2)], [(mean(melNormed.sessionOne-melNormed.sessionTwo) - 1.96*differenceSD) (mean(melNormed.sessionOne-melNormed.sessionTwo) - 1.96*differenceSD)], 'Color', 'k');
+line([min((melNormed.sessionOne+melNormed.sessionTwo)/2) max((melNormed.sessionOne+melNormed.sessionTwo)/2)], [(mean(melNormed.sessionOne-melNormed.sessionTwo)) mean(melNormed.sessionOne-melNormed.sessionTwo)], 'LineStyle', '--', 'Color', 'k');
 
 % these lines would be the so-called limits of agreement -- there's a 95%
 % chance the difference between a second measurement and a first measurement

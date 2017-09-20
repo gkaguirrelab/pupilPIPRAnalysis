@@ -1,20 +1,23 @@
-function summarizeTPUP(TPUPAmplitudes, temporalParameters, varianceExplained, dropboxAnalysisDir)
+function summarizeTPUP(TPUPParameters, dropboxAnalysisDir)
 
 %% make a bar graph to compare relative contributions of each parameter to the final fit
-stimulusOrder = {'LMS' 'mel' 'blue' 'red'};
+stimulusOrder = {'LMS' 'Mel' 'Blue' 'Red'};
 
-for session = 1:2
+for session = 1:3
     
     %% first compare mean values of each parameter across different
     % stimulation conditions
     amplitudes = [];
     sem = [];
     for stimulus = 1:length(stimulusOrder)
+        
+        measures = {'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude'};
+        temporalMeasures = {'delay', 'gammaTau', 'exponentialTau'};
         for measure = 1:3 % we have three measures of amplitude: transient, sustained, persistent as well as three temporal parameters
-            amplitudes(measure,stimulus) = mean(TPUPAmplitudes{session}{stimulus}(:,measure));
-            sem(measure,stimulus) = std(TPUPAmplitudes{session}{stimulus}(:,measure))/sqrt(length(TPUPAmplitudes{session}{stimulus}));
-            meanTemporalParameters(measure,stimulus) = mean(temporalParameters{session}{stimulus}(:,measure));
-            semTemporalParameters(measure,stimulus) = std(temporalParameters{session}{stimulus}(:,measure))/sqrt(length(temporalParameters{session}{stimulus}));
+            amplitudes(measure,stimulus) = mean(TPUPParameters{session}.(stimulusOrder{stimulus}).(measures{measure}));
+            sem(measure,stimulus) = std(TPUPParameters{session}.(stimulusOrder{stimulus}).(measures{measure}))/sqrt(length(TPUPParameters{session}.(stimulusOrder{stimulus}).(measures{measure})));
+            meanTemporalParameters(measure,stimulus) = mean(TPUPParameters{session}.(stimulusOrder{stimulus}).(temporalMeasures{measure}));
+            semTemporalParameters(measure,stimulus) = std(TPUPParameters{session}.(stimulusOrder{stimulus}).(temporalMeasures{measure}))/sqrt(length(TPUPParameters{session}.(stimulusOrder{stimulus}).(temporalMeasures{measure})));
             
         end
     end
@@ -42,11 +45,13 @@ for session = 1:2
     sem = [];
     iqrAmplitudes = [];
     for stimulus = 1:length(stimulusOrder)
+        measures = {'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude'};
+        temporalMeasures = {'delay', 'gammaTau', 'exponentialTau'};
         for measure = 1:3 % we have three measures of amplitude: transient, sustained, persistent as well as three temporal parameters
-            amplitudes(measure,stimulus) = median(TPUPAmplitudes{session}{stimulus}(:,measure));
-            iqrAmplitudes(measure,stimulus) = iqr(TPUPAmplitudes{session}{stimulus}(:,measure));
-            meanTemporalParameters(measure,stimulus) = mean(temporalParameters{session}{stimulus}(:,measure));
-            semTemporalParameters(measure,stimulus) = std(temporalParameters{session}{stimulus}(:,measure))/sqrt(length(temporalParameters{session}{stimulus}));
+            amplitudes(measure,stimulus) = median(TPUPParameters{session}.(stimulusOrder{stimulus}).(measures{measure}));
+            iqrAmplitudes(measure,stimulus) = iqr(TPUPParameters{session}.(stimulusOrder{stimulus}).(measures{measure}));
+            meanTemporalParameters(measure,stimulus) = mean(TPUPParameters{session}.(stimulusOrder{stimulus}).(temporalMeasures{measure}));
+            semTemporalParameters(measure,stimulus) = std(TPUPParameters{session}.(stimulusOrder{stimulus}).(temporalMeasures{measure}))/sqrt(length(TPUPParameters{session}.(stimulusOrder{stimulus}).(temporalMeasures{measure})));
             
         end
     end
@@ -90,8 +95,8 @@ for session = 1:2
     % now compare the median variance explained
     % first calculate the median variance for each stimulation
     for stimulus = 1:length(stimulusOrder)
-        medianVarianceExplained(1,stimulus) = median(varianceExplained{session}{stimulus}(:,1));
-        iqrVarianceExplained(1,stimulus) = iqr(varianceExplained{session}{stimulus}(:,1));
+        medianVarianceExplained(1,stimulus) = median((TPUPParameters{session}.(stimulusOrder{stimulus}).rSquared));
+        iqrVarianceExplained(1,stimulus) = iqr(TPUPParameters{session}.(stimulusOrder{stimulus}).rSquared);
     end
     % now do the plotting
     plotFig = figure;
@@ -117,7 +122,7 @@ for session = 1:2
     set(plotFig, 'units', 'normalized', 'Position', [0.1300 0.1100 0.7750 0.8150])
     
     
-    stimulusOrder = {'LMS' 'mel' 'blue' 'red'};
+    stimulusOrder = {'LMS' 'Mel' 'Blue' 'Red'};
     stimulusColor = {'k' 'c' 'b' 'r'};
     
     % Transient Amplitude
@@ -127,7 +132,7 @@ for session = 1:2
     edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
-        h = histc(TPUPAmplitudes{session}{stimulation}(:,1), edges);
+        h = histc(TPUPParameters{session}.(stimulusOrder{stimulation}).transientAmplitude, edges);
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
@@ -156,7 +161,7 @@ for session = 1:2
     edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
-        h = histc(TPUPAmplitudes{session}{stimulation}(:,2), edges);
+        h = histc((TPUPParameters{session}.(stimulusOrder{stimulation}).sustainedAmplitude), edges);
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
@@ -182,7 +187,7 @@ for session = 1:2
     edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
-        h = histc(TPUPAmplitudes{session}{stimulation}(:,3), edges);
+        h = histc((TPUPParameters{session}.(stimulusOrder{stimulation}).persistentAmplitude), edges);
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
@@ -208,7 +213,7 @@ for session = 1:2
     edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
-        h = histc(temporalParameters{session}{stimulation}(:,1), edges);
+        h = histc((TPUPParameters{session}.(stimulusOrder{stimulation}).delay), edges);
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
@@ -235,7 +240,7 @@ for session = 1:2
     edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
-        h = histc(temporalParameters{session}{stimulation}(:,2), edges);
+        h = histc((TPUPParameters{session}.(stimulusOrder{stimulation}).gammaTau), edges);
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
@@ -262,7 +267,7 @@ for session = 1:2
     edgeMidpoint = (edges(1) + (edges(2) - edges(1))/2):(edges(2) - edges(1)):edges(length(edges)) - (edges(2) - edges(1))/2;
     
     for stimulation = 1:length(stimulusOrder)
-        h = histc(temporalParameters{session}{stimulation}(:,3), edges);
+        h = histc((TPUPParameters{session}.(stimulusOrder{stimulation}).exponentialTau), edges);
         binNumber = length(h);
         h(binNumber-1) = h(binNumber-1)+h(binNumber);
         h(binNumber) = [];
@@ -289,16 +294,16 @@ for session = 1:2
     % reduced for melanopsin stimulation relative to LMS. Express this
     % quantiatively where percent persistent = (peristent
     % )/(sustained + transient + persisent) * 100%
-    for ss = 1:size(TPUPAmplitudes{session}{1},1)
+    for ss = 1:length(TPUPParameters{session}.LMS.transientAmplitude)
         for stimulation = 1:length(stimulusOrder)
             
-            percentPersistent{session}(ss, stimulation) = TPUPAmplitudes{session}{stimulation}(ss,3)/(TPUPAmplitudes{session}{stimulation}(ss,1) + TPUPAmplitudes{session}{stimulation}(ss,2) + TPUPAmplitudes{session}{stimulation}(ss,3)) * 100;
+            percentPersistent{session}(ss, stimulation) = (TPUPParameters{session}.(stimulusOrder{stimulation}).persistentAmplitude(ss))/(TPUPParameters{session}.(stimulusOrder{stimulation}).transientAmplitude(ss) + TPUPParameters{session}.(stimulusOrder{stimulation}).sustainedAmplitude(ss) + TPUPParameters{session}.(stimulusOrder{stimulation}).persistentAmplitude(ss)) * 100;
         end
     end
     
     for stimulation = 1:length(stimulusOrder)
-        meanPercentPersistent{session}(stimulation) = mean(percentPersistent{session}(:, stimulation));
-        semPercentPersistent{session}(stimulation) = std((percentPersistent{session}(:, stimulation)))/sqrt(length((percentPersistent{session}(:, stimulation))));
+        meanPercentPersistent{session}(stimulation) = nanmean(percentPersistent{session}(:, stimulation));
+        semPercentPersistent{session}(stimulation) = nanstd((percentPersistent{session}(:, stimulation)))/sqrt(length((percentPersistent{session}(:, stimulation))));
     end
     plotFig = figure;
     b = barwitherr(semPercentPersistent{session}, meanPercentPersistent{session});
@@ -311,16 +316,16 @@ for session = 1:2
     % but also calculate percent persistent by just normalizing by the
     % sustained and persistent components, with the logic being that the
     % transient component is a simple "alerting" response to the stimulus
-    for ss = 1:size(TPUPAmplitudes{session}{1},1)
+    for ss = 1:length(TPUPParameters{session}.LMS.transientAmplitude)
         for stimulation = 1:length(stimulusOrder)
             
-            percentPersistent{session}(ss, stimulation) = TPUPAmplitudes{session}{stimulation}(ss,3)/(TPUPAmplitudes{session}{stimulation}(ss,2) + TPUPAmplitudes{session}{stimulation}(ss,3)) * 100;
+            percentPersistent{session}(ss, stimulation) = TPUPParameters{session}.(stimulusOrder{stimulation}).persistentAmplitude(ss)/(TPUPParameters{session}.(stimulusOrder{stimulation}).sustainedAmplitude(ss) + TPUPParameters{session}.(stimulusOrder{stimulation}).persistentAmplitude(ss)) * 100;
         end
     end
     
     for stimulation = 1:length(stimulusOrder)
-        meanPercentPersistent{session}(stimulation) = mean(percentPersistent{session}(:, stimulation));
-        semPercentPersistent{session}(stimulation) = std((percentPersistent{session}(:, stimulation)))/sqrt(length((percentPersistent{session}(:, stimulation))));
+        meanPercentPersistent{session}(stimulation) = nanmean(percentPersistent{session}(:, stimulation));
+        semPercentPersistent{session}(stimulation) = nanstd((percentPersistent{session}(:, stimulation)))/sqrt(length((percentPersistent{session}(:, stimulation))));
     end
     plotFig = figure;
     b = barwitherr(semPercentPersistent{session}, meanPercentPersistent{session});
