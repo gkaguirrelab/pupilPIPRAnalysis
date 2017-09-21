@@ -313,6 +313,12 @@ for session = 1:3
     saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent1.png']), 'png');
     close(plotFig);
     
+    plotFig = figure;
+    data = horzcat({percentPersistent{session}(:,1)', percentPersistent{session}(:,2)', percentPersistent{session}(:,3)', percentPersistent{session}(:,4)'});
+    [test] = plotSpread(data, 'distributionMarkers', 'o', 'xNames', {'LMS', 'Mel', 'Blue', 'Red'});
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent1_distribution.png']), 'png');
+    close(plotFig);
+    
     % but also calculate percent persistent by just normalizing by the
     % sustained and persistent components, with the logic being that the
     % transient component is a simple "alerting" response to the stimulus
@@ -333,6 +339,12 @@ for session = 1:3
     %legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
     title('Mean Percent Persistent = P/(S+P)')
     saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent2.png']), 'png');
+    close(plotFig);
+    
+    plotFig = figure;
+    data = horzcat({percentPersistent{session}(:,1)', percentPersistent{session}(:,2)', percentPersistent{session}(:,3)', percentPersistent{session}(:,4)'});
+    [test] = plotSpread(data, 'distributionMarkers', 'o', 'xNames', {'LMS', 'Mel', 'Blue', 'Red'});
+    saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent2_distribution.png']), 'png');
     close(plotFig);
     
 end
