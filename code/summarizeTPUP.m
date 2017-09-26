@@ -56,6 +56,8 @@ for session = 1:3
         end
     end
     
+    
+    
     outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/TPUP/summarizeTPUP', num2str(session));
     
     if ~exist(outDir, 'dir')
@@ -73,6 +75,33 @@ for session = 1:3
     legend('LMS', 'Mel', 'Blue', 'Red', 'Location', 'SouthWest')
     saveas(plotFig, fullfile(outDir, ['compareStimuli_amplitudes_median.png']), 'png');
     close(plotFig);
+    
+    % box and whisker plot for amplitude parameters
+    for stimuli = 1:length(stimulusOrder)
+        plotFig = figure;
+        hold on
+        bplot(TPUPParameters{session}.(stimulusOrder{stimuli}).transientAmplitude, 1, 'color', 'c')
+        bplot(TPUPParameters{session}.(stimulusOrder{stimuli}).sustainedAmplitude, 2, 'color', 'c')
+        bplot(TPUPParameters{session}.(stimulusOrder{stimuli}).persistentAmplitude, 3, 'color', 'c')
+        xticks([1, 2, 3])
+        xticklabels({'Transient', 'Sustained', 'Persistent'})
+        saveas(plotFig, fullfile(outDir, [stimulusOrder{stimuli}, '_bplot.png']), 'png');
+        close(plotFig)
+    end
+    
+    % make a combined one for mel and lms
+    plotFig = figure;
+    hold on
+    bplot(TPUPParameters{session}.Mel.transientAmplitude, 1, 'color', 'c')
+    bplot(TPUPParameters{session}.Mel.sustainedAmplitude, 4, 'color', 'c')
+    bplot(TPUPParameters{session}.Mel.persistentAmplitude, 7, 'color', 'c')
+    bplot(TPUPParameters{session}.LMS.transientAmplitude, 2, 'color', 'm')
+    bplot(TPUPParameters{session}.LMS.sustainedAmplitude, 5, 'color', 'm')
+    bplot(TPUPParameters{session}.LMS.persistentAmplitude, 8, 'color', 'm')
+    xticks([1.5, 4.5, 7.5])
+    xticklabels({'Transient', 'Sustained', 'Persistent'})
+    saveas(plotFig, fullfile(outDir, ['MelLMSComparison_bplot.png']), 'png');
+        close(plotFig)
     
     % now compare the temporal parameters
     % first set the delay to positive
