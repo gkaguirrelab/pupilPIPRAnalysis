@@ -24,6 +24,7 @@ for ss = 1:length(combinedSubjects)
 end
 
 plotFig = figure;
+set(gcf,'un','n','pos',[.05,.05,.7,.6])
 hold on
 
 
@@ -81,18 +82,25 @@ for splatter = 1:length(splatters)
             ylims=[-20 20];
         end
         plotFig = figure;
+        set(gcf,'un','n','pos',[.05,.05,.7,.6])
         hold on
-        hpre = plot(cellfun(@(x) datenum(x, 'mmddyy'), goodSubjects{3}.date), preSplatterValue.(stimuli{stimulus})*100, 'o', 'Color', colors{stimulus});
-        hpost = plot(cellfun(@(x) datenum(x, 'mmddyy'), goodSubjects{3}.date), postSplatterValue.(stimuli{stimulus})*100, '+', 'Color', colors{stimulus});
+        [sorted, indices] = sort(goodSubjects{3}.date);
+        
+        hpre = plot(1:length(preSplatterValue.(stimuli{stimulus})), (preSplatterValue.(stimuli{stimulus})(indices))*100, 'o', 'Color', colors{stimulus});
+        hpost = plot(1:length(postSplatterValue.(stimuli{stimulus})), (postSplatterValue.(stimuli{stimulus})(indices))*100, '+', 'Color', colors{stimulus});
+        %hpost = plot(cellfun(@(x) datenum(x, 'mmddyy'), goodSubjects{3}.date), postSplatterValue.(stimuli{stimulus})*100, '+', 'Color', colors{stimulus});
   
         title([splatters{splatter}, ' for ', stimuli{stimulus}, ' Directed Modulations'])
         ylabel('Splatter (%)')
-        xlabel('Date')
-        datetick('x', 'mmddyy')
-        xlabel('Date of Measurement')
+        xlabel('Session Date')
+        ylim([ylims(1) ylims(2)]); 
+        xticks(1:length(preSplatterValue.(stimuli{stimulus})))
+        xticklabels(goodSubjects{3}.date(indices))
+        %datetick('x', 'mmddyy')
+        %xlabel('Date of Measurement')
         
         for date = 1:length(datesWhenWeChangedNDFilter)
-            line([datenum(datesWhenWeChangedNDFilter{date}, 'mmddyy'), datenum(datesWhenWeChangedNDFilter{date}, 'mmddyy')], [ylims(1), ylims(2)], 'Color', 'k', 'LineStyle', '--')
+            %line([datenum(datesWhenWeChangedNDFilter{date}, 'mmddyy'), datenum(datesWhenWeChangedNDFilter{date}, 'mmddyy')], [ylims(1), ylims(2)], 'Color', 'k', 'LineStyle', '--')
         end
         legend([hpre hpost], {'Pre-Experiment', 'Post-Experiment'})
         saveas(plotFig, fullfile(outDir, [stimuli{stimulus}, 'DirectedModulation_', splatters{splatter}, '.png']), 'png');
