@@ -92,12 +92,12 @@ for session = 1:3
     % make a combined one for mel and lms
     plotFig = figure;
     hold on
-    bplot(TPUPParameters{session}.Mel.transientAmplitude, 1, 'color', 'c')
-    bplot(TPUPParameters{session}.Mel.sustainedAmplitude, 4, 'color', 'c')
-    bplot(TPUPParameters{session}.Mel.persistentAmplitude, 7, 'color', 'c')
-    bplot(TPUPParameters{session}.LMS.transientAmplitude, 2, 'color', 'm')
-    bplot(TPUPParameters{session}.LMS.sustainedAmplitude, 5, 'color', 'm')
-    bplot(TPUPParameters{session}.LMS.persistentAmplitude, 8, 'color', 'm')
+    bplot(TPUPParameters{session}.Mel.transientAmplitude, 1, 'color', 'c');
+    bplot(TPUPParameters{session}.Mel.sustainedAmplitude, 4, 'color', 'c');
+    bplot(TPUPParameters{session}.Mel.persistentAmplitude, 7, 'color', 'c');
+    bplot(TPUPParameters{session}.LMS.transientAmplitude, 2, 'color', 'm');
+    bplot(TPUPParameters{session}.LMS.sustainedAmplitude, 5, 'color', 'm');
+    bplot(TPUPParameters{session}.LMS.persistentAmplitude, 8, 'color', 'm');
     xticks([1.5, 4.5, 7.5])
     xticklabels({'Transient', 'Sustained', 'Persistent'})
     saveas(plotFig, fullfile(outDir, ['MelLMSComparison_bplot.png']), 'png');
@@ -341,6 +341,17 @@ for session = 1:3
     title('Mean Percent Persistent = P/(T+S+P)')
     saveas(plotFig, fullfile(outDir, ['compareStimuli_meanPercentPersistent1.png']), 'png');
     close(plotFig);
+    
+    plotFig = figure;
+    hold on
+    bplot(percentPersistent{session}(:, 1), 1, 'color', 'k');
+    bplot(percentPersistent{session}(:, 2), 2, 'color', 'c');
+    bplot(percentPersistent{session}(:, 3), 3, 'color', 'b');
+    bplot(percentPersistent{session}(:, 4), 4, 'color', 'r');
+    xticks([1, 2, 3, 4])
+    xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
+    saveas(plotFig, fullfile(outDir, 'compareStimuli_percentPersistent_boxPlot.png'), 'png');
+    close(plotFig)
     
     plotFig = figure;
     data = horzcat({percentPersistent{session}(:,1)', percentPersistent{session}(:,2)', percentPersistent{session}(:,3)', percentPersistent{session}(:,4)'});
