@@ -75,6 +75,11 @@ for splatter = 1:length(splatters)
     stimuli = {'Mel', 'LMS'};
     colors = {'c', 'k'};
     for stimulus = 1:2
+        if strcmp(stimuli{stimulus}, 'Mel') && strcmp(splatters{splatter}, 'MelanopsinContrast') ||  strcmp(stimuli{stimulus}, 'LMS') && strcmp(splatters{splatter}, 'LMSContrast')
+            ylims=[350 450];
+        else
+            ylims=[-20 20];
+        end
         plotFig = figure;
         hold on
         hpre = plot(cellfun(@(x) datenum(x, 'mmddyy'), goodSubjects{3}.date), preSplatterValue.(stimuli{stimulus})*100, 'o', 'Color', colors{stimulus});
@@ -85,7 +90,7 @@ for splatter = 1:length(splatters)
         xlabel('Date')
         datetick('x', 'mmddyy')
         xlabel('Date of Measurement')
-        ylims=get(gca,'ylim');  
+        
         for date = 1:length(datesWhenWeChangedNDFilter)
             line([datenum(datesWhenWeChangedNDFilter{date}, 'mmddyy'), datenum(datesWhenWeChangedNDFilter{date}, 'mmddyy')], [ylims(1), ylims(2)], 'Color', 'k', 'LineStyle', '--')
         end
