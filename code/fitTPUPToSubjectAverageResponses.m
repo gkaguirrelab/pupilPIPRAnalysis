@@ -15,6 +15,10 @@ defaultParamsInfo.nInstances = 1;
 temporalFit = tfeTPUP('verbosity','full');
 
 % set up boundaries for our fits
+% although the boundaries are being coded here, the upper limit of the
+% gamma tau will change depending on whether the stimulus is PIPR
+% (blue/red) or silent substitution (mel/lms). This change will occur in
+% the main loop.
 vlb=[-500, 150, 1, -400, -400, -400]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right). also the range of the amplitude parameters is probably much larger than we need
 vub=[0, 400, 20, 0, 0, 0];
 startingValues = [-100, 0];
@@ -33,6 +37,16 @@ thePacket.metaData = [];
 for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
         for stimulus = 1:length(stimuli)
+            
+            % from looking at the quality of fits, we've shown that the
+            % PIPR stimuli are better fit when we allow the gamma to extend
+            % up to 750. For the silent substitution stimuli, the fit is
+            % better when the max gamma is 400
+            if strcmp(stimuli{stimulus}, 'Mel') || strcmp(stimuli{stimulus}, 'LMS')
+                vub(2) = 400;
+            elseif strcmp(stimuli{stimulus}, 'Blue') || strcmp(stimuli{stimulus}, 'Red')
+                vub(2) = 750;
+            end
             
             rSquaredPooled = []; % for each subject, for each condition, we want to look at the R2 values of each fit
             for initialTransient = 1:2
