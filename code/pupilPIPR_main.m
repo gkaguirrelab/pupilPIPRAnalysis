@@ -15,9 +15,10 @@ subAnalysisDirectory = 'pupilPIPRAnalysis';
 %% Set-up cache behavior
 % Define cache and analysis behavior.
 
-packetCacheBehavior='make';
+packetCacheBehavior='load';
 packetCacheTag='averageResponses';
-packetCacheHash='4b0b8c2b7796ea46066526628594be72';%  averageResponsePerSubject format, 16 session 3 subjects
+packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject format, 20 session 3 subjects
+%packetCacheHash='4b0b8c2b7796ea46066526628594be72';%  averageResponsePerSubject format, 16 session 3 subjects
 %packetCacheHash='bb16f8bf6378d5d9c4d17a974ce8b50a'; %  averageResponsePerSubject format
 %packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
@@ -35,8 +36,9 @@ fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject form
 
 fitTPUPCacheBehavior='load';
 fitTPUPCacheTag='TPUPParameters';
+fitTPUPCacheHash='9a509f623f277c16ac330a05c9499091'; % TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms; 20 session 3 subjects
 %fitTPUPCacheHash='71a1232f88f36a9d4fe50b27b2eeec82'; % TPUPParamter format, maxGamma 750
-fitTPUPCacheHash='3e8657fda425c1ff57c7eb9c939efef5'; % TPUPParameter format, maxGamma 400
+%fitTPUPCacheHash='3e8657fda425c1ff57c7eb9c939efef5'; % TPUPParameter format, maxGamma 400
 %fitTPUPCacheHash='328e576af3d9b937571b2166a7d44753'; % TPUPParameter format, maxGamma 600
 %fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff'; % with extended gamma range (150-700)
 
