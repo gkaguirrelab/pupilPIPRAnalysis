@@ -1,5 +1,8 @@
 # pupilPIPRAnalysis
 
+Code for analysis of pupil response data collected during stimulation with melanopsin, cone, and "PIPR" spectral pulses.
+
+
 Description here:
 
 This project code may be configured using ToolboxToolbox:
