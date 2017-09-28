@@ -10,9 +10,33 @@ function [averageResponsePerSubject, groupAverageResponse] = makeAverageResponse
 % response across all subjects is determined for each session, for each
 % stimulus type.
 
+% Output:
+%       averageResponsePerSubject: a cell array with each cell referring to
+%           a session. The content of each cell array is a structure, with
+%           subfields referring to the stimulus (as well as for the standard 
+%           error of the mean for that stimulus). The contents of each subfield
+%           is a matrix, with each row referring to a different subject. Each 
+%           column is a timepoint containing the average pupil diameter in 
+%           units % change.
+%       groupAverageResponse: same structure as the
+%           averageResponsePerSubject, except the contents of each subfield is
+%           a single vector. Each value of the vector is the average pupil
+%           diameter across all subjects for that stimulus type. 
+%
+% Input (required):
+%       goodSubjects: list of subjects and associated dates when they were
+%           studied
+%       dropboxAnalysisDir: location of the directory where we can find the
+%           data
+%         
+% Options:
+%       'plot': if followed by the key-value pair 'on', plots of the
+%       average responses will be displayed and saved 
 
 
-% 12/12/2016, written by hmm
+% 9/28/2017: hmm added comments
+% 9/20/2017: updated by hmm to new averageResponsePerSubject structure
+% 12/12/2016: written by hmm
 
 
 %% Parse input
@@ -42,7 +66,9 @@ for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
         
         stimuli = {'LMS' 'Mel' 'Blue' 'Red'};
+        
         for stimulus = 1:length(stimuli)
+            % the names of the datafiles vary by stimulus type
             if strcmp(stimuli(stimulus), 'LMS')
                 stimuliDir = 'PIPRMaxPulse_PulseLMS';
                 csvName = '_PupilPulseData_MaxLMS_TimeSeries.csv';
@@ -58,7 +84,9 @@ for session = 1:length(goodSubjects)
             end
             
             subject = goodSubjects{session}.ID{ss};
+            % find the relevant data directory
             numberSessions = dir(fullfile(dropboxAnalysisDir, subdir, subject));
+            % determine how many sessions are contained within
             numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
             
             % determine the date of a session
@@ -67,10 +95,11 @@ for session = 1:length(goodSubjects)
             
             date = goodSubjects{session}.date{ss};
             
+            % now actually grab the data that contains the responses from all trials for this stimulus type 
             responses = importdata(fullfile(dropboxAnalysisDir, subdir, stimuliDir, subject, date, [subject, csvName]));
             
             
-            
+            % now do the averaging across trials
             for timepoints = 1:length(responses)
                 averageResponsePerSubject{session}.(stimuli{stimulus})(ss,timepoints) = nanmean(responses(timepoints,:));
                 averageResponsePerSubject{session}.([stimuli{stimulus}, '_SEM'])(ss,timepoints) = nanstd(responses(timepoints, :))/sqrt((size(responses,2)));
@@ -78,6 +107,8 @@ for session = 1:length(goodSubjects)
             end
         end
         
+        % perform a quick PIPR calculation, where we just subtract the red
+        % average response from the blue average response
         averageResponsePerSubject{session}.PIPR = averageResponsePerSubject{session}.Blue - averageResponsePerSubject{session}.Red;
         averageResponsePerSubject{session}.PIPR_SEM = (averageResponsePerSubject{session}.Blue_SEM.^2 + averageResponsePerSubject{session}.Red_SEM.^2).^(1/2);
         
@@ -145,6 +176,7 @@ end % end loop over sessions
 %% Make group average plots
 for session = 1:length(goodSubjects)
     for stimulus = 1:length(stimuli)
+        % do the averaging
         for timepoints = 1:size(averageResponsePerSubject{session}.(stimuli{stimulus}), 2)
             groupAverageResponse{session}.(stimuli{stimulus})(timepoints) = nanmean(averageResponsePerSubject{session}.(stimuli{stimulus})(:,timepoints));
             groupAverageResponse{session}.([stimuli{stimulus}, '_SEM'])(timepoints) = nanstd(averageResponsePerSubject{session}.(stimuli{stimulus})(:,timepoints))/sqrt(size(averageResponsePerSubject{session}.(stimuli{stimulus}), 1));
