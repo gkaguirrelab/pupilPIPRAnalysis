@@ -1,6 +1,6 @@
 function [ percentPersistentPerSubject ] = calculatePercentPersistent(goodSubjects, TPUPParameters, dropboxAnalysisDir)
 
-
+% This function calculates the percentPersistent temporal parameter 
 
 
 stimuli = {'LMS', 'Mel', 'Blue', 'Red'};
