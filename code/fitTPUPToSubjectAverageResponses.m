@@ -1,4 +1,51 @@
 function [ TPUPParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir)
+% fitTPUPToSubjectAverageResponses
+%
+% DESCRIPTION OF ROUTINE
+%
+%
+%
+% INPUTS:
+%
+%
+% OUTPUTS:
+%
+%
+% OPTIONS:
+%
+
+
+%% Parse vargin for options passed here
+p = inputParser; p.KeepUnmatched = true;
+
+% Required
+p.addRequired('goodSubjects',@iscell);
+p.addRequired('averageResponsePerSubject',@iscell);
+p.addRequired('dropboxAnalysisDir',@ischar);
+
+% Optional display and I/O params
+p.addParameter('verbose',true,@islogical);
+p.addParameter('makePlots',true,@islogical);
+
+% Optional analysis parameters
+p.addParameter('stimulusLabels',{'LMS' 'Mel' 'Blue' 'Red'},@iscell);
+p.addParameter('lbTPUPbyStimulus',[-500, 150, 1, -400, -400, -400; ...
+                                   -500, 150, 1, -400, -400, -400; ...
+                                   -500, 150, 1, -400, -400, -400; ...
+                                   -500, 150, 1, -400, -400, -400],@isnumeric);
+p.addParameter('ubTPUPbyStimulus',[0, 400, 20, 0, 0, 0; ...
+                                   0, 400, 20, 0, 0, 0; ...
+                                   0, 400, 20, 0, 0, 0; ...
+                                   0, 400, 20, 0, 0, 0],@isnumeric);
+p.addParameter('stimulusTimebase',0:20:13980,@isnumeric);
+p.addParameter('stimulusStepOnset',1000,@isnumeric);
+p.addParameter('stimulusStepOffset',4000,@isnumeric);
+p.addParameter('stimulusRampDuration',500,@isnumeric);
+
+
+%% Parse and check the parameters
+p.parse(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir, varargin{:});
+
 
 % The main output will be an [ss x 3] matrix, called amplitude, which contains the results
 % from fitting the IAMP model to to average responses per subject. The
@@ -24,10 +71,10 @@ vub=[0, 400, 20, 0, 0, 0];
 startingValues = [-100, 0];
 
 % build up common parts of the packet
-timebase = 0:20:13980; % in msec
-stepOnset = 1000; % in msec
-stepOffset = 4000; % in msec
-[stimulusStruct] = makeStepPulseStimulusStruct(timebase, stepOnset, stepOffset, 'rampDuration', 500);
+[stimulusStruct] =  makeStepPulseStimulusStruct(p.Results.stimulusTimebase, ...
+                                                p.Results.stimulusStepOnset, ...
+                                                p.Results.stimulusStepOffset, ...
+                                                'rampDuration', p.Results.stimulusRampDuration);
 thePacket.stimulus = stimulusStruct; % add stimulusStruct to the packet
 thePacket.response.timebase = timebase;
 thePacket.kernel = [];
