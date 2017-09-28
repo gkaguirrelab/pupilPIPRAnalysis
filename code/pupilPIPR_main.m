@@ -1,4 +1,5 @@
 %% Setup basic variables
+
 % Discover user name and set Dropbox path
 [~, userName] = system('whoami');
 userName = strtrim(userName);
@@ -7,9 +8,18 @@ dropboxAnalysisDir = ...
     '/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/');
 subAnalysisDirectory = 'pupilPIPRAnalysis';
 
-%% Determine which subjects pass inclusion/exclusion criteria for use in further analyses
+verbose = true;
 
-[ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
+%% Determine which subjects pass inclusion/exclusion criteria for use in further analyses
+[ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir);
+if verbose
+    fprintf('Identified these good subjects:\n');
+    goodSubjects{1}
+    goodSubjects{2}
+    goodSubjects{3}
+    fprintf('Identified these bad subjects:\n');
+    badSubjects
+end
 
 
 %% Set-up cache behavior
@@ -22,7 +32,7 @@ packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject 
 %packetCacheHash='bb16f8bf6378d5d9c4d17a974ce8b50a'; %  averageResponsePerSubject format
 %packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
-fitIAMPCacheBehavior='make';
+fitIAMPCacheBehavior='load';
 fitIAMPCacheTag='IAMPParameters';
 fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %itIAMPCacheHash='c7ef9027bab0d773ab5749be36a4c543'; % BAD -- amplitudesPerSubject format, with 1,000,000 bootstrap iterations, 16 session 3 subjects
@@ -43,7 +53,16 @@ fitTPUPCacheHash='9a509f623f277c16ac330a05c9499091'; % TPUPParameter format, max
 %fitTPUPCacheHash='55b8bafaf8ac5a164a0bf4060418a8ff'; % with extended gamma range (150-700)
 
 
-% Create or load the packetCellArray
+%% Create or load the packetCellArray
+% The variable averageResponsePerSubject is a 3 x 1 cell array, with the
+% first dimension corresponding to the data from the three sessions. Each
+% cell contains a structure. The fields include 'LMS','Mel,'Blue','Red',
+% and each of these fields contains a m x n matrix, where m is the number
+% of subjects and n is the number of timepoints in the response.
+%
+% The 'make' case not only assembles the packets, but also creates figures
+% that are saved in the directory 'dataOverview/averageResponse' within the
+% dropboxAnalysisDir.
 switch packetCacheBehavior
     case 'make'  % If we are not to load the cache, then we must generate it
         % Make the average responses. 
@@ -62,7 +81,14 @@ switch packetCacheBehavior
         error('Please define a legal packetCacheBehavior');
 end
 
-% Fit IAMP model to avg packets
+%% Fit IAMP model
+% This routine models the pupil response for a given subject with the
+% average response across subjects for that stimulus. The fitting is done
+% on a per-trial basis and then the standard error of the mean of the
+% across-trial amplitude is determined by bootstrap resampling.
+%
+% The 'make' case also creates figures that are saved in the directory
+% 'IAMP/modelFits'
 switch fitIAMPCacheBehavior    
     case 'make'
         [ amplitudesPerSubject ] = fitIAMPToSubjectTrialResponses(goodSubjects, averageResponsePerSubject, groupAverageResponse, dropboxAnalysisDir);
@@ -80,7 +106,11 @@ switch fitIAMPCacheBehavior
         error('Please define a legal packetCacheBehavior');
 end
 
-% Fit TPUP model to avg packets
+%% Fit TPUP model to avg packets
+% 
+% the 'make' case creates figures which are saved in the directory
+% 'TPUP/modelFits'.
+
 switch fitTPUPCacheBehavior    
     case 'make'
         [ TPUPParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir);
