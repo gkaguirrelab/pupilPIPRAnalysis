@@ -1,10 +1,16 @@
 function [averageResponsePerSubject, groupAverageResponse] = makeAverageResponse(goodSubjects, dropboxAnalysisDir, varargin)
+% [averageResponsePerSubject, groupAverageResponse] = makeAverageResponse(goodSubjects, dropboxAnalysisDir, 'plot', 'on')
 
-% Function to plot the average  response
+% This function to both calculate and plot the average  response for each
+% subject for each stimulus type. The basic approach is to 1) figure out
+% where the raw data lives for the given session, 2) compute the average 
+% and standard error of the mean for all timepoints across all trials, 
+% and 3) plot the results. These average responses are saved as output.
+% Once the average responses for each subject are found, the average
+% response across all subjects is determined for each session, for each
+% stimulus type.
 
-% Second, we plot the average pupil response to blue stimulation, red
-% stimulation, and the subtracted PIPR response
-% Finally plots a group average
+
 
 % 12/12/2016, written by hmm
 
