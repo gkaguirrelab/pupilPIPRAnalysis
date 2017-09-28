@@ -3,25 +3,25 @@ function [averageResponsePerSubject, groupAverageResponse] = makeAverageResponse
 
 % This function to both calculate and plot the average  response for each
 % subject for each stimulus type. The basic approach is to 1) figure out
-% where the raw data lives for the given session, 2) compute the average 
-% and standard error of the mean for all timepoints across all trials, 
-% and 3) plot the results. These average responses are saved as output.
-% Once the average responses for each subject are found, the average
-% response across all subjects is determined for each session, for each
-% stimulus type.
+% where the raw data lives for the given session, 2) compute the average
+% and standard error of the mean for all timepoints across all trials, and
+% 3) plot the results. These average responses are saved as output. Once
+% the average responses for each subject are found, the average response
+% across all subjects is determined for each session, for each stimulus
+% type.
 
 % Output:
 %       averageResponsePerSubject: a cell array with each cell referring to
 %           a session. The content of each cell array is a structure, with
-%           subfields referring to the stimulus (as well as for the standard 
-%           error of the mean for that stimulus). The contents of each subfield
-%           is a matrix, with each row referring to a different subject. Each 
-%           column is a timepoint containing the average pupil diameter in 
-%           units % change.
+%           subfields referring to the stimulus (as well as for the
+%           standard error of the mean for that stimulus). The contents of
+%           each subfield is a matrix, with each row referring to a
+%           different subject. Each column is a timepoint containing the
+%           average pupil diameter in units % change.
 %       groupAverageResponse: same structure as the
-%           averageResponsePerSubject, except the contents of each subfield is
-%           a single vector. Each value of the vector is the average pupil
-%           diameter across all subjects for that stimulus type. 
+%           averageResponsePerSubject, except the contents of each subfield
+%           is a single vector. Each value of the vector is the average
+%           pupil diameter across all subjects for that stimulus type.
 %
 % Input (required):
 %       goodSubjects: list of subjects and associated dates when they were
@@ -30,8 +30,8 @@ function [averageResponsePerSubject, groupAverageResponse] = makeAverageResponse
 %           data
 %         
 % Options:
-%       'plot': if followed by the key-value pair 'on', plots of the
-%       average responses will be displayed and saved 
+%       'makePlots': if set to true, plots of the average responses will be
+%       displayed and saved
 
 
 % 9/28/2017: hmm added comments
@@ -42,14 +42,15 @@ function [averageResponsePerSubject, groupAverageResponse] = makeAverageResponse
 %% Parse input
 p = inputParser; p.KeepUnmatched = true;
 
+% Required
+p.addRequired('goodSubjects',@iscell);
+p.addRequired('dropboxAnalysisDir',@ischar);
 
-p.addParameter('plot','on',@ischar);
+% Optional display and I/O params
+p.addParameter('makePlots',true,@islogical);
 
-
-
-p.parse(varargin{:});
-
-
+% Parse and check the parameters
+p.parse(goodSubjects, dropboxAnalysisDir, varargin{:});
 
 
 %% Determine the average response across all trials for each subject for each stimulation type 
@@ -95,7 +96,8 @@ for session = 1:length(goodSubjects)
             
             date = goodSubjects{session}.date{ss};
             
-            % now actually grab the data that contains the responses from all trials for this stimulus type 
+            % now actually grab the data that contains the responses from
+            % all trials for this stimulus type
             responses = importdata(fullfile(dropboxAnalysisDir, subdir, stimuliDir, subject, date, [subject, csvName]));
             
             
@@ -114,7 +116,7 @@ for session = 1:length(goodSubjects)
         
         
         % now do the plotting per subject
-        if strcmp(p.Results.plot, 'on')
+        if p.Results.makePlots
             timebase = 0:0.02:13.98;
             for stimulus = 1:(length(stimuli) - 1)
                 if strcmp(stimuli(stimulus), 'Blue')
@@ -183,7 +185,7 @@ for session = 1:length(goodSubjects)
         end
     end
     
-    if strcmp(p.Results.plot, 'on')
+    if p.Results.makePlots
         timebase = 0:0.02:13.98;
         for stimulus = 1:(length(stimuli)-1)
             if strcmp(stimuli{stimulus}, 'Blue')
