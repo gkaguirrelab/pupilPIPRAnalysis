@@ -87,6 +87,7 @@ end
 
 %% do the permutation test to see the significance of this median difference between mel and lms
 
+comparisons = {'Mel', 'LMS'; 'Blue', 'Red'};
 
 nSimulations = 1000000;
 for session = 1:length(percentPersistentPerSubject)
@@ -94,41 +95,43 @@ for session = 1:length(percentPersistentPerSubject)
     if ~exist(outDir, 'dir')
         mkdir(outDir);
     end
-    result = [];
-    
-    for nn = 1:nSimulations
-        for ss = 1:length(percentPersistentPerSubject{session}.Mel)
-            shouldWeFlipLabel = round(rand);
-            
-            if shouldWeFlipLabel == 1 % then flip the label for that subject
-                melGroup(ss) = percentPersistentPerSubject{session}.LMS(ss);
-                lmsGroup(ss) = percentPersistentPerSubject{session}.Mel(ss);
-            elseif shouldWeFlipLabel == 0
-                lmsGroup(ss) = percentPersistentPerSubject{session}.LMS(ss);
-                melGroup(ss) = percentPersistentPerSubject{session}.Mel(ss);
+    for comparison = 1:size(comparisons,1)
+        result = [];
+        
+        for nn = 1:nSimulations
+            for ss = 1:length(percentPersistentPerSubject{session}.Mel)
+                shouldWeFlipLabel = round(rand);
+                
+                if shouldWeFlipLabel == 1 % then flip the label for that subject
+                    firstGroup(ss) = percentPersistentPerSubject{session}.(comparisons{comparison,1})(ss);
+                    secondGroup(ss) = percentPersistentPerSubject{session}.(comparisons{comparison,2})(ss);
+                elseif shouldWeFlipLabel == 0
+                    secondGroup(ss) = percentPersistentPerSubject{session}.(comparisons{comparison,1})(ss);
+                    firstGroup(ss) = percentPersistentPerSubject{session}.(comparisons{comparison,2})(ss);
+                end
             end
+            result = [result, median(firstGroup) - median(secondGroup)];
         end
-        result = [result, median(melGroup) - median(lmsGroup)];
+        
+        observedMedianDifference = median(percentPersistentPerSubject{session}.(comparisons{comparison,1})) - median(percentPersistentPerSubject{session}.(comparisons{comparison,2}));
+        numberOfPermutationsLessThanObserved = result < observedMedianDifference;
+        
+        
+        plotFig = figure;
+        hold on
+        histogram(result);
+        ylims=get(gca,'ylim');
+        xlims=get(gca,'xlim');
+        line([observedMedianDifference, observedMedianDifference], [ylims(1), ylims(2)], 'Color', 'r')
+        
+        string = (sprintf(['Observed Median Difference = ', num2str(observedMedianDifference), '\n', num2str(sum(numberOfPermutationsLessThanObserved)/length(result)*100), '%% of simulations < Observed Median Difference']));
+        
+        ypos = 0.9*ylims(2);
+        xpos = xlims(1)-0.1*xlims(1);
+        text(xpos, ypos, string)
+        saveas(plotFig, fullfile(outDir, [comparisons{comparison,1},'-', comparisons{comparison,2},'_permutationHistogram.png']), 'png');
+        close(plotFig)
     end
-    
-    observedMedianDifference = median(percentPersistentPerSubject{session}.Mel) - median(percentPersistentPerSubject{session}.LMS);
-    numberOfPermutationsLessThanObserved = result < observedMedianDifference;
-    
-    
-    plotFig = figure;
-    hold on
-    histogram(result);
-    ylims=get(gca,'ylim');
-    xlims=get(gca,'xlim');
-    line([observedMedianDifference, observedMedianDifference], [ylims(1), ylims(2)], 'Color', 'r')
-    
-    string = (sprintf(['Observed Median Difference = ', num2str(observedMedianDifference), '\n', num2str(sum(numberOfPermutationsLessThanObserved)/length(result)*100), '%% of simulations < Observed Median Difference']));
-    
-    ypos = 0.9*ylims(2);
-    xpos = xlims(1)-0.1*xlims(1);
-    text(xpos, ypos, string)
-    saveas(plotFig, fullfile(outDir, ['permutationHistogram.png']), 'png');
-    close(plotFig)
 end
 
 
