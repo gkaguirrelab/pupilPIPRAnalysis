@@ -22,7 +22,7 @@ packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject 
 %packetCacheHash='bb16f8bf6378d5d9c4d17a974ce8b50a'; %  averageResponsePerSubject format
 %packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
-fitIAMPCacheBehavior='make';
+fitIAMPCacheBehavior='load';
 fitIAMPCacheTag='IAMPParameters';
 fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %itIAMPCacheHash='c7ef9027bab0d773ab5749be36a4c543'; % BAD -- amplitudesPerSubject format, with 1,000,000 bootstrap iterations, 16 session 3 subjects
