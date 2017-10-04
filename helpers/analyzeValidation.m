@@ -1,8 +1,65 @@
 function [ passStatus, validation, medianMelanopsinBackgroundLuminance ] = analyzeValidation(subject, date, dropboxAnalysisDir, varargin)
 
-% date option
-% default is third session, but i need a way to look up other subjects
-% by date (for my exclude subjecgts scripts
+% This function takes as input a particular session, specified by subject
+% ID and date, and summarizes the validation results for that session. The
+% code first finds where the relevant validation files live, reads in the
+% textfiles outputted by the validation process, and compiles the
+% validation results into a variable that can be saved as output. The
+% routine will also determine if the particular session meets our
+% inclusion/exclusion criteria, which for these PIPR experiments is <20%
+% contrast for directions not of interest, and >350% contrast for the
+% direction of interest (that is the median value of all validation
+% measurements), and returns this as the variable passStatus. The routine
+% can also display plots that summarize these validation results.
+
+% The intended use case for this function is to examine an individual
+% subject's validation results both before and after a session to make sure
+% the session meets inclusion/exclusion criteria.
+
+% Output:
+%       - passStatus: this variable contains a logical determined by whether
+%       this particular sesssion meetings inclusion criteria
+%       - validation: this variable is a structure containing 4 subfields
+%       pertaining to each stimulus type (Mel, LMS, Blue, and Red). Each
+%       subfield is itself a structure, with distinct subfields for all
+%       splatter measurements (Melanopsin, LMS, LMinusM, and S). The
+%       subfield contains as many measurements as were specified (typically
+%       10 total measurements for 5 pre-experiment, 5 post-experiment). 
+%       - medianMelanopsinBackgroundLuminance: outputs the median value for
+%       all validation measurements of the melanopsin background luminance
+%       (note that all values will be saved within the validation
+%       variable). This was useful when we were closely monitoring
+%       melanopsin background luminance as a means of tracking overall
+%       light output.
+
+% Input (required):
+%       -subject: the contents of this variable are a string that specifies
+%       the subject ID ('MELA_0078', for example)
+%       -date: the contents of this variable are a a string that specifies
+%       the date of the session of interest, in MMDDYY format ('082417',
+%       for example)
+%       -dropboxAnalysisDir: the contents of this variable are a string
+%       that specify where to look for the relevant results.
+%           Note: for the PIPR experiment, validation results live within
+%           the MELA_materials and MELA_materials_Through061317 so these
+%           folders must be synced to the user's computer.
+
+% Options:
+%       -'whichValidation': a key-value pair to specify which validation
+%       results to summarize. Options include 'pre' to only look for the
+%       first 5 validation results, 'post' to look at only the last 5
+%       validation results, or 'combined' to look at all ten validation
+%       results. Essentially this input determines when we look at the
+%       relevant validation session folder, which validation files are we
+%       summarizing.
+%       -'plot': a key-value pair to specify whether or not to display a
+%       plot of the validation results. Options include 'on' or 'off'
+%       -'verbose': a key-value pair to specify whether to display
+%       potentially helpful information on the screen. Options include 'on'
+%       or 'off'
+
+% Example call:
+%   [passStatus, validation, medianMelanopsinBackgroundLuminance] = analyzeValidation('MELA_0096', '092117', dropboxAnalysisDir, 'whichValidation', 'combined', 'plot', 'on')
 
 %% Parse input
 p = inputParser; p.KeepUnmatched = true;
@@ -27,7 +84,10 @@ else
 end
 
 % basedon the 'whichValidation' key-value pair, determine which validation
-% measurements we care about
+% measurements we care about. Basically later on we're going to find a
+% folder which contains all of the validation results for the given
+% session. Here is where we specify which of these validation files we care
+% about.
 if strcmp(p.Results.whichValidation, 'pre')
     firstValidationIndex = 1;
     lastValidationIndex = 5;
