@@ -1,4 +1,4 @@
-function [ TPUPParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir)
+function [ TPUPParameters ] = fitTPUPToSubjectAverageResponses(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir, varargin)
 % fitTPUPToSubjectAverageResponses
 %
 % DESCRIPTION OF ROUTINE
@@ -35,40 +35,26 @@ p.addParameter('lbTPUPbyStimulus',[-500, 150, 1, -400, -400, -400; ...
                                    -500, 150, 1, -400, -400, -400],@isnumeric);
 p.addParameter('ubTPUPbyStimulus',[0, 400, 20, 0, 0, 0; ...
                                    0, 400, 20, 0, 0, 0; ...
-                                   0, 400, 20, 0, 0, 0; ...
-                                   0, 400, 20, 0, 0, 0],@isnumeric);
+                                   0, 750, 20, 0, 0, 0; ...
+                                   0, 750, 20, 0, 0, 0],@isnumeric);
+p.addParameter('initialTemporalParameters',[-200, 350, 5],@isnumeric);           
 p.addParameter('stimulusTimebase',0:20:13980,@isnumeric);
 p.addParameter('stimulusStepOnset',1000,@isnumeric);
 p.addParameter('stimulusStepOffset',4000,@isnumeric);
 p.addParameter('stimulusRampDuration',500,@isnumeric);
-
+p.addParameter('initialValuesToSample',[-100, 0] ,@isnumeric);
+p.addParameter('nInstances', 1 ,@isnumeric);
 
 %% Parse and check the parameters
 p.parse(goodSubjects, averageResponsePerSubject, dropboxAnalysisDir, varargin{:});
 
 
-% The main output will be an [ss x 3] matrix, called amplitude, which contains the results
-% from fitting the IAMP model to to average responses per subject. The
-% first column will be the amplitude of LMS stimulation, the second column
-% melanopsin stimulation, the third column pipr stimulation
-
-stimuli = {'LMS' 'Mel' 'Blue' 'Red'};
-
 % We will fit each average response as a single stimulus in a packet, so
 % each packet therefore contains a single stimulus instance.
-defaultParamsInfo.nInstances = 1;
+defaultParamsInfo.nInstances = p.Results.nInstances;
 
 % Construct the model object
 temporalFit = tfeTPUP('verbosity','full');
-
-% set up boundaries for our fits
-% although the boundaries are being coded here, the upper limit of the
-% gamma tau will change depending on whether the stimulus is PIPR
-% (blue/red) or silent substitution (mel/lms). This change will occur in
-% the main loop.
-vlb=[-500, 150, 1, -400, -400, -400]; % these boundaries are necessary to specify until we change how the delay parameter is implemented in the forward model (negative delay currently means push curve to the right). also the range of the amplitude parameters is probably much larger than we need
-vub=[0, 400, 20, 0, 0, 0];
-startingValues = [-100, 0];
 
 % build up common parts of the packet
 [stimulusStruct] =  makeStepPulseStimulusStruct(p.Results.stimulusTimebase, ...
@@ -76,37 +62,28 @@ startingValues = [-100, 0];
                                                 p.Results.stimulusStepOffset, ...
                                                 'rampDuration', p.Results.stimulusRampDuration);
 thePacket.stimulus = stimulusStruct; % add stimulusStruct to the packet
-thePacket.response.timebase = timebase;
+thePacket.response.timebase = p.Results.stimulusTimebase;
 thePacket.kernel = [];
 thePacket.metaData = [];
 
 %% now fit each subject
 for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
-        for stimulus = 1:length(stimuli)
+        for stimulus = 1:length(p.Results.stimulusLabels)
             
-            % from looking at the quality of fits, we've shown that the
-            % PIPR stimuli are better fit when we allow the gamma to extend
-            % up to 750. For the silent substitution stimuli, the fit is
-            % better when the max gamma is 400
-            if strcmp(stimuli{stimulus}, 'Mel') || strcmp(stimuli{stimulus}, 'LMS')
-                vub(2) = 400;
-            elseif strcmp(stimuli{stimulus}, 'Blue') || strcmp(stimuli{stimulus}, 'Red')
-                vub(2) = 750;
-            end
+            
             
             rSquaredPooled = []; % for each subject, for each condition, we want to look at the R2 values of each fit
             for initialTransient = 1:2
                 for initialSustained = 1:2
                     for initialPersistent = 1:2
                         % build the packet
-                        initialValues = [-200, 350, 5, startingValues(initialTransient), startingValues(initialSustained), startingValues(initialPersistent)];
-                        
-                        thePacket.response.values = averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:)*100;
+                        initialValues = [p.Results.initialTemporalParameters, p.Results.initialValuesToSample(initialTransient), p.Results.initialValuesToSample(initialSustained), p.Results.initialValuesToSample(initialPersistent)];
+                        thePacket.response.values = averageResponsePerSubject{session}.(p.Results.stimulusLabels{stimulus})(ss,:)*100;
                         [paramsFit,fVal,modelResponseStruct] = ...
                             temporalFit.fitResponse(thePacket, ...
                             'defaultParamsInfo', defaultParamsInfo, ...
-                            'vlb', vlb, 'vub',vub,...
+                            'vlb', p.Results.lbTPUPbyStimulus(stimulus,:), 'vub',p.Results.ubTPUPbyStimulus(stimulus,:),...
                             'initialValues',initialValues,...
                             'fminconAlgorithm','sqp'...
                             );
@@ -122,14 +99,14 @@ for session = 1:length(goodSubjects)
             % rSquared value
             [maxValue, maxIndex] = max(rSquaredPooled(:));
             [index1, index2, index3] = ind2sub(size(rSquaredPooled), maxIndex);
-            bestInitialValues = [-200, 350, 5, startingValues(index1), startingValues(index2), startingValues(index3)];
+            bestInitialValues = [p.Results.initialTemporalParameters, p.Results.initialValuesToSample(index1), p.Results.initialValuesToSample(index2), p.Results.initialValuesToSample(index3)];
             
             % do the fit with the best initialValues
-            thePacket.response.values = averageResponsePerSubject{session}.(stimuli{stimulus})(ss,:)*100;
+            thePacket.response.values = averageResponsePerSubject{session}.(p.Results.stimulusLabels{stimulus})(ss,:)*100;
             [paramsFit,fVal,modelResponseStruct] = ...
                 temporalFit.fitResponse(thePacket, ...
                 'defaultParamsInfo', defaultParamsInfo, ...
-                'vlb', vlb, 'vub',vub,...
+                'vlb', p.Results.lbTPUPbyStimulus(stimulus,:), 'vub',p.Results.ubTPUPbyStimulus(stimulus,:),...
                 'initialValues',bestInitialValues,...
                 'fminconAlgorithm','sqp'...
                 );
@@ -156,7 +133,7 @@ for session = 1:length(goodSubjects)
             text(xpos, ypos, string)
             title(goodSubjects{session}.ID(ss));
             
-            outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/TPUP/modelFits/', stimuli{stimulus}, num2str(session));
+            outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/TPUP/modelFits/', p.Results.stimulusLabels{stimulus}, num2str(session));
             if ~exist(outDir, 'dir')
                 mkdir(outDir);
             end
@@ -164,13 +141,13 @@ for session = 1:length(goodSubjects)
             close(plotFig)
             
             % also save out the summary statistics of the model fit
-            TPUPParameters{session}.(stimuli{stimulus}).transientAmplitude(ss) = paramsFit.paramMainMatrix(4);
-            TPUPParameters{session}.(stimuli{stimulus}).sustainedAmplitude(ss) = paramsFit.paramMainMatrix(5);
-            TPUPParameters{session}.(stimuli{stimulus}).persistentAmplitude(ss) = paramsFit.paramMainMatrix(6);
-            TPUPParameters{session}.(stimuli{stimulus}).delay(ss) = paramsFit.paramMainMatrix(1);
-            TPUPParameters{session}.(stimuli{stimulus}).gammaTau(ss) = paramsFit.paramMainMatrix(2);
-            TPUPParameters{session}.(stimuli{stimulus}).exponentialTau(ss) = paramsFit.paramMainMatrix(3);
-            TPUPParameters{session}.(stimuli{stimulus}).rSquared(ss) = rSquared;
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).transientAmplitude(ss) = paramsFit.paramMainMatrix(4);
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).sustainedAmplitude(ss) = paramsFit.paramMainMatrix(5);
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).persistentAmplitude(ss) = paramsFit.paramMainMatrix(6);
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).delay(ss) = paramsFit.paramMainMatrix(1);
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).gammaTau(ss) = paramsFit.paramMainMatrix(2);
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).exponentialTau(ss) = paramsFit.paramMainMatrix(3);
+            TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).rSquared(ss) = rSquared;
             
             
             
