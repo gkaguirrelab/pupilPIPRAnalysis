@@ -73,7 +73,9 @@ p.parse(varargin{:});
 
 %% Figure out where the relevant session folder lives
 
-% First look in the new Legacy dir within the current MELA_materials dir
+% Where the validation files live depends on when the data was collected.
+% Older sessions will be located within the MELA_materials_Through061317
+% folder, while newer sessions are found within MELA_materials/Legacy
 if exist(fullfile(fullfile(dropboxAnalysisDir, '..', 'MELA_materials', 'Legacy', 'PIPRMaxPulse', date)), 'dir')
     subdir = '../MELA_materials/Legacy/PIPRMaxPulse';
 elseif exist(fullfile(fullfile(dropboxAnalysisDir, '..', 'MELA_materials_Through061317', 'PIPRMaxPulse', date)), 'dir')
@@ -99,65 +101,93 @@ elseif strcmp(p.Results.whichValidation, 'combined')
     lastValidationIndex = 10;
 end
 
-%% Now start collecting the stats
-% set up some variables
+%% Now start collecting the validation results
+% This section ultimately compiles the validation output variable
 stimuli = {'Melanopsin', 'LMS', 'Blue', 'Red'};
 
+% set up a tracker for fail status. If at any point as we start collecting
+% these validation results the session meets exclusion criteria, this
+% variable will take on a value of 1
 failStatus = 0;
 
 
 for stimulus = 1:length(stimuli)
+    
+    % the name of the folder in which the validation results live depends
+    % on the stimulus
     if strcmp(stimuli(stimulus), 'Melanopsin')
         validationFolder = ['Cache-MelanopsinDirectedSuperMaxMel_' subject '_' date];
-        %validationStruct = validation.MelanopsinStimulation;
         
     elseif strcmp(stimuli(stimulus), 'LMS')
         validationFolder = ['Cache-LMSDirectedSuperMaxLMS_' subject '_' date];
-        %validationStruct = validation.LMSStimulation;
         
     elseif strcmp(stimuli(stimulus), 'Blue')
         validationFolder = ['Cache-PIPRBlue_' subject '_' date];
-        %validationStruct = validation.BlueStimulation;
         
     elseif strcmp(stimuli(stimulus), 'Red')
         validationFolder = ['Cache-PIPRRed_' subject '_' date];
-        %validationStruct = validation.RedStimulation;
         
     end
     
     
-    
+    % within the relevant validation folder, list all of the contents
     availableValidations = dir(fullfile(dropboxAnalysisDir, subdir, date, validationFolder));
+    
+    % prune this list of things we don't care about (like .DS_Store, ., and
+    % ..) so we're left with a list that's just the relevant validations
     availableValidations = availableValidations(arrayfun(@(x) x.name(1), availableValidations) ~='.'); % discard the . .. and .DSStore dirs
+    
+    % determine how many validation files there are that we could be
+    % looking at
     numberValidations = size(availableValidations,1);
+    
+    % based on the inputted 'whichValidation', can we in fact analyze the
+    % validation files we mean to? (as in make sure if I ask to look at the
+    % combined 10 validation files but there's only 5 validation files
+    % within the session folder, stop the function and display an error)
     if lastValidationIndex - firstValidationIndex+1 > numberValidations
         failStatus = failStatus + 1; % if we're trying to analyze more validation files than are available, that's a fail
         passStatus = 0;
         return
+        
+    % assuming we can find all of the validation files we need, now we can start to look at some of the validation results    
     else
         if stimulus == 1;
             if strcmp(p.Results.verbose, 'on')
+                % tell user what validation files we found to work on
                 sprintf('Of %s total validations, analyzing validation files %s to %s', num2str(numberValidations), num2str(firstValidationIndex), num2str(lastValidationIndex))
             end
         end
         
+        % the structure and content of the validation files are different
+        % for silent substitution and PIPR stimuli. This if statement sets
+        % the structure for what the validation file looks like and what
+        % validation results to save out for melanopsin and LMS directed
+        % stimuli
         if strcmp(stimuli(stimulus), 'Melanopsin') || strcmp(stimuli(stimulus), 'LMS')
             
+            % loop over the relevant validation measurements
             for ii = firstValidationIndex:lastValidationIndex
+                
+                % find the relevant validation file
                 validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
                 validationResultsFile = {validationResultsFile.name};
                 fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
                 
+                % read in that validation file
                 fileID = fopen(fullValidationResultsFile);
                 textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
                 fclose('all');
                 
+                % extract the relevant validation measurements form that
+                % file
                 backgroundLuminance = str2num(textFileContents{1}{4});
                 SConeContrast = str2num(textFileContents{1}{60});
                 LMinusMContrast = str2num(textFileContents{1}{53});
                 LMSContrast = str2num(textFileContents{1}{44});
                 MelanopsinContrast = str2num(textFileContents{1}{67});
                 
+                % save out these validation measurements
                 validation.(stimuli{stimulus})(ii).SConeContrast = SConeContrast;
                 validation.(stimuli{stimulus})(ii).LMinusMContrast = LMinusMContrast;
                 validation.(stimuli{stimulus})(ii).LMSContrast = LMSContrast;
@@ -165,16 +195,25 @@ for stimulus = 1:length(stimuli)
                 validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
             end
         end
+        
+        % again the structure of the PIPR stimuli validation files is a bit
+        % different, this if statement sets the structure for what to look
+        % for
         if strcmp(stimuli(stimulus), 'Blue') || strcmp(stimuli(stimulus), 'Red')
             
+            % loop over the relevant validation files
             for ii = firstValidationIndex:lastValidationIndex
+                
+                % find the relevant validation file
                 validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.txt']);
                 validationResultsFile = {validationResultsFile.name};
                 fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
                 
+                % open and read-in the validation file
                 fileID = fopen(fullValidationResultsFile);
                 textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
                 
+                % save out the relevant validation result
                 backgroundLuminance = str2num(textFileContents{1}{4});
                 
                 validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
@@ -184,13 +223,27 @@ for stimulus = 1:length(stimuli)
 end % end loop over stimuli
 
 %% Determine if subject meets inclusion criteria
+% From the contents of the validation results variable, determine if the
+% given session meets inclusion/exclusion criteria. 
+
+% For the PIPR study, inclusion/exclusion criteria were as follows:
+%   - for directions not of interest: splatter contrast must be less than
+%   20%
+%   - for the direction of interest: contrast must be at least 350%
+%   - this evaluation is performed on the median validation measurement
  
 for stimulus = 1:length(stimuli)
+    
+    % first analyze the silent substitution validations
     if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
+        % compile all validation results into a vector to make it easier to
+        % calculate median
         SConeContrastVector = cell2mat({validation.(stimuli{stimulus}).SConeContrast});
         LMSContrastVector = cell2mat({validation.(stimuli{stimulus}).LMSContrast});
         LMinusMContrastVector = cell2mat({validation.(stimuli{stimulus}).LMinusMContrast});
         MelanopsinContrastVector = cell2mat({validation.(stimuli{stimulus}).MelanopsinContrast});
+        
+        % for LMS stimuli, apply exclusion criteria
         if strcmp(stimuli(stimulus), 'LMS')
             if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
                 if median(LMSContrastVector(1:5)) < 3.5
@@ -252,17 +305,10 @@ for stimulus = 1:length(stimuli)
                     end
                     
                 end
-            end
-            
-            
-            
-            
-            
-            
-            
+            end  
         end
         
-        
+        % for melanopsin stimuli, apply the exlcusion criteria
         if strcmp(stimuli(stimulus), 'Melanopsin')
             if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
                 
@@ -362,8 +408,10 @@ end
 
 
 %% plot to summarize results
+% Note that this plotting function is over-engineered to flexibly show all validation measurements with a reasonable spread. That is much of the code that follows is involved in determining where the appropriate yLims should be so that we can clearly see all of the data points 
 if strcmp(p.Results.plot, 'on')
-    %plotFig = figure;
+  
+    % make a big plot
     set(gcf,'un','n','pos',[.05,.05,.7,.6])
     for stimulus = 1:length(stimuli)
         if strcmp(stimuli(stimulus), 'LMS') || strcmp(stimuli(stimulus), 'Melanopsin')
@@ -387,6 +435,10 @@ if strcmp(p.Results.plot, 'on')
                 splatterVectors = [SConeContrastVector LMinusMContrastVector LMSContrastVector];
             end
             
+            % for the direction of interest, the y axis will be bounded
+            % between 390 and 410 unless any of the data points are outside
+            % that range. in that case, extend the range from that data
+            % point further by 5%
             if min(intendedContrastVector*100) < 390
                 yIntendedMin = min(intendedContrastVector*100) - 5;
                 
@@ -399,6 +451,9 @@ if strcmp(p.Results.plot, 'on')
                 yIntendedMax = 410;
             end
             
+            % for directions not of interest, the y bounds will be set
+            % between -10 and 10 again unless individual data points
+            % require that range to be extended 
             if min(splatterVectors*100) < -10
                 ySplatterMin = min(splatterVectors*100) - 5;
                 
@@ -412,20 +467,22 @@ if strcmp(p.Results.plot, 'on')
             end
             
             hold on;
+            
+            % add lines to show the boundaries of our exclusion criteria
             line([0.5 4.5], [350 350], 'Color', 'r', 'LineStyle', '--');
             line([0.5 4.5], [20 20], 'Color', 'r', 'LineStyle', '--');
             line([0.5 4.5], [-20 -20], 'Color', 'r', 'LineStyle', '--');
             
             ylim([ySplatterMin yIntendedMax]);
             
-            %data = {100*SConeContrastVector, 100*LMinusMContrastVector, 100*LMSContrastVector, 100*MelanopsinContrastVector};
-            %plotSpread(data,'xNames', {'S Cone', 'L-M', 'LMS', 'Melanopsin'}, 'distributionMarkers', {'o', 'o', 'o', 'o'});
-            %breakyaxis([ySplatterMax yIntendedMin], 0.01, 0.1);
+           
             
-            
-            
+            % putting the data together to work with the plotSpread
+            % function
             data = horzcat({100*SConeContrastVector', 100*LMinusMContrastVector', 100*LMSContrastVector', 100*MelanopsinContrastVector'});
             
+            % some flexibility with plotting depending on which validation
+            % measurements we're looking at
             if strcmp(p.Results.whichValidation, 'pre')
                 catIdxInstance = zeros(1,5);
                 catIdx = horzcat(catIdxInstance, catIdxInstance, catIdxInstance, catIdxInstance)';
@@ -445,6 +502,8 @@ if strcmp(p.Results.plot, 'on')
             if yIntendedMin - ySplatterMax < 100
             else
                 
+                % apply y-axis break to more cleanly show all validation
+                % measurements on 1 subplot
                 [test] = breakyaxis([ySplatterMax yIntendedMin], 0.01, 0.1);
             end
             
