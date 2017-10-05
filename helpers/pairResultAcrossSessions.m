@@ -23,16 +23,16 @@ pairedResult.sessionOne = [];
 pairedResult.sessionTwo = [];
 pairedResult.subjectKey = [];
 
-for ss = 1:length(sessionTwoSubjectList.ID) % loop over subjects that have completed both sessions
-    subject = sessionTwoSubjectList.ID(ss);
+for ss = 1:length(sessionTwoSubjectList) % loop over subjects that have completed both sessions
+    subject = sessionTwoSubjectList(ss);
     
     secondSessionIndex = ss;
-    whichSubject = cellfun(@(x) strcmp(x, subject), sessionOneSubjectList.ID);
+    whichSubject = cellfun(@(x) strcmp(x, subject), sessionOneSubjectList);
     if sum(whichSubject) ~= 0
         [maxValue, firstSessionIndex] = max(whichSubject);
         pairedResult.sessionOne = [pairedResult.sessionOne, sessionOneResult(firstSessionIndex)];
         pairedResult.sessionTwo = [pairedResult.sessionTwo, sessionTwoResult(secondSessionIndex)];
-        pairedResult.subjectKey = [pairedResult.subjectKey, sessionTwoSubjectList.ID(ss)];
+        pairedResult.subjectKey = [pairedResult.subjectKey, sessionTwoSubjectList(ss)];
     end
     
 end
@@ -43,11 +43,11 @@ if isempty(p.Results.sessionOneErrorBar)
 else
     pairedResult.sessionOneErrorBar = [];
     pairedResult.sessionTwoErrorBar = [];
-    for ss = 1:length(sessionTwoSubjectList.ID) % loop over subjects that have completed both sessions
-        subject = sessionTwoSubjectList.ID(ss);
+    for ss = 1:length(sessionTwoSubjectList) % loop over subjects that have completed both sessions
+        subject = sessionTwoSubjectList(ss);
         
         secondSessionIndex = ss;
-        whichSubject = cellfun(@(x) strcmp(x, subject), sessionOneSubjectList.ID);
+        whichSubject = cellfun(@(x) strcmp(x, subject), sessionOneSubjectList);
         if sum(whichSubject) ~= 0
             [maxValue, firstSessionIndex] = max(whichSubject);
             pairedResult.sessionOneErrorBar = [pairedResult.sessionOneErrorBar, p.Results.sessionOneErrorBar(firstSessionIndex)];
