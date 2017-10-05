@@ -15,14 +15,14 @@ subAnalysisDirectory = 'pupilPIPRAnalysis';
 %% Set-up cache behavior
 % Define cache and analysis behavior.
 
-packetCacheBehavior='load';
+packetCacheBehavior='make';
 packetCacheTag='averageResponses';
 packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject format, 20 session 3 subjects
 %packetCacheHash='4b0b8c2b7796ea46066526628594be72';%  averageResponsePerSubject format, 16 session 3 subjects
 %packetCacheHash='bb16f8bf6378d5d9c4d17a974ce8b50a'; %  averageResponsePerSubject format
 %packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
-fitIAMPCacheBehavior='load';
+fitIAMPCacheBehavior='make';
 fitIAMPCacheTag='IAMPParameters';
 fitIAMPCacheHash='f1bb384d4ba55b3c397e4b45e7ebe440' % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
@@ -35,7 +35,7 @@ fitIAMPCacheHash='f1bb384d4ba55b3c397e4b45e7ebe440' % amplitudesPerSubject forma
 %fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3'; % with 1000 bootstrap iterations
 %fitIAMPCacheHash='2c0fb7a2620551afe8d3a0849b368685'; % with 100 bootstrap iterations
 
-fitTPUPCacheBehavior='load';
+fitTPUPCacheBehavior='make';
 fitTPUPCacheTag='TPUPParameters';
 fitTPUPCacheHash='9a509f623f277c16ac330a05c9499091'; % TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms; 20 session 3 subjects
 %fitTPUPCacheHash='71a1232f88f36a9d4fe50b27b2eeec82'; % TPUPParamter format, maxGamma 750
@@ -99,7 +99,10 @@ switch fitTPUPCacheBehavior
         error('Please define a legal packetCacheBehavior');
 end
 
-
+%% Test-Retest Analysis
+[pairedMeltoLMS_2x3] = pairResultAcrossSessions(goodSubjects{2}, goodSubjects{3}, amplitudesPerSubject{2}.MeltoLMS, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Session1xSession2', 'sessionOneErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{3}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session2xSession3');
+[pairedMeltoLMS_1x2] = pairResultAcrossSessions(goodSubjects{1}, goodSubjects{2}, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Session1xSession2', 'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session1xSession2');
+[pairedMeltoLMS_1x3] = pairResultAcrossSessions(goodSubjects{1}, goodSubjects{3}, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Session1xSession2', 'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{3}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session1xSession3');
 %% IAMP Analysis
 
 % Examine correlation of response amplitudes across different stimulus
