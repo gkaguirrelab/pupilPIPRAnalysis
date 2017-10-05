@@ -100,9 +100,13 @@ switch fitTPUPCacheBehavior
 end
 
 %% Test-Retest Analysis
-[pairedMeltoLMS_2x3] = pairResultAcrossSessions(goodSubjects{2}, goodSubjects{3}, amplitudesPerSubject{2}.MeltoLMS, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Session1xSession2', 'sessionOneErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{3}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session2xSession3');
-[pairedMeltoLMS_1x2] = pairResultAcrossSessions(goodSubjects{1}, goodSubjects{2}, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Session1xSession2', 'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session1xSession2');
-[pairedMeltoLMS_1x3] = pairResultAcrossSessions(goodSubjects{1}, goodSubjects{3}, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Session1xSession2', 'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{3}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session1xSession3');
+[pairedMeltoLMS_2x3] = pairResultAcrossSessions(goodSubjects{2}.ID, goodSubjects{3}.ID, amplitudesPerSubject{2}.MeltoLMS, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP',  'sessionOneErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{3}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session2xSession3');
+[pairedMeltoLMS_1x2] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP',  'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session1xSession2');
+[pairedMeltoLMS_1x3] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{3}.ID, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP',  'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{3}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8], 'saveName', 'MeltoLMS_Session1xSession3');
+
+% Now pooling session 1 and session 2 together
+[ OneTwoCombined] = combineResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS);
+[pairedMeltoLMS_12x3] = pairResultAcrossSessions(OneTwoCombined.subjectKey, goodSubjects{3}.ID, OneTwoCombined.result, amplitudesPerSubject{3}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'IAMP', 'saveName', 'MeltoLMS_Sessions12xSession3', 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8]);
 %% IAMP Analysis
 
 % Examine correlation of response amplitudes across different stimulus
