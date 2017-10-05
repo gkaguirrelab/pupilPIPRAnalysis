@@ -24,7 +24,8 @@ packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject 
 
 fitIAMPCacheBehavior='load';
 fitIAMPCacheTag='IAMPParameters';
-fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
+fitIAMPCacheHash='f1bb384d4ba55b3c397e4b45e7ebe440' % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
+%fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %itIAMPCacheHash='c7ef9027bab0d773ab5749be36a4c543'; % BAD -- amplitudesPerSubject format, with 1,000,000 bootstrap iterations, 16 session 3 subjects
 %fitIAMPCacheHash='35cddbf0e2e521c995e61a42f068a57b'; % BAD -- amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %fitIAMPCacheHash='6419bead30977ae08fac174c0add6050'; % BAD -- amplitudesPerSubject format, with 10,000 bootstrap iterations
