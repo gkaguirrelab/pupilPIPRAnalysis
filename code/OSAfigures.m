@@ -131,3 +131,28 @@ ylim([-40 10]);
 pbaspect([1 1 1])
 saveas(plotFig,fullfile(outDir, ['LMSGroup_repeatability.pdf']), 'pdf');
 close(plotFig)
+
+%% looking at two subjects with varying mel/lms ratios
+lowMeltoLMSSubject = 'MELA_0037';
+whichSubject = cellfun(@(x) strcmp(x, lowMeltoLMSSubject), goodSubjects{2}.ID);
+[maxValue, lowSubjectIndex] = max(whichSubject);
+
+
+highMeltoLMSSubject = 'MELA_0026';
+whichSubject = cellfun(@(x) strcmp(x, highMeltoLMSSubject), goodSubjects{2}.ID);
+[maxValue, highSubjectIndex] = max(whichSubject);
+
+plotFig = figure;
+hold on
+plot(timebase, averageResponsePerSubject{2}.Mel(lowSubjectIndex,:), 'Color', 'b', 'LineWidth', 3)
+plot(timebase, averageResponsePerSubject{2}.LMS(lowSubjectIndex,:), 'Color', [0.4 0.4 0.4], 'LineWidth', 3)
+saveas(plotFig,fullfile(outDir, ['lowMeltoLMSSubject.pdf']), 'pdf');
+close(plotFig)
+
+plotFig = figure;
+hold on
+plot(timebase, averageResponsePerSubject{2}.Mel(highSubjectIndex,:), 'Color', 'b', 'LineWidth', 3)
+plot(timebase, averageResponsePerSubject{2}.LMS(highSubjectIndex,:), 'Color', [0.4 0.4 0.4], 'LineWidth', 3)
+saveas(plotFig,fullfile(outDir, ['highMeltoLMSSubject.pdf']), 'pdf');
+close(plotFig)
+
