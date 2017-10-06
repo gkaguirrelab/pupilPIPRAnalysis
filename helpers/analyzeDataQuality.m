@@ -37,6 +37,7 @@ for bb = 1:length(blockTypes)
     % set up counters for each block
     blockFailedTrials = 0;
     blockTotalTrials = 0;
+    blockGoodTrials = 0;
     
     % load the dataQuality CSV file that tells about subject performance
     % and how many trials we had to discard within a block
@@ -51,12 +52,59 @@ for bb = 1:length(blockTypes)
         totalTrials = totalTrials + dataQualityCSV.data(tt,2);
         % keep track of total number of trials within a given block
         blockTotalTrials = blockTotalTrials + dataQualityCSV.data(tt,2);
+        
         % keep track of total number of failed trials
-        totalFailedTrials = totalFailedTrials + dataQualityCSV.data(tt,1);
+        %totalFailedTrials = totalFailedTrials + dataQualityCSV.data(tt,1);
         % keep track of total number of failed trials within a given
         % block
-        blockFailedTrials = blockFailedTrials + dataQualityCSV.data(tt,1);
+        %blockFailedTrials = blockFailedTrials + dataQualityCSV.data(tt,1);
+        
+        if strcmp(blockTypes{bb}, 'PIPR')
+            if tt == 1 % blue
+                csvFileName = dir(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse', blockTypes{bb}], subject, date, [subject, '*',  'Blue_TimeSeries.csv']));
+            end
+            if tt == 2 % red
+                csvFileName = dir(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse', blockTypes{bb}], subject, date, [subject, '*',  'Red_TimeSeries.csv']));
+                
+            end
+        else
+            csvFileName = dir(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse', blockTypes{bb}], subject, date, [subject, '*', blockTypes{bb}, '_TimeSeries.csv']));
+            
+        end
+        
+        
+        if length(csvFileName) == 0
+            blockGoodTrials = 0;
+        else
+            csvFileName = csvFileName.name;
+            % load the raw data
+            allTrials = importdata(fullfile(dropboxAnalysisDir, ['PIPRMaxPulse_Pulse', blockTypes{bb}], subject, date, csvFileName));
+            % determine number of trials
+            numberTrials = size(allTrials,2);
+            packetCellArray = [];
+            
+            %discard a trial if it is all NaNs, discard it
+            for trial = 1:numberTrials
+                packetCellArray{trial} = [];
+            end
+            for trial = 1:numberTrials
+                if sum(isnan(allTrials(:,trial))) ~= 700
+                    packetCellArray{trial}.response.values = allTrials(:,trial)';
+                else
+                    packetCellArray{trial} = [];
+                    
+                end
+            end
+            
+            packetCellArray = packetCellArray(~cellfun('isempty',packetCellArray));
+            
+            
+            
+            blockGoodTrials = blockGoodTrials + length(packetCellArray);
+        end
     end
+    
+    blockFailedTrials = blockTotalTrials - blockGoodTrials;
     
     if blockFailedTrials/blockTotalTrials > 0.75;
         failurePotential = failurePotential + 1;
