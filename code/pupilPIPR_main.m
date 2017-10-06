@@ -15,16 +15,18 @@ subAnalysisDirectory = 'pupilPIPRAnalysis';
 %% Set-up cache behavior
 % Define cache and analysis behavior.
 
-packetCacheBehavior='make';
+packetCacheBehavior='load';
 packetCacheTag='averageResponses';
-packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject format, 20 session 3 subjects
+packetCacheHash='c55f904c000bed99a96d823e4ecc0349'; % FINAL SAMPLE; averageResponsePerSubject format
+%packetCacheHash='1dba149dca5ca39db2642e937ca641a4'; % averageResponsePerSubject format, 20 session 3 subjects
 %packetCacheHash='4b0b8c2b7796ea46066526628594be72';%  averageResponsePerSubject format, 16 session 3 subjects
 %packetCacheHash='bb16f8bf6378d5d9c4d17a974ce8b50a'; %  averageResponsePerSubject format
 %packetCacheHash='33d1c25008a78f521ec22d5ac8b90c45';
 
-fitIAMPCacheBehavior='make';
+fitIAMPCacheBehavior='load';
 fitIAMPCacheTag='IAMPParameters';
-fitIAMPCacheHash='f1bb384d4ba55b3c397e4b45e7ebe440' % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
+fitIAMPCacheHash='d8a50c002b704f1b28a1343521334aac'; % FINAL SAMPLE; amplitudesPerSubject format, with 1,000,000 bootstrap iterations
+%fitIAMPCacheHash='f1bb384d4ba55b3c397e4b45e7ebe440'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %fitIAMPCacheHash='9ad20e4e5b8620e1320bccf30524950a'; % amplitudesPerSubject format, with 1,000,000 bootstrap iterations
 %itIAMPCacheHash='c7ef9027bab0d773ab5749be36a4c543'; % BAD -- amplitudesPerSubject format, with 1,000,000 bootstrap iterations, 16 session 3 subjects
 %fitIAMPCacheHash='35cddbf0e2e521c995e61a42f068a57b'; % BAD -- amplitudesPerSubject format, with 1,000,000 bootstrap iterations
@@ -35,9 +37,10 @@ fitIAMPCacheHash='f1bb384d4ba55b3c397e4b45e7ebe440' % amplitudesPerSubject forma
 %fitIAMPCacheHash='b895c664ae7fb3385f4be0ff75f99dd3'; % with 1000 bootstrap iterations
 %fitIAMPCacheHash='2c0fb7a2620551afe8d3a0849b368685'; % with 100 bootstrap iterations
 
-fitTPUPCacheBehavior='make';
+fitTPUPCacheBehavior='load';
 fitTPUPCacheTag='TPUPParameters';
-fitTPUPCacheHash='9a509f623f277c16ac330a05c9499091'; % TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms; 20 session 3 subjects
+fitTPUPCacheHash='e948f2bf632bf829ab23c9c472ab6806'; % FINAL SAMPLE; TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms
+%fitTPUPCacheHash='9a509f623f277c16ac330a05c9499091'; % TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms; 20 session 3 subjects
 %fitTPUPCacheHash='71a1232f88f36a9d4fe50b27b2eeec82'; % TPUPParamter format, maxGamma 750
 %fitTPUPCacheHash='3e8657fda425c1ff57c7eb9c939efef5'; % TPUPParameter format, maxGamma 400
 %fitTPUPCacheHash='328e576af3d9b937571b2166a7d44753'; % TPUPParameter format, maxGamma 600
