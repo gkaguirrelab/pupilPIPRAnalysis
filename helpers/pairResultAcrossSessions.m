@@ -9,7 +9,7 @@ p = inputParser; p.KeepUnmatched = true;
 p.addParameter('makePlot',true,@islogical);
 p.addParameter('significance','rho',@ischar);
 p.addParameter('subdir','',@ischar);
-p.addParameter('saveName','unnamed',@ischar);
+p.addParameter('saveName','',@ischar);
 p.addParameter('sessionOneErrorBar','',@isnumeric);
 p.addParameter('sessionTwoErrorBar','',@isnumeric);
 p.addParameter('xLims',[0 10],@isnumeric);
@@ -59,20 +59,21 @@ end
 
 %% do the plotting
 if p.Results.makePlot
-    plotFig = figure;
     hold on
     plot(-100:100, -100:100, '-.', 'Color', 'k')
     if isempty(p.Results.sessionOneErrorBar)
-       prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
-
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
+        
     else
-       prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
-
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
+        
     end
-    outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis', p.Results.subdir, 'testRetest');
-    if ~exist(outDir, 'dir')
-        mkdir(outDir);
+    if ~isempty(p.Results.saveName)
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis', p.Results.subdir, 'testRetest');
+        if ~exist(outDir, 'dir')
+            mkdir(outDir);
+        end
+        saveas(plotFig, fullfile(outDir, [p.Results.saveName, '.png']), 'png')
     end
-    saveas(plotFig, fullfile(outDir, [p.Results.saveName, '.png']), 'png')
 end
 end % end function
