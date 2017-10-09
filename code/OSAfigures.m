@@ -63,7 +63,10 @@ timebase = 0:0.02:13.98;
 plotFig = figure;
 hold on
 line([1 4], [5 5], 'LineWidth', 4, 'Color', 'k');
-plot(timebase, groupAverageResponse{1}.Mel*100, 'Color', 'b', 'LineWidth', 3)
+errBar(1,:) = groupAverageResponse{1}.Mel_SEM;
+errBar(2,:) = errBar(1,:);
+shadedErrorBar(timebase, groupAverageResponse{1}.Mel*100, errBar*100, 'lineProps', '-b')
+plot(timebase, groupAverageResponse{1}.Mel*100, 'Color', [0.5 0.5 1], 'LineWidth', 5)
 xlabel('Time (s)');
 ylabel('Pupil Diameter (% Change)')
 ylim([-40 10]);
@@ -76,7 +79,10 @@ close(plotFig)
 plotFig = figure;
 hold on
 line([1 4], [5 5], 'LineWidth', 4, 'Color', 'k');
-plot(timebase, groupAverageResponse{1}.LMS*100, 'Color', [0.4 0.4 0.4], 'LineWidth', 3)
+errBar(1,:) = groupAverageResponse{1}.LMS_SEM;
+errBar(2,:) = errBar(1,:);
+shadedErrorBar(timebase, groupAverageResponse{1}.LMS*100, errBar*100, 'lineProps', '-k')
+plot(timebase, groupAverageResponse{1}.LMS*100, 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
 xlabel('Time (s)');
 ylabel('Pupil Diameter (% Change)')
 ylim([-40 10]);
@@ -89,7 +95,7 @@ close(plotFig)
 plotFig = figure;
 hold on
 line([1 4], [5 5], 'LineWidth', 4, 'Color', 'k');
-plot(timebase, groupAverageResponse{1}.LMS*100, 'Color', [0.4 0.4 0.4], 'LineWidth', 3)
+plot(timebase, groupAverageResponse{1}.LMS*100, 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
 plot(timebase, groupAverageResponse{1}.Mel*100, 'Color', 'b', 'LineWidth', 3)
 xlabel('Time (s)');
 ylabel('Pupil Diameter (% Change)')
@@ -106,7 +112,9 @@ timebase = 0:0.02:13.98;
 plotFig = figure;
 hold on
 line([1 4], [5 5], 'LineWidth', 4, 'Color', 'k');
-plot(timebase, groupAverageResponse{1}.Mel*100, '-.', 'Color', [0.5 0.5 1], 'LineWidth', 5)
+%plot(timebase, groupAverageResponse{1}.Mel*100, '-.', 'Color', [0.5 0.5 1], 'LineWidth', 5)
+plot(timebase, groupAverageResponse{1}.Mel*100, 'Color', [0.5 0.5 1], 'LineWidth', 5)
+
 plot(timebase, groupAverageResponse{2}.Mel*100,  'Color', 'b', 'LineWidth', 1)
 
 xlabel('Time (s)');
@@ -121,7 +129,9 @@ close(plotFig)
 plotFig = figure;
 hold on
 line([1 4], [5 5], 'LineWidth', 4, 'Color', 'k');
-plot(timebase, groupAverageResponse{1}.LMS*100, '-.', 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+%plot(timebase, groupAverageResponse{1}.LMS*100, '-.', 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+plot(timebase, groupAverageResponse{1}.LMS*100, 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+
 plot(timebase, groupAverageResponse{2}.LMS*100,  'Color', [0.3 0.3 0.3], 'LineWidth', 1)
 
 xlabel('Time (s)');
@@ -135,24 +145,32 @@ close(plotFig)
 %% looking at two subjects with varying mel/lms ratios
 lowMeltoLMSSubject = 'MELA_0037';
 whichSubject = cellfun(@(x) strcmp(x, lowMeltoLMSSubject), goodSubjects{2}.ID);
-[maxValue, lowSubjectIndex] = max(whichSubject);
+[maxValue, lowSubjectIndex2] = max(whichSubject);
+whichSubject = cellfun(@(x) strcmp(x, lowMeltoLMSSubject), goodSubjects{1}.ID);
+[maxValue, lowSubjectIndex1] = max(whichSubject);
 
-
-highMeltoLMSSubject = 'MELA_0026';
+highMeltoLMSSubject = 'MELA_0082';
 whichSubject = cellfun(@(x) strcmp(x, highMeltoLMSSubject), goodSubjects{2}.ID);
-[maxValue, highSubjectIndex] = max(whichSubject);
+[maxValue, highSubjectIndex2] = max(whichSubject);
+whichSubject = cellfun(@(x) strcmp(x, highMeltoLMSSubject), goodSubjects{1}.ID);
+[maxValue, highSubjectIndex1] = max(whichSubject);
 
 plotFig = figure;
 hold on
-plot(timebase, averageResponsePerSubject{2}.Mel(lowSubjectIndex,:), 'Color', 'b', 'LineWidth', 3)
-plot(timebase, averageResponsePerSubject{2}.LMS(lowSubjectIndex,:), 'Color', [0.4 0.4 0.4], 'LineWidth', 3)
-saveas(plotFig,fullfile(outDir, ['lowMeltoLMSSubject.pdf']), 'pdf');
+plot(timebase, averageResponsePerSubject{1}.Mel(lowSubjectIndex1,:), 'Color', 'b', 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{1}.LMS(lowSubjectIndex1,:), 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{2}.LMS(lowSubjectIndex2,:), 'Color', [0.3 0.3 0.3], 'LineWidth', 1)
+plot(timebase, averageResponsePerSubject{2}.Mel(lowSubjectIndex2,:), 'Color', 'b', 'LineWidth', 1)
+
+saveas(plotFig,fullfile(outDir, ['lowMeltoLMSSubject_combined.pdf']), 'pdf');
 close(plotFig)
 
 plotFig = figure;
 hold on
-plot(timebase, averageResponsePerSubject{2}.Mel(highSubjectIndex,:), 'Color', 'b', 'LineWidth', 3)
-plot(timebase, averageResponsePerSubject{2}.LMS(highSubjectIndex,:), 'Color', [0.4 0.4 0.4], 'LineWidth', 3)
-saveas(plotFig,fullfile(outDir, ['highMeltoLMSSubject.pdf']), 'pdf');
+plot(timebase, averageResponsePerSubject{1}.Mel(highSubjectIndex1,:), 'Color', 'b', 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{1}.LMS(highSubjectIndex1,:), 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{2}.LMS(highSubjectIndex2,:), 'Color', [0.3 0.3 0.3], 'LineWidth', 1)
+plot(timebase, averageResponsePerSubject{2}.Mel(highSubjectIndex2,:), 'Color', 'b', 'LineWidth', 1)
+saveas(plotFig,fullfile(outDir, ['highMeltoLMSSubject_combined.pdf']), 'pdf');
 close(plotFig)
 
