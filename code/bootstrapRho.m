@@ -1,10 +1,10 @@
-function [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, firstSessionResult, secondSessionResult)
+function [ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, firstSessionResult, secondSessionResult, dropboxAnalysisDir)
 
 % if the firstSessionResult and the secondSessionResult are not of the same
 % length, then we assume they have to be paired using the function
 % pairResultAcrossSessions
 if length(firstSessionResult) ~= length(secondSessionResult)
-    [resultCombined] = pairResultAcrossSessions(goodSubjects, firstSessionResult, secondSessionResult);
+    [resultCombined] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, firstSessionResult, secondSessionResult, dropboxAnalysisDir, 'makePlot', false);
 else
     resultCombined.sessionOne = firstSessionResult;
     resultCombined.sessionTwo = secondSessionResult;
@@ -15,7 +15,7 @@ nBootstraps = 10000;
 
 for bb = 1:nBootstraps
     % grab a list of subjects, with replacement
-    nSubjects = 25;
+    nSubjects = 24;
     randomSubjects = randsample(1:nSubjects, nSubjects, true);
     
     rho = corr(resultCombined.sessionOne(randomSubjects)', resultCombined.sessionTwo(randomSubjects)', 'type', 'Spearman');
