@@ -1,8 +1,8 @@
 function plotSparkline_onlySS(subjects, averageResponsePerSubject, dropboxAnalysisDir)
 
 stimuli = {'LMS' 'Mel'};
-color = {[0.3 0.3 0.3], 'b'};
-colorDotted = {[0.7 0.7 0.7], [0.5 0.5 1]};
+color1 = {[0.7 0.7 0.7], [0.5 0.5 1]};
+color2 = {[0.3 0.3 0.3], 'b'};
 
 plotFig = figure;
 hold on
@@ -37,14 +37,14 @@ for ss = 1:length(subjects{2}.ID)
             x1 = 800;
             x = x1:x1+(xlength-1);
        elseif ss <= 12 && stimulus == 2
-            x1 = 1600;
+            x1 = 2000;
             x = x1:x1+(xlength-1);
         elseif ss > 12 && stimulus == 2
             if ss == 25
-                x1 = 1600;
+                x1 = 2000;
                 x = x1:x1+(xlength-1);
             else
-                x1 = 2400;
+                x1 = 2800;
                 x = x1:x1+(xlength-1);
             end
         end
@@ -60,7 +60,7 @@ for ss = 1:length(subjects{2}.ID)
             response2 = response2 - offset*(ss - 13);
         end
         
-        plot(x, response1, 'Color', color{stimulus})
+        plot(x, response1, 'Color', color1{stimulus}, 'LineWidth', 4)
         
         
         
@@ -108,14 +108,14 @@ for ss = 1:length(subjects{2}.ID)
             x1 = 800;
             x = x1:x1+(xlength-1);
        elseif ss <= 12 && stimulus == 2
-            x1 = 1600;
+            x1 = 2000;
             x = x1:x1+(xlength-1);
         elseif ss > 12 && stimulus == 2
             if ss == 25
-                x1 = 1600;
+                x1 = 2000;
                 x = x1:x1+(xlength-1);
             else
-                x1 = 2400;
+                x1 = 2800;
                 x = x1:x1+(xlength-1);
             end
         end
@@ -131,8 +131,8 @@ for ss = 1:length(subjects{2}.ID)
             response2 = response2 - offset*(ss - 13);
         end
         
-        plot(x, response1, '-.', 'Color', colorDotted{stimulus}, 'LineWidth', 3)
-        plot(x, response2, 'Color', color{stimulus})
+        plot(x, response1, 'Color', color1{stimulus}, 'LineWidth', 4)
+        plot(x, response2, 'Color', color2{stimulus})
         
         
         
