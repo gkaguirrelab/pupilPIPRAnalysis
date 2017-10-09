@@ -165,15 +165,17 @@ close(plotFig)
 
 % first maked paired results variable so we can compare the mel/lms ratio
 % from the first session with the second session
-[melNormedCombined] = pairResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS);
-[melNormedSEMCombined] = pairResultAcrossSessions(goodSubjects, amplitudesPerSubject{1}.MeltoLMS_SEM, amplitudesPerSubject{2}.MeltoLMS_SEM);
-
 plotFig = figure;
-prettyScatterplots(melNormedCombined.sessionOne, melNormedCombined.sessionTwo, melNormedSEMCombined.sessionOne, melNormedSEMCombined.sessionTwo, 'stimulation', 'gray', 'grid', 'on', 'axes', 'on', 'xLim', [ -0.2 1.8 ], 'yLim', [ -0.2 1.8 ], 'xLabel', 'Mel/LMS Session 1', 'yLabel', 'Mel/LMS Session 2', 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
+[pairedMeltoLMS_1x2] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS, dropboxAnalysisDir, 'subdir', 'figures',  'sessionOneErrorBar', amplitudesPerSubject{1}.MeltoLMS_SEM, 'sessionTwoErrorBar', amplitudesPerSubject{2}.MeltoLMS_SEM, 'xLims', [-0.2 1.8], 'yLims', [-0.2 1.8]);
+
+
 
 % now add confidence interval to plot
-[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS);
+[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, amplitudesPerSubject{1}.MeltoLMS, amplitudesPerSubject{2}.MeltoLMS, dropboxAnalysisDir);
 
+pbaspect([1 1 1])
+xlabel('Mel : Cone Session 1')
+ylabel('Mel : Cone Session 2')
 xlims=get(gca,'xlim');
 ylims=get(gca,'ylim');
 xrange = xlims(2)-xlims(1);
