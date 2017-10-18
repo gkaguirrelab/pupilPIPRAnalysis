@@ -149,7 +149,7 @@ whichSubject = cellfun(@(x) strcmp(x, lowMeltoLMSSubject), goodSubjects{2}.ID);
 whichSubject = cellfun(@(x) strcmp(x, lowMeltoLMSSubject), goodSubjects{1}.ID);
 [maxValue, lowSubjectIndex1] = max(whichSubject);
 
-highMeltoLMSSubject = 'MELA_0082';
+highMeltoLMSSubject = 'MELA_0089';
 whichSubject = cellfun(@(x) strcmp(x, highMeltoLMSSubject), goodSubjects{2}.ID);
 [maxValue, highSubjectIndex2] = max(whichSubject);
 whichSubject = cellfun(@(x) strcmp(x, highMeltoLMSSubject), goodSubjects{1}.ID);
@@ -157,7 +157,16 @@ whichSubject = cellfun(@(x) strcmp(x, highMeltoLMSSubject), goodSubjects{1}.ID);
 
 plotFig = figure;
 hold on
-plot(timebase, averageResponsePerSubject{1}.Mel(lowSubjectIndex1,:), 'Color', 'b', 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{1}.Mel(lowSubjectIndex1,:), 'Color', [0.5 0.5 1], 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{1}.LMS(lowSubjectIndex1,:), 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+
+
+saveas(plotFig,fullfile(outDir, ['lowMeltoLMSSubject_first.pdf']), 'pdf');
+close(plotFig)
+
+plotFig = figure;
+hold on
+plot(timebase, averageResponsePerSubject{1}.Mel(lowSubjectIndex1,:), 'Color', [0.5 0.5 1], 'LineWidth', 5)
 plot(timebase, averageResponsePerSubject{1}.LMS(lowSubjectIndex1,:), 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
 plot(timebase, averageResponsePerSubject{2}.LMS(lowSubjectIndex2,:), 'Color', [0.3 0.3 0.3], 'LineWidth', 1)
 plot(timebase, averageResponsePerSubject{2}.Mel(lowSubjectIndex2,:), 'Color', 'b', 'LineWidth', 1)
@@ -167,10 +176,68 @@ close(plotFig)
 
 plotFig = figure;
 hold on
-plot(timebase, averageResponsePerSubject{1}.Mel(highSubjectIndex1,:), 'Color', 'b', 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{1}.Mel(highSubjectIndex1,:), 'Color', [0.5 0.5 1], 'LineWidth', 5)
+plot(timebase, averageResponsePerSubject{1}.LMS(highSubjectIndex1,:), 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+ylim([-0.5 0.1])
+
+saveas(plotFig,fullfile(outDir, ['highMeltoLMSSubject_first.pdf']), 'pdf');
+close(plotFig)
+
+plotFig = figure;
+hold on
+plot(timebase, averageResponsePerSubject{1}.Mel(highSubjectIndex1,:), 'Color', [0.5 0.5 1], 'LineWidth', 5)
 plot(timebase, averageResponsePerSubject{1}.LMS(highSubjectIndex1,:), 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
 plot(timebase, averageResponsePerSubject{2}.LMS(highSubjectIndex2,:), 'Color', [0.3 0.3 0.3], 'LineWidth', 1)
 plot(timebase, averageResponsePerSubject{2}.Mel(highSubjectIndex2,:), 'Color', 'b', 'LineWidth', 1)
+ylim([-0.5 0.1])
 saveas(plotFig,fullfile(outDir, ['highMeltoLMSSubject_combined.pdf']), 'pdf');
 close(plotFig)
+
+
+%% amplitude figure
+subjectID = 'MELA_0003';
+session = 1;
+for session = 1:2
+whichSubject = cellfun(@(x) strcmp(x, subjectID), goodSubjects{session}.ID);
+[maxValue, subjectIndex] = max(whichSubject);
+
+plotFig = figure;
+plot(timebase, averageResponsePerSubject{session}.Mel(subjectIndex,:).*100, 'Color', [0.5 0.5 1], 'LineWidth', 5)
+xlabel('Time (s)')
+ylabel('Pupil Diameter (% Change)')
+
+saveas(plotFig,fullfile(outDir, [session, '_amplitudeDemoSubject.pdf']), 'pdf');
+close(plotFig)
+
+plotFig = figure;
+plot(timebase, groupAverageResponse{1}.Mel.*100, 'Color', 'r', 'LineWidth', 5)
+xlabel('Time (s)')
+ylabel('Pupil Diameter (% Change)')
+
+saveas(plotFig,fullfile(outDir, [session, '_amplitudeDemoModel.pdf']), 'pdf');
+close(plotFig)
+
+plotFig = figure;
+hold on
+plot(timebase, averageResponsePerSubject{session}.Mel(subjectIndex,:).*100, 'Color', [0.5 0.5 1], 'LineWidth', 5)
+plot(timebase, groupAverageResponse{session}.Mel./abs(min(groupAverageResponse{session}.Mel))*amplitudesPerSubject{session}.Mel(subjectIndex)*100, 'Color', 'r', 'LineWidth', 5)
+
+xlabel('Time (s)')
+ylabel('Pupil Diameter (% Change)')
+ylim([-45 5])
+
+saveas(plotFig,fullfile(outDir, [num2str(session), '_amplitudeDemoModel_fitted_mel.pdf']), 'pdf');
+close(plotFig)
+plotFig = figure;
+hold on
+plot(timebase, averageResponsePerSubject{session}.LMS(subjectIndex,:).*100, 'Color', [0.7 0.7 0.7], 'LineWidth', 5)
+plot(timebase, groupAverageResponse{session}.LMS./abs(min(groupAverageResponse{1}.LMS))*amplitudesPerSubject{session}.LMS(subjectIndex)*100, 'Color', 'r', 'LineWidth', 5)
+
+xlabel('Time (s)')
+ylabel('Pupil Diameter (% Change)')
+ylim([-45 5])
+
+saveas(plotFig,fullfile(outDir, [num2str(session), '_amplitudeDemoModel_fitted_lms.pdf']), 'pdf');
+close(plotFig)
+end
 
