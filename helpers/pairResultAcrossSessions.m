@@ -59,8 +59,9 @@ end
 
 %% do the plotting
 if p.Results.makePlot
+    plotFig = figure;
     hold on
-    plot(-100:100, -100:100, '-.', 'Color', 'k')
+    plot(-1000:1000, -1000:1000, '-.', 'Color', 'k')
     if isempty(p.Results.sessionOneErrorBar)
         prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
         
