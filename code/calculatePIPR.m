@@ -1,4 +1,4 @@
-function [ pipr, netPipr ] = calculatePIPR(subjects, amplitudes, dropboxAnalysisDir, varargin)
+function [ pipr, netPipr ] = calculatePIPR(subjects, amplitudesPerSubject, dropboxAnalysisDir, varargin)
 
 % the purpose of this function is to calculate the PIPR according to a
 % couple of different possible methods.
@@ -76,30 +76,37 @@ if strcmp(p.Results.computeMethod, 'window')
     % For each subject for each trial of red and blue light, determine the
     % average sustained amplitude. Then determine the average sustained
     % amplitude for each subject across all red or all blue trials
-    for session = 1:2;
+    for session = 1:3
         sustainedAmplitudes{session} = [];
         pipr{session} = [];
         netPipr{session} = [];
     end
     
-    for session = 1:2;
-        for ss = 1:size(subjects{session}{1},1);
-            subject = subjects{session}{1}(ss,:);
-            numberSessions = dir(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject));
+    for session = 1:3
+        % where the data lives is different for sessions 1 and 2 compared
+        % with session 3
+        if session == 1 || session == 2
+            subdir = '';
+        elseif session == 3
+            subdir = 'Legacy';
+        end
+        for ss = 1:length(subjects{session}.ID)
+            subject = subjects{session}.ID{ss};
+            numberSessions = dir(fullfile(dropboxAnalysisDir, subdir, 'PIPRMaxPulse_PulsePIPR', subject));
             numberSessions =length(numberSessions(~ismember({numberSessions.name},{'.','..', '.DS_Store'})));
             
-            date = subjects{session}{2}(ss,:);
+            date = subjects{session}.date{ss};
             
-            blue = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRBlue_TimeSeries.csv']));
-            red = importdata(fullfile(dropboxAnalysisDir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRRed_TimeSeries.csv']));
-            for stimuli = 1:2;
-                if stimuli == 1;
+            blue = importdata(fullfile(dropboxAnalysisDir, subdir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRBlue_TimeSeries.csv']));
+            red = importdata(fullfile(dropboxAnalysisDir, subdir, 'PIPRMaxPulse_PulsePIPR', subject, date, [subject, '_PupilPulseData_PIPRRed_TimeSeries.csv']));
+            for stimuli = 1:2
+                if stimuli == 1
                     color = blue;
-                elseif stimuli == 2;
+                elseif stimuli == 2
                     color = red;
                 end
                 sustainedStimulusCombined = [];
-                for trial = 1:size(color,2);
+                for trial = 1:size(color,2)
                     sustainedStimulusCombined(trial) = nanmean(color(round(sustainedWindow),trial));
                 end
                 sustainedAmplitudes{session}(ss,stimuli) = nanmean(sustainedStimulusCombined);
@@ -108,8 +115,8 @@ if strcmp(p.Results.computeMethod, 'window')
     end
     
     % Now to calculate the actual PIPR values
-    for session = 1:2;
-        for ss = 1:size(subjects{session}{1},1);
+    for session = 1:3
+        for ss = 1:length(subjects{session}.ID)
             pipr{session}(ss) = 0 - sustainedAmplitudes{session}(ss,1)*100;
             netPipr{session}(ss) = ((0 - sustainedAmplitudes{session}(ss,1)) - (0 - sustainedAmplitudes{session}(ss,2)))*100;
         end
@@ -125,9 +132,9 @@ end
 % amplitude
 
 if strcmp(p.Results.computeMethod, 'totalAmplitude')
-    for session = 1:2 % loop over session
-        for ss = 1:size(subjects{session}{1},1);
-            netPipr{session}(ss) = amplitudes{session}(ss, 3) - amplitudes{session}(ss, 4);
+    for session = 1:3 % loop over session
+        for ss = 1:length(subjects{session}.ID)
+            netPipr{session}(ss) = amplitudesPerSubject{session}.PIPR(ss);
         end
     end
 end
@@ -136,9 +143,37 @@ end
 % just the red and blue amplitude results already found in the amplitude
 % variable
 if strcmp(p.Results.computeMethod, 'totalAmplitude')
-    for session = 1:2 % loop over session
-        for ss = 1:size(subjects{session}{1},1);
-            pipr{session}(ss) = amplitudes{session}(ss, 3);
+    for session = 1:3 % loop over session
+        for ss = 1:length(subjects{session}.ID)
+            pipr{session}(ss) = amplitudesPerSubject{session}.Blue(ss);
+        end
+    end
+end
+
+%% Second compute method: total amplitude normed
+% compute PIPR by determining amplitude based on the total time series. we
+% get a group average fit to both blue and red stimulus. for each subject,
+% determine the beta coefficient for the linear regression of this group
+% average to each individual subject; this will be our amplitude component.
+% determine the PIPR then by subtracting the blue amplitude from the red
+% amplitude. The PIPR will then be normalized for variation in overall
+% response amplitude by dividing this PIPR by the sum of amplitude of
+% repsonses to blue and red stimulation.
+
+if strcmp(p.Results.computeMethod, 'totalAmplitudeNormed')
+    for session = 1:3 % loop over session
+        for ss = 1:length(subjects{session}.ID)
+            netPipr{session}(ss) = amplitudesPerSubject{session}.PIPR(ss) / (2*amplitudesPerSubject{session}.PIPRAverage(ss));
+            
+        end
+    end
+end
+
+if strcmp(p.Results.computeMethod, 'totalAmplitudeNormed')
+    for session = 1:3 % loop over session
+        for ss = 1:length(subjects{session}.ID)
+            pipr{session}(ss) = amplitudesPerSubject{session}.Blue(ss) /(2*amplitudesPerSubject{session}.PIPRAverage(ss));
+            
         end
     end
 end
@@ -148,7 +183,7 @@ if strcmp(p.Results.plot, 'yes')
     subDir = 'pupilPIPRAnalysis/IAMP/calculatePIPR'
     
     % Plot correlation of this PIPR with IAMP PIPR
-    for session = 1:2;
+    for session = 1:3
         outDir = fullfile(dropboxAnalysisDir,subDir, num2str(session));
         if ~exist(outDir, 'dir')
             mkdir(outDir);
