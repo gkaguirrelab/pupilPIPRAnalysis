@@ -105,7 +105,7 @@ set(scatterPlot                            , ...
 
 
 if strcmp(p.Results.unity, 'on')
-    plot(-100:100, -100:100, '-.', 'Color', errorBarColor)
+    plot(-1000:1000, -1000:1000, '-.', 'Color', errorBarColor)
 end
 
 if strcmp(p.Results.xLim, 'none')
