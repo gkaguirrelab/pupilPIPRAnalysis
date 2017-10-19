@@ -14,6 +14,8 @@ p.addParameter('sessionOneErrorBar','',@isnumeric);
 p.addParameter('sessionTwoErrorBar','',@isnumeric);
 p.addParameter('xLims',[0 10],@isnumeric);
 p.addParameter('yLims',[0 10],@isnumeric);
+p.addParameter('xLabel','',@ischar);
+p.addParameter('yLabel','',@ischar);
 
 p.parse(varargin{:});
 
@@ -63,10 +65,10 @@ if p.Results.makePlot
     hold on
     plot(-1000:1000, -1000:1000, '-.', 'Color', 'k')
     if isempty(p.Results.sessionOneErrorBar)
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel)
         
     else
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance)
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel)
         
     end
     if ~isempty(p.Results.saveName)
