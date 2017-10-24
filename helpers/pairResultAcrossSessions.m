@@ -61,18 +61,19 @@ end
 
 %% do the plotting
 if p.Results.makePlot
-    plotFig = figure;
-    hold on
-    plot(-1000:1000, -1000:1000, '-.', 'Color', 'k')
+    if ~isempty(p.Results.saveName)
+        plotFig = figure;
+    end
+
     if isempty(p.Results.sessionOneErrorBar)
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square')
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square')
         
     else
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square')
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square')
         
     end
     if ~isempty(p.Results.saveName)
-        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis', p.Results.subdir, 'testRetest');
+        outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis', p.Results.subdir);
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
