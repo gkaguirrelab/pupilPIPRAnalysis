@@ -1,4 +1,4 @@
-function [ pipr, netPipr ] = calculatePIPR(subjects, amplitudesPerSubject, dropboxAnalysisDir, varargin)
+function [ pipr, netPipr ] = calculatePIPR(subjects, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir, varargin)
 
 % the purpose of this function is to calculate the PIPR according to a
 % couple of different possible methods.
@@ -173,6 +173,27 @@ if strcmp(p.Results.computeMethod, 'totalAmplitudeNormed')
     for session = 1:3 % loop over session
         for ss = 1:length(subjects{session}.ID)
             pipr{session}(ss) = amplitudesPerSubject{session}.Blue(ss) /(2*amplitudesPerSubject{session}.PIPRAverage(ss));
+            
+        end
+    end
+end
+
+%% Method 3: using total response area via TPUP, rather than amplitude via IAMP
+[ totalResponseArea ] = calculateTotalResponseArea(TPUPParameters, dropboxAnalysisDir)
+
+if strcmp(p.Results.computeMethod, 'totalAreaNormed')
+    for session = 1:3 % loop over session
+        for ss = 1:length(subjects{session}.ID)
+            netPipr{session}(ss) = (totalResponseArea{session}.Blue(ss)-totalResponseArea{session}.Red(ss)) / (totalResponseArea{session}.Blue(ss)+totalResponseArea{session}.Red(ss));
+            
+        end
+    end
+end
+
+if strcmp(p.Results.computeMethod, 'totalAreaNormed')
+    for session = 1:3 % loop over session
+        for ss = 1:length(subjects{session}.ID)
+            pipr{session}(ss) = (totalResponseArea{session}.Blue(ss)) / (totalResponseArea{session}.Blue(ss)+totalResponseArea{session}.Red(ss));
             
         end
     end
