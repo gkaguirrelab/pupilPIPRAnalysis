@@ -152,17 +152,20 @@ end
 
 % by session
 [ totalResponseArea ] = calculateTotalResponseArea(TPUPParameters, dropboxAnalysisDir);
+[responseIntegrationTime] = calculateModeledResponseIntegrationTime(goodSubjects, totalResponseArea, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir);
+
+
 for session = 1:3
     plotFig = figure;
     hold on
-    bplot(totalResponseArea{session}.LMS./amplitudesPerSubject{session}.LMS, 1, 'color', 'k')
-    bplot(totalResponseArea{session}.Mel./amplitudesPerSubject{session}.Mel, 2, 'color', 'c')
-    bplot(totalResponseArea{session}.Blue./amplitudesPerSubject{session}.Blue, 3, 'color', 'b')
-    bplot(totalResponseArea{session}.Red./amplitudesPerSubject{session}.Red, 4, 'color', 'r')
+    bplot(responseIntegrationTime{session}.LMS, 1, 'color', 'k')
+    bplot(responseIntegrationTime{session}.Mel, 2, 'color', 'c')
+    bplot(responseIntegrationTime{session}.Blue, 3, 'color', 'b')
+    bplot(responseIntegrationTime{session}.Red, 4, 'color', 'r')
     xticks([1, 2, 3, 4])
     xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
     ylabel('Response Integration Time')
-    ylim([-650 -250])
+    ylim([0 8])
     title(['Session ' num2str(session)])
     saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session', num2str(session), '.pdf']), 'pdf')
     close(plotFig)
@@ -171,7 +174,7 @@ end
 % session 1 and 2 combined
 stimuli = {'LMS', 'Mel', 'Blue', 'Red'};
 for stimulus = 1:length(stimuli)
-    [ combinedResponseIntegrationTime.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.(stimuli{stimulus})./amplitudesPerSubject{1}.(stimuli{stimulus}), totalResponseArea{2}.(stimuli{stimulus})./amplitudesPerSubject{2}.(stimuli{stimulus}));
+    [ combinedResponseIntegrationTime.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, responseIntegrationTime{1}.(stimuli{stimulus}), responseIntegrationTime{2}.(stimuli{stimulus}));
 end
 plotFig = figure;
 hold on
@@ -181,8 +184,8 @@ bplot(combinedResponseIntegrationTime.Blue.result, 3, 'color', 'b')
 bplot(combinedResponseIntegrationTime.Red.result, 4, 'color', 'r')
 xticks([1, 2, 3, 4])
 xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
-ylim([-650 -250])
 xlabel('Stimulus')
+ylim([0 8])
 ylabel('Response Integration Time')
 title('Session 1/2 Combined')
 saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session1-2Combined.pdf']), 'pdf')
