@@ -40,58 +40,61 @@ close(plotFig)
 % 1 b.: we can use our three component model to fit the shapes of these
 % responses
 colors = {'k', 'c', 'b', 'r'};
-plotFig = figure;
-for stimulus = 1:length(stimuli)
-    
-    subplot(2,2,stimulus)
-    hold on
-    timebase = 0:20:13980; % in msec
-    plot(timebase, groupAverageResponse{1}.(stimuli{stimulus})*100, 'Color', colors{stimulus})
-    
-    % make the TPUP fit from the median parameters
-    temporalFit = tfeTPUP('verbosity','none');
-    params0 = temporalFit.defaultParams;
-    params0.paramMainMatrix(1) = median(TPUPParameters{1}.(stimuli{stimulus}).delay);
-    params0.paramMainMatrix(2) = median(TPUPParameters{1}.(stimuli{stimulus}).gammaTau);
-    params0.paramMainMatrix(3) = median(TPUPParameters{1}.(stimuli{stimulus}).exponentialTau);
-    params0.paramMainMatrix(4) = median(TPUPParameters{1}.(stimuli{stimulus}).transientAmplitude);
-    params0.paramMainMatrix(5) = median(TPUPParameters{1}.(stimuli{stimulus}).sustainedAmplitude);
-    params0.paramMainMatrix(6) = median(TPUPParameters{1}.(stimuli{stimulus}).persistentAmplitude);
-    
-    
-    stepOnset = 1000; % in msec
-    stepOffset = 4000; % in msec
-    [stimulusStruct] = makeStepPulseStimulusStruct(timebase, stepOnset, stepOffset, 'rampDuration', 500);
-    
-    
-    tmpParams=params0;
-    tmpParams.paramMainMatrix([5,6])=0;
-    modelResponseStruct=temporalFit.computeResponse(tmpParams,stimulusStruct,[]);
-    plot(timebase, modelResponseStruct.values,'Color',[1 .25 .25])
-    tmpParams=params0;
-    tmpParams.paramMainMatrix([4,6])=0;
-    modelResponseStruct=temporalFit.computeResponse(tmpParams,stimulusStruct,[]);
-    plot(timebase, modelResponseStruct.values,'Color',[1 .5 .5])
-    tmpParams=params0;
-    tmpParams.paramMainMatrix([4,5])=0;
-    modelResponseStruct=temporalFit.computeResponse(tmpParams,stimulusStruct,[]);
-    plot(timebase, modelResponseStruct.values,'Color',[1 .75 .75]);
-    
-    modelResponseStruct=temporalFit.computeResponse(params0,stimulusStruct,[]);
-    plot(timebase, modelResponseStruct.values, 'Color', 'g')
-    if stimulus == 1
-        legend('Session 1 Group Average', 'Median Model Fit', 'Location', 'SouthEast')
+for session = 1:3
+    plotFig = figure;
+    for stimulus = 1:length(stimuli)
+        
+        subplot(2,2,stimulus)
+        hold on
+        timebase = 0:20:13980; % in msec
+        plot(timebase, groupAverageResponse{session}.(stimuli{stimulus})*100, 'Color', colors{stimulus})
+        
+        % make the TPUP fit from the median parameters
+        temporalFit = tfeTPUP('verbosity','none');
+        params0 = temporalFit.defaultParams;
+        params0.paramMainMatrix(1) = median(TPUPParameters{session}.(stimuli{stimulus}).delay);
+        params0.paramMainMatrix(2) = median(TPUPParameters{session}.(stimuli{stimulus}).gammaTau);
+        params0.paramMainMatrix(3) = median(TPUPParameters{session}.(stimuli{stimulus}).exponentialTau);
+        params0.paramMainMatrix(4) = median(TPUPParameters{session}.(stimuli{stimulus}).transientAmplitude);
+        params0.paramMainMatrix(5) = median(TPUPParameters{session}.(stimuli{stimulus}).sustainedAmplitude);
+        params0.paramMainMatrix(6) = median(TPUPParameters{session}.(stimuli{stimulus}).persistentAmplitude);
+        
+        
+        stepOnset = 1000; % in msec
+        stepOffset = 4000; % in msec
+        [stimulusStruct] = makeStepPulseStimulusStruct(timebase, stepOnset, stepOffset, 'rampDuration', 500);
+        
+        
+        tmpParams=params0;
+        tmpParams.paramMainMatrix([5,6])=0;
+        modelResponseStruct=temporalFit.computeResponse(tmpParams,stimulusStruct,[]);
+        plot(timebase, modelResponseStruct.values,'Color',[1 .25 .25])
+        tmpParams=params0;
+        tmpParams.paramMainMatrix([4,6])=0;
+        modelResponseStruct=temporalFit.computeResponse(tmpParams,stimulusStruct,[]);
+        plot(timebase, modelResponseStruct.values,'Color',[1 .5 .5])
+        tmpParams=params0;
+        tmpParams.paramMainMatrix([4,5])=0;
+        modelResponseStruct=temporalFit.computeResponse(tmpParams,stimulusStruct,[]);
+        plot(timebase, modelResponseStruct.values,'Color',[1 .75 .75]);
+        
+        modelResponseStruct=temporalFit.computeResponse(params0,stimulusStruct,[]);
+        plot(timebase, modelResponseStruct.values, 'Color', 'g')
+        if stimulus == 1
+            legend('Session 1 Group Average', 'Median Model Fit', 'Location', 'SouthEast')
+        end
+        xlabel('Time (ms)')
+        ylabel('Pupil Diameter (% Change)')
+        ylim([-50 10])
+        xlim([0 14000])
+        title([stimuli{stimulus}])
     end
-    xlabel('Time (ms)')
-    ylabel('Pupil Diameter (% Change)')
-    ylim([-50 10])
-    xlim([0 14000])
-    title([stimuli{stimulus}])
+    set(gcf,'Renderer','painters')
+    saveas(plotFig, fullfile(outDir, ['1b_groupAverageTPUPFits_session', num2str(session), '.pdf']), 'pdf');
+    close(plotFig)
 end
 
-set(gcf,'Renderer','painters')
-saveas(plotFig, fullfile(outDir, ['1b_groupAverageTPUPFits.pdf']), 'pdf');
-close(plotFig)
+
 
 %% Figure 2: stimuli that produces a relatively larger melanopsin response are different in this quantitative way
 % The general idea is that consistent with electrophysiologic properties
@@ -191,6 +194,44 @@ title('Session 1/2 Combined')
 saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session1-2Combined.pdf']), 'pdf')
 close(plotFig)
 
+
+for session = 1:3
+    plotFig = figure;
+    hold on
+    bplot(TPUPParameters{session}.LMS.exponentialTau, 1, 'color', 'k')
+    bplot(TPUPParameters{session}.Mel.exponentialTau, 2, 'color', 'c')
+    bplot(TPUPParameters{session}.Blue.exponentialTau, 3, 'color', 'b')
+    bplot(TPUPParameters{session}.Red.exponentialTau, 4, 'color', 'r')
+    xticks([1, 2, 3, 4])
+    xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
+    ylabel('Response Integration Time')
+    ylim([0 8])
+    title(['Session ' num2str(session)])
+    saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session', num2str(session), '.pdf']), 'pdf')
+    close(plotFig)
+end
+
+% session 1 and 2 combined
+stimuli = {'LMS', 'Mel', 'Blue', 'Red'};
+for stimulus = 1:length(stimuli)
+    [ combinedResponseIntegrationTime.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, responseIntegrationTime{1}.(stimuli{stimulus}), responseIntegrationTime{2}.(stimuli{stimulus}));
+end
+plotFig = figure;
+hold on
+bplot(combinedResponseIntegrationTime.LMS.result, 1, 'color', 'k')
+bplot(combinedResponseIntegrationTime.Mel.result, 2, 'color', 'c')
+bplot(combinedResponseIntegrationTime.Blue.result, 3, 'color', 'b')
+bplot(combinedResponseIntegrationTime.Red.result, 4, 'color', 'r')
+xticks([1, 2, 3, 4])
+xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
+xlabel('Stimulus')
+ylim([0 8])
+ylabel('Response Integration Time')
+title('Session 1/2 Combined')
+saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session1-2Combined.pdf']), 'pdf')
+close(plotFig)
+
+
 %% Figure 3: Subjects varuy in overall pupil responsiveness
 
 [ totalResponseArea ] = calculateTotalResponseArea(TPUPParameters, dropboxAnalysisDir);
@@ -220,6 +261,17 @@ title('Session 1/2 Combined')
 saveas(plotFig, fullfile(outDir, ['4b_meltoLMSxBluetoRed_session1-2Combined.pdf']), 'pdf')
 close all
 
+% 4 c.: Examining the reproducibility of the percent persistent, averaged
+% across all responses for session 1 to session 2
+[ percentPersistentPerSubject ] = calculatePercentPersistent(goodSubjects, TPUPParameters, dropboxAnalysisDir);
+for session = 1:2
+    for ss = 1:length(percentPersistentPerSubject{session}.LMS)
+        averagePercentPersistentAcrossStimuli{session}(ss) = (percentPersistentPerSubject{session}.LMS(ss) + percentPersistentPerSubject{session}.Mel(ss) + percentPersistentPerSubject{session}.Blue(ss) + percentPersistentPerSubject{session}.Red(ss))/4;
+    end
+end
+[ pairedAveragePercentPersistentAcrossStimuli ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, averagePercentPersistentAcrossStimuli{1}*100, averagePercentPersistentAcrossStimuli{2}*100, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4c_averagePercentPersistent_1x2'], 'xLim', [0 100], 'yLim', [0 100], 'plotOption', 'square', 'xLabel', ['Session 1 Average Percent Persistent'], 'yLabel', ['Session 2 Average Percent Persistent']);
+    
+
 %% Additional Figures to highlight session 3 differences
 % Figure 5: is the mel/lms response area ratio reproducible at a higher
 % light level?
@@ -248,7 +300,46 @@ xticklabels({'Session 1/2 Combined', 'Session 3'})
 saveas(plotFig, fullfile(outDir, '6_PIPRbySession_window.pdf'), 'pdf')
 
 % Figure 7: how PIPR relates to mel via SS
+for session = 1:3
+    plotFig = figure;
+    prettyScatterplots(netPIPRTotalAreaNormed{session}, totalResponseArea{session}.Mel./totalResponseArea{session}.LMS, 0*netPIPRTotalAreaNormed{session}, 0*netPIPRTotalAreaNormed{session}, 'xLabel', 'Net PIPR (Blue-Red)/(Blue+Red)', 'yLabel', 'Mel/LMS Total Response Area', 'significance', 'rho')
+    saveas(plotFig, fullfile(outDir, ['7_PIPRxSS_session', num2str(session), '.pdf']), 'pdf')
+end
+
+% Figure 8: Reproducibility of average responses from session 1/2 combined
+% at the group level compared with session 3
+% first make the session 1/2 group average response
+for stimulus = 1:length(stimuli)
+    for tt = 1:length(timebase)
+        [combinedResultAtTimepoint] = combineResultAcrossSessions(goodSubjects, averageResponsePerSubject{1}.(stimuli{stimulus})(:, tt), averageResponsePerSubject{2}.(stimuli{stimulus})(:, tt));
+        combinedGroupAverageResponse.(stimuli{stimulus})(tt) = nanmean(combinedResultAtTimepoint.result);
+    end
+end
+
 plotFig = figure;
-prettyScatterplots(netPIPRTotalAreaNormed{3}, totalResponseArea{3}.Mel./totalResponseArea{3}.LMS, 0*netPIPRTotalAreaNormed{3}, 0*netPIPRTotalAreaNormed{3}, 'xLabel', 'Net PIPR (Blue-Red)/(Blue+Red)', 'yLabel', 'Mel/LMS Total Response Area', 'significance', 'rho')
-saveas(plotFig, fullfile(outDir, ['7_PIPRxSS.pdf']), 'pdf')
+for stimulus = 1:length(stimuli)
+    subplot(2,2,stimulus)
+    
+    timebase = 0:20:13980;
+    
+    plot(timebase, combinedGroupAverageResponse.(stimuli{stimulus})*100, '-.', 'Color', [0.5, 0.5, 0.5], 'LineWidth', 3)
+    hold on
+    plot(timebase, groupAverageResponse{3}.(stimuli{stimulus})*100, 'Color', 'b')
+    
+    % now adjust the plot a bit
+    if stimulus == 1
+        legend('Session 1/2 Combined', 'Session 3', 'Location', 'SouthEast')
+    end
+    xlabel('Time (ms)')
+    ylabel('Pupil Diameter (% Change)')
+    ylim([-50 10])
+    xlim([0 14000])
+    title([stimuli{stimulus}])
+    
+end
+
+set(gcf,'Renderer','painters')
+saveas(plotFig, fullfile(outDir, ['8_groupAverageResponseReproducibility_12x3.pdf']), 'pdf');
+close(plotFig)
+        
 end % end function
