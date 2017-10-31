@@ -74,7 +74,17 @@ if p.Results.makePlot
         xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
         saveas(plotFig, fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/responseIntegrationTime/modeled', ['compareStimuli_responseIntegrationTime_', num2str(session), '.png']), 'png');
         close(plotFig)
+        
+        plotFig = figure;
+        prettyScatterplots(responseIntegrationTime{session}.LMS, responseIntegrationTime{session}.Mel, 0*responseIntegrationTime{session}.LMS, 0*responseIntegrationTime{session}.LMS, 'plotOption', 'square', 'unity', 'on', 'significance', 'rho', 'xLim', [0 8], 'yLim', [0 8], 'xLabel', 'LMS Response Integration Time', 'yLabel', 'Mel Response Integration Time')
+        saveas(plotFig, fullfile(dropboxAnalysisDir, ['pupilPIPRAnalysis/responseIntegrationTime/modeled/LMSxMel_session' num2str(session), '.png']), 'png') 
+        
+        plotFig = figure;
+        prettyScatterplots(responseIntegrationTime{session}.Blue, responseIntegrationTime{session}.Red, 0*responseIntegrationTime{session}.LMS, 0*responseIntegrationTime{session}.LMS, 'plotOption', 'square', 'unity', 'on', 'significance', 'rho', 'xLim', [0 8], 'yLim', [0 8], 'xLabel', 'Blue Response Integration Time', 'yLabel', 'Red Response Integration Time')
+        saveas(plotFig, fullfile(dropboxAnalysisDir, ['pupilPIPRAnalysis/responseIntegrationTime/modeled/BluexRed_session' num2str(session), '.png']), 'png') 
+
     end
 end
 
+close all
 end % end function
