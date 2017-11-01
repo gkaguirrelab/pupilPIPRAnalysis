@@ -1,4 +1,4 @@
-function makeFigures(goodSubjects, groupAverageResponse, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir)
+function makeFigures(goodSubjects, averageResponsePerSubject, groupAverageResponse, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir)
 
 %% Set up some basic variables
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
@@ -89,6 +89,7 @@ for session = 1:3
         xlim([0 14000])
         title([stimuli{stimulus}])
     end
+    suptitle(['Session ' num2str(session)])
     set(gcf,'Renderer','painters')
     saveas(plotFig, fullfile(outDir, ['1b_groupAverageTPUPFits_session', num2str(session), '.pdf']), 'pdf');
     close(plotFig)
@@ -131,7 +132,7 @@ xticks([1, 2, 3, 4])
 xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
 xlabel('Stimulus')
 ylabel('Percent Persistent (P/(T+S+P)x100%)')
-title('Percent Persistent')
+title('Session 1/2 Combined')
 saveas(plotFig, fullfile(outDir, ['2_percentPersistent_session1-2Combined.pdf']), 'pdf')
 
 for session = 1:3
@@ -204,28 +205,28 @@ for session = 1:3
     bplot(TPUPParameters{session}.Red.exponentialTau, 4, 'color', 'r')
     xticks([1, 2, 3, 4])
     xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
-    ylabel('Response Integration Time')
-    ylim([0 8])
+    ylabel('Exponential Tau')
+    ylim([0 20])
     title(['Session ' num2str(session)])
-    saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session', num2str(session), '.pdf']), 'pdf')
+    saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session', num2str(session), '.pdf']), 'pdf')
     close(plotFig)
 end
 
 % session 1 and 2 combined
 stimuli = {'LMS', 'Mel', 'Blue', 'Red'};
 for stimulus = 1:length(stimuli)
-    [ combinedResponseIntegrationTime.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, responseIntegrationTime{1}.(stimuli{stimulus}), responseIntegrationTime{2}.(stimuli{stimulus}));
+    [ combinedExponentialTau.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).exponentialTau, TPUPParameters{2}.(stimuli{stimulus}).exponentialTau);
 end
 plotFig = figure;
 hold on
-bplot(combinedResponseIntegrationTime.LMS.result, 1, 'color', 'k')
-bplot(combinedResponseIntegrationTime.Mel.result, 2, 'color', 'c')
-bplot(combinedResponseIntegrationTime.Blue.result, 3, 'color', 'b')
-bplot(combinedResponseIntegrationTime.Red.result, 4, 'color', 'r')
+bplot(combinedExponentialTau.LMS.result, 1, 'color', 'k')
+bplot(combinedExponentialTau.Mel.result, 2, 'color', 'c')
+bplot(combinedExponentialTau.Blue.result, 3, 'color', 'b')
+bplot(combinedExponentialTau.Red.result, 4, 'color', 'r')
 xticks([1, 2, 3, 4])
 xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
 xlabel('Stimulus')
-ylim([0 8])
+ylim([0 20])
 ylabel('Response Integration Time')
 title('Session 1/2 Combined')
 saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session1-2Combined.pdf']), 'pdf')
@@ -237,6 +238,7 @@ close(plotFig)
 [ totalResponseArea ] = calculateTotalResponseArea(TPUPParameters, dropboxAnalysisDir);
 
 plotFig = figure;
+title('Subjects vary in overall pupil responsiveness')
 
 % calculate overall responsiveness
 [ overallPupilResponsiveness ] = calculateOverallPupilResponsiveness(goodSubjects, totalResponseArea, dropboxAnalysisDir);
@@ -246,7 +248,7 @@ plotFig = figure;
 
 %% Figure 4: Examining individual differences in the melanopsin and blue responses
 % 4 a.: Examining the reproducibility of the mel/lms response ratio
-[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, totalResponseArea{1}.Mel./totalResponseArea{1}.LMS, totalResponseArea{2}.Mel./totalResponseArea{2}.LMS, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area']);
+[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, totalResponseArea{1}.Mel./totalResponseArea{1}.LMS, totalResponseArea{2}.Mel./totalResponseArea{2}.LMS, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
 
 % 4 b.: how individual differences in the mel/lms response ratio relate to
 % individual differences in the blue/red response ratio
@@ -269,39 +271,44 @@ for session = 1:2
         averagePercentPersistentAcrossStimuli{session}(ss) = (percentPersistentPerSubject{session}.LMS(ss) + percentPersistentPerSubject{session}.Mel(ss) + percentPersistentPerSubject{session}.Blue(ss) + percentPersistentPerSubject{session}.Red(ss))/4;
     end
 end
-[ pairedAveragePercentPersistentAcrossStimuli ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, averagePercentPersistentAcrossStimuli{1}*100, averagePercentPersistentAcrossStimuli{2}*100, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4c_averagePercentPersistent_1x2'], 'xLim', [0 100], 'yLim', [0 100], 'plotOption', 'square', 'xLabel', ['Session 1 Average Percent Persistent'], 'yLabel', ['Session 2 Average Percent Persistent']);
-    
+[ pairedAveragePercentPersistentAcrossStimuli ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, averagePercentPersistentAcrossStimuli{1}*100, averagePercentPersistentAcrossStimuli{2}*100, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4c_averagePercentPersistent_1x2'], 'xLim', [0 100], 'yLim', [0 100], 'plotOption', 'square', 'xLabel', ['Session 1 Average Percent Persistent'], 'yLabel', ['Session 2 Average Percent Persistent'], 'title', 'Reproducibility of Average Percent Persistent');
+
 
 %% Additional Figures to highlight session 3 differences
 % Figure 5: is the mel/lms response area ratio reproducible at a higher
 % light level?
 [ OneTwoCombined] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.Mel./totalResponseArea{1}.LMS, totalResponseArea{2}.Mel./totalResponseArea{2}.LMS);
-[pairedMeltoLMS_12x3] = pairResultAcrossSessions(OneTwoCombined.subjectKey, goodSubjects{3}.ID, OneTwoCombined.result, totalResponseArea{3}.Mel./totalResponseArea{3}.LMS, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', '5_melToLMS_12x3', 'xLims', [0 1.6], 'yLims', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1/2 Combined Mel/LMS Total Response Area'], 'yLabel', ['Session 3 Mel/LMS Total Response Area']);
+[pairedMeltoLMS_12x3] = pairResultAcrossSessions(OneTwoCombined.subjectKey, goodSubjects{3}.ID, OneTwoCombined.result, totalResponseArea{3}.Mel./totalResponseArea{3}.LMS, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', '5_melToLMS_12x3', 'xLims', [0 1.6], 'yLims', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1/2 Combined Mel/LMS Total Response Area'], 'yLabel', ['Session 3 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio at Higher Light Level');
 
 % Figure 6: at the higher light level, the PIPR is increased
 [piprTotalAreaNormed, netPIPRTotalAreaNormed] = calculatePIPR(goodSubjects, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir, 'computeMethod', 'totalAreaNormed');
 [ PIPRCombined ] = combineResultAcrossSessions(goodSubjects, netPIPRTotalAreaNormed{1}, netPIPRTotalAreaNormed{2});
 plotFig = figure;
+title('PIPR as area under the curve, normalized')
 hold on
 bplot(PIPRCombined.result, 1)
-bplot(netPIPRTotalAmplitudeNormed{3}, 2)
+bplot(netPIPRTotalAreaNormed{3}, 2)
 xticks([1, 2])
 xticklabels({'Session 1/2 Combined', 'Session 3'})
+ylabel('PIPR (Blue-Red)/(Blue+Red)')
 saveas(plotFig, fullfile(outDir, '6_PIPRbySession_totalResponseArea.pdf'), 'pdf')
 
 [piprTotalWindowed, netPIPRWindowed] = calculatePIPR(goodSubjects, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir, 'computeMethod', 'window');
 [ PIPRCombined ] = combineResultAcrossSessions(goodSubjects, netPIPRWindowed{1}, netPIPRWindowed{2});
 plotFig = figure;
+title('PIPR as sustained constriction following light offset')
 hold on
 bplot(PIPRCombined.result, 1)
 bplot(netPIPRWindowed{3}, 2)
 xticks([1, 2])
 xticklabels({'Session 1/2 Combined', 'Session 3'})
+ylabel('PIPR: Average Blue Sustained Constriction - Average Red Sustained Constriction')
 saveas(plotFig, fullfile(outDir, '6_PIPRbySession_window.pdf'), 'pdf')
 
 % Figure 7: how PIPR relates to mel via SS
 for session = 1:3
     plotFig = figure;
+    title (['Session ' num2str(session')])
     prettyScatterplots(netPIPRTotalAreaNormed{session}, totalResponseArea{session}.Mel./totalResponseArea{session}.LMS, 0*netPIPRTotalAreaNormed{session}, 0*netPIPRTotalAreaNormed{session}, 'xLabel', 'Net PIPR (Blue-Red)/(Blue+Red)', 'yLabel', 'Mel/LMS Total Response Area', 'significance', 'rho')
     saveas(plotFig, fullfile(outDir, ['7_PIPRxSS_session', num2str(session), '.pdf']), 'pdf')
 end
@@ -337,9 +344,27 @@ for stimulus = 1:length(stimuli)
     title([stimuli{stimulus}])
     
 end
-
+suptitle('Reproducibility of group average response at higher light levels')
 set(gcf,'Renderer','painters')
 saveas(plotFig, fullfile(outDir, ['8_groupAverageResponseReproducibility_12x3.pdf']), 'pdf');
 close(plotFig)
-        
+
+% Figure 9: is overall repsonsiveness reproducible from session 1/2 to
+% session 3?
+[ overallPupilResponsiveness ] = calculateOverallPupilResponsiveness(goodSubjects, totalResponseArea, dropboxAnalysisDir);
+[ combinedOverallResponsiveness ]  = combineResultAcrossSessions(goodSubjects, overallPupilResponsiveness{1}, overallPupilResponsiveness{2});
+pairResultAcrossSessions(combinedOverallResponsiveness.subjectKey, goodSubjects{3}.ID, combinedOverallResponsiveness.result, overallPupilResponsiveness{3}, dropboxAnalysisDir, 'xLims', [-225 0], 'yLims', [-225 0], 'subdir', 'figures', 'saveName', '9_overallResponsiveness_12x3', 'xLabel', 'Overall Responsiveness Session 1/2', 'yLabel', 'Overall Responsiveness Session 3')
+
+% Figure 10: is the total response area for a given stimulus reproducible from session 1/2 to session 3?
+
+plotFig = figure;
+for stimulus = 1:length(stimuli)
+    subplot(2,2,stimulus)
+    [ combinedTotalResponseArea.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.(stimuli{stimulus}), totalResponseArea{2}.(stimuli{stimulus}));
+    pairResultAcrossSessions(combinedTotalResponseArea.(stimuli{stimulus}).subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.(stimuli{stimulus}).result, totalResponseArea{3}.(stimuli{stimulus}), dropboxAnalysisDir, 'xLims', [-375 0], 'yLims', [-375 0], 'subdir', 'figures', 'xLabel', [stimuli{stimulus}, ' Session 1/2 Total Response Area'], 'yLabel', [stimuli{stimulus}, ' Session 3 Total Response Area'])
+end
+suptitle('Reproducibility of Total Response Area for Each Stimulus')
+saveas(plotFig, fullfile(outDir, '10_reproducibilityByStimulus_12x3.pdf'), 'pdf')
+
+
 end % end function
