@@ -16,6 +16,7 @@ p.addParameter('xLims',[0 10],@isnumeric);
 p.addParameter('yLims',[0 10],@isnumeric);
 p.addParameter('xLabel','',@ischar);
 p.addParameter('yLabel','',@ischar);
+p.addParameter('title','',@ischar);
 
 p.parse(varargin{:});
 
@@ -66,10 +67,10 @@ if p.Results.makePlot
     end
 
     if isempty(p.Results.sessionOneErrorBar)
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square')
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square', 'title', p.Results.title)
         
     else
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square')
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square', 'title', p.Results.title)
         
     end
     if ~isempty(p.Results.saveName)
@@ -77,7 +78,7 @@ if p.Results.makePlot
         if ~exist(outDir, 'dir')
             mkdir(outDir);
         end
-        saveas(plotFig, fullfile(outDir, [p.Results.saveName, '.png']), 'png')
+        saveas(plotFig, fullfile(outDir, [p.Results.saveName, '.pdf']), 'pdf')
     end
 end
 end % end function

@@ -20,6 +20,8 @@ p.addParameter('dotSize',8,@isnumeric);
 p.addParameter('significance','none',@ischar);
 p.addParameter('close','none',@ischar);
 p.addParameter('subplot','none',@isvector);
+p.addParameter('title','',@ischar);
+
 
 
 
@@ -42,6 +44,11 @@ p.parse(varargin{:});
 if strcmp(p.Results.subplot, 'none')
 else
     subplot(p.Results.subplot(1), p.Results.subplot(2), p.Results.subplot(3))
+end
+
+if strcmp(p.Results.title, '')
+else
+    title(p.Results.title)
 end
 
 if strcmp(p.Results.stimulation, 'greyScale')
