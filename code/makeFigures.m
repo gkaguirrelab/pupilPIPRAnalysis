@@ -366,5 +366,15 @@ end
 suptitle('Reproducibility of Total Response Area for Each Stimulus')
 saveas(plotFig, fullfile(outDir, '10_reproducibilityByStimulus_12x3.pdf'), 'pdf')
 
+lims = {-200, -200, -375, -375};
+for stimulus = 1:length(stimuli)
+    plotFig = figure;
+    [ combinedTotalResponseArea.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.(stimuli{stimulus}), totalResponseArea{2}.(stimuli{stimulus}));
+    pairResultAcrossSessions(combinedTotalResponseArea.(stimuli{stimulus}).subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.(stimuli{stimulus}).result, totalResponseArea{3}.(stimuli{stimulus}), dropboxAnalysisDir, 'xLims', [lims{stimulus} 0], 'yLims', [lims{stimulus} 0], 'subdir', 'figures', 'xLabel', [stimuli{stimulus}, ' Session 1/2 Total Response Area'], 'yLabel', [stimuli{stimulus}, ' Session 3 Total Response Area'])
+    title(['Reproducibility of ' stimuli{stimulus}, ' Total Response Area from Session 1/2 to Session 3'])
+    saveas(plotFig, fullfile(outDir, ['10_' stimuli{stimulus}, 'Reproducibility_12x3.pdf']), 'pdf')
+end
+
+
 
 end % end function
