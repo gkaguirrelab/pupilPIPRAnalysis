@@ -1,4 +1,4 @@
-function [ TPUPParameters ] = fitTPUPToSubjectAverageResponses_bootstrapped(goodSubjects, TPUPParameters, dropboxAnalysisDir, varargin)
+function [ TPUPParameters_bootstrapped ] = fitTPUPToSubjectAverageResponses_bootstrapped(goodSubjects, TPUPParameters, dropboxAnalysisDir, varargin)
 
 %% Parse vargin for options passed here
 p = inputParser; p.KeepUnmatched = true;
@@ -111,6 +111,7 @@ for session = 1:length(goodSubjects)
             vlb = p.Results.lbTPUPbyStimulus(stimulus,:);
             vub = p.Results.ubTPUPbyStimulus(stimulus,:);
             
+            distribution = [];
             for bb = 1:nBootstraps
                 trialIdx = randsample(1:nTrials, nTrials, true);
                 
@@ -131,16 +132,21 @@ for session = 1:length(goodSubjects)
                     'fminconAlgorithm','sqp'...
                     );
                 
-                paramsFit.paramMainMatrix
                 
-                measures = {'delay', 'gammaTau', 'exponentialTau', 'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude'};
-                for mm = 1:length(measures)
-                    distribution.(measures{mm})(bb) = paramsFit.paramMainMatrix(mm);
+                components = {'delay', 'gammaTau', 'exponentialTau', 'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude'};
+                for cc = 1:length(components)
+                    distribution.(p.Results.stimulusLabels{stimulus}).(components{cc})(bb) = paramsFit.paramMainMatrix(cc);
                 end
-                distribution.totalResponseArea(bb) = paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6)
+                distribution.(p.Results.stimulusLabels{stimulus}).totalResponseArea(bb) = paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6);
             end % end bootstraps
             
-            
+            % extract information from bootstrap distribution
+            measures = fieldnames(distribution);
+            for mm = 1:length(measures)
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).(measures{mm})(ss) = mean(distribution.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_SEM'])(ss) = std(distribution.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
+            end
+                
             
         end % end loop over stimuli
     end % end loop over subjects
