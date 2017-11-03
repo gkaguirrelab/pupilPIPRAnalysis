@@ -77,6 +77,9 @@ for session = 1:length(goodSubjects)
         date = goodSubjects{session}.date{ss};
         
         for stimulus = 1:length(p.Results.stimulusLabels)
+            % create empty structure for accumulator
+            accumulator.(p.Results.stimulusLabels{stimulus}) = struct('delay', {}, 'gammaTau', {}, 'exponentialTau', {}, 'transientAmplitude', {}, 'sustainedAmplitude', {}, 'persistentAmplitude', {}, 'totalResponseArea', {}, 'percentPersistent');
+            
             
             % determine where the raw data for each trial lives. this
             % depends on the stimulus
@@ -111,7 +114,7 @@ for session = 1:length(goodSubjects)
             vlb = p.Results.lbTPUPbyStimulus(stimulus,:);
             vub = p.Results.ubTPUPbyStimulus(stimulus,:);
             
-            distribution = [];
+            
             for bb = 1:nBootstraps
                 trialIdx = randsample(1:nTrials, nTrials, true);
                 
@@ -132,19 +135,24 @@ for session = 1:length(goodSubjects)
                     'fminconAlgorithm','sqp'...
                     );
                 
+                components = {'delay', 'gammaTau', 'exponentialTau', 'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude', 'totalResponseArea', 'percentPersistent'};
+
+                % add total response area as a 7th parameter
+                paramsFit.paramMainMatrix(7) = paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6);
                 
-                components = {'delay', 'gammaTau', 'exponentialTau', 'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude'};
-                for cc = 1:length(components)
-                    distribution.(p.Results.stimulusLabels{stimulus}).(components{cc})(bb) = paramsFit.paramMainMatrix(cc);
-                end
-                distribution.(p.Results.stimulusLabels{stimulus}).totalResponseArea(bb) = paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6);
+                % add percent persistent as an 8th parameter
+                paramsFit.paramMainMatrix(8) = paramsFit.paramMainMatrix(6)/(paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6));
+
+                
+                fitParams = cell2struct(num2cell(paramsFit.paramMainMatrix),components,2);
+                accumulator.(p.Results.stimulusLabels{stimulus}) = [accumulator.(p.Results.stimulusLabels{stimulus}), fitParams];
             end % end bootstraps
             
-            % extract information from bootstrap distribution
-            measures = fieldnames(distribution);
+            % extract information from bootstrap accumulator
+            measures = fieldnames(accumulator);
             for mm = 1:length(measures)
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).(measures{mm})(ss) = mean(distribution.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_SEM'])(ss) = std(distribution.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).(measures{mm})(ss) = mean(accumulator.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_SEM'])(ss) = std(accumulator.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
             end
                 
             
