@@ -137,13 +137,13 @@ for session = 1:length(goodSubjects)
                     );
                 
                 components = {'delay', 'gammaTau', 'exponentialTau', 'transientAmplitude', 'sustainedAmplitude', 'persistentAmplitude', 'totalResponseArea', 'percentPersistent'};
-
+                
                 % add total response area as a 7th parameter
                 paramsFit.paramMainMatrix(7) = paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6);
                 
                 % add percent persistent as an 8th parameter
                 paramsFit.paramMainMatrix(8) = paramsFit.paramMainMatrix(6)/(paramsFit.paramMainMatrix(4) + paramsFit.paramMainMatrix(5) + paramsFit.paramMainMatrix(6));
-
+                
                 
                 fitParams = cell2struct(num2cell(paramsFit.paramMainMatrix),components,2);
                 accumulator.(p.Results.stimulusLabels{stimulus}) = [accumulator.(p.Results.stimulusLabels{stimulus}), fitParams];
@@ -155,12 +155,37 @@ for session = 1:length(goodSubjects)
                 TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).(measures{mm})(ss) = mean([accumulator.(p.Results.stimulusLabels{stimulus})(:).(measures{mm})]);
                 TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_SEM'])(ss) = std([accumulator.(p.Results.stimulusLabels{stimulus})(:).(measures{mm})]);;
                 sorted = sort([accumulator.(p.Results.stimulusLabels{stimulus})(:).(measures{mm})]);
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_90'])(ss) = sorted(
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_10'])(ss)
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_90'])(ss)
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_90'])(ss) = sorted(round(0.90*nBootstraps));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_10'])(ss) = sorted(round(0.10*nBootstraps));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_975'])(ss) = sorted(round(0.975*nBootstraps));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_025'])(ss) = sorted(round(0.025*nBootstraps));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_667'])(ss) = sorted(round(2/3*nBootstraps));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_333'])(ss) = sorted(round(1/3*nBootstraps));
             end
-                
+            
+         
             
         end % end loop over stimuli
+        
+        % now determine the mel to lms response ratio
+        nSimulations = 1000;
+        for st = 1:nSimulations
+            randomDraw = randsample(nBootstraps, 1);
+            melResponse = accumulator.Mel(randomDraw).totalResponseArea;
+            randomDraw = randsample(nBootstraps, 1);
+            lmsResponse = accumulator.LMS(randomDraw).totalResponseArea;
+            
+            melToLMSAccumulator(st) = melResponse/lmsResponse;
+        end
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea = mean(melToLMSAccumulator);
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_SEM = std(melToLMSAccumulator);
+        
+        sortedMeltoLMS = sort(melToLMSAccumulator);
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_90 = sortedMeltoLMS(round(0.90*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_10 = sortedMeltoLMS(round(0.10*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_975 = sortedMeltoLMS(round(0.975*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_025 = sortedMeltoLMS(round(0.025*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_667 = sortedMeltoLMS(round(2/3*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_333 = sortedMeltoLMS(round(1/3*nSimulations));
     end % end loop over subjects
 end % end loop over sessions
