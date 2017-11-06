@@ -75,10 +75,11 @@ for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
         subject = goodSubjects{session}.ID{ss};
         date = goodSubjects{session}.date{ss};
+        fprintf(['Fitting subject %d, session %d. Started at ' char(datetime('now'))], ss, session)
         
         for stimulus = 1:length(p.Results.stimulusLabels)
             % create empty structure for accumulator
-            accumulator.(p.Results.stimulusLabels{stimulus}) = struct('delay', {}, 'gammaTau', {}, 'exponentialTau', {}, 'transientAmplitude', {}, 'sustainedAmplitude', {}, 'persistentAmplitude', {}, 'totalResponseArea', {}, 'percentPersistent');
+            accumulator.(p.Results.stimulusLabels{stimulus}) = struct('delay', {}, 'gammaTau', {}, 'exponentialTau', {}, 'transientAmplitude', {}, 'sustainedAmplitude', {}, 'persistentAmplitude', {}, 'totalResponseArea', {}, 'percentPersistent', {});
             
             
             % determine where the raw data for each trial lives. this
@@ -96,19 +97,19 @@ for session = 1:length(goodSubjects)
             
             
             for trial = 1:numberTrials
-                packetCellArray(trial,:) = allTrials(:,trial)';
+                trailsMatrix(trial,:) = allTrials(:,trial)';
             end
             
             % sometimes trials will be included even if all values are
             % NaNs. This happens because if the normalization window is
             % entirely NaNs, the entire response becomes NaNs when
             % attempting to divide each value by the baseline size
-            packetCellArray = packetCellArray(all(~isnan(packetCellArray),2),:);
+            trailsMatrix = trailsMatrix(all(~isnan(trailsMatrix),2),:);
             
             % now to do the bootstrapping.
             nBootstraps = 100;
             
-            nTrials = size(packetCellArray,1);
+            nTrials = size(trailsMatrix,1);
             
             initialValues = [TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).delay(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).gammaTau(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).exponentialTau(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).transientAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).sustainedAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).persistentAmplitude(ss)];
             vlb = p.Results.lbTPUPbyStimulus(stimulus,:);
@@ -119,8 +120,8 @@ for session = 1:length(goodSubjects)
                 trialIdx = randsample(1:nTrials, nTrials, true);
                 
                 % make average ersponse out of these trials
-                packetCellArray_bootstrapped = packetCellArray(trialIdx, :);
-                averageResponse_bootstrapped = nanmean(packetCellArray_bootstrapped , 1);
+                trialsMatrix_bootstrapped = trailsMatrix(trialIdx, :);
+                averageResponse_bootstrapped = nanmean(trialsMatrix_bootstrapped , 1);
                 
                 % stick the new bootstrapped average into the packet
                 thePacket.response.values = averageResponse_bootstrapped*100;
@@ -149,10 +150,14 @@ for session = 1:length(goodSubjects)
             end % end bootstraps
             
             % extract information from bootstrap accumulator
-            measures = fieldnames(accumulator);
+            measures = fieldnames(accumulator.(p.Results.stimulusLabels{stimulus}));
             for mm = 1:length(measures)
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).(measures{mm})(ss) = mean(accumulator.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
-                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_SEM'])(ss) = std(accumulator.(p.Results.stimulusLabels{stimulus}).(measures{mm}));
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).(measures{mm})(ss) = mean([accumulator.(p.Results.stimulusLabels{stimulus})(:).(measures{mm})]);
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_SEM'])(ss) = std([accumulator.(p.Results.stimulusLabels{stimulus})(:).(measures{mm})]);;
+                sorted = sort([accumulator.(p.Results.stimulusLabels{stimulus})(:).(measures{mm})]);
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_90'])(ss) = sorted(
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_10'])(ss)
+                TPUPParameters_bootstrapped{session}.(p.Results.stimulusLabels{stimulus}).([measures{mm}, '_90'])(ss)
             end
                 
             
