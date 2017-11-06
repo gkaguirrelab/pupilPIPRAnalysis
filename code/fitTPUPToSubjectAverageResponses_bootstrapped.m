@@ -177,15 +177,15 @@ for session = 1:length(goodSubjects)
             
             melToLMSAccumulator(st) = melResponse/lmsResponse;
         end
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea = mean(melToLMSAccumulator);
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_SEM = std(melToLMSAccumulator);
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea(ss) = mean(melToLMSAccumulator);
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_SEM(ss) = std(melToLMSAccumulator);
         
         sortedMeltoLMS = sort(melToLMSAccumulator);
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_90 = sortedMeltoLMS(round(0.90*nSimulations));
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_10 = sortedMeltoLMS(round(0.10*nSimulations));
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_975 = sortedMeltoLMS(round(0.975*nSimulations));
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_025 = sortedMeltoLMS(round(0.025*nSimulations));
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_667 = sortedMeltoLMS(round(2/3*nSimulations));
-        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_333 = sortedMeltoLMS(round(1/3*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_90(ss) = sortedMeltoLMS(round(0.90*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_10(ss) = sortedMeltoLMS(round(0.10*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_975(ss) = sortedMeltoLMS(round(0.975*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_025(ss) = sortedMeltoLMS(round(0.025*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_667(ss) = sortedMeltoLMS(round(2/3*nSimulations));
+        TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_333(ss) = sortedMeltoLMS(round(1/3*nSimulations));
     end % end loop over subjects
 end % end loop over sessions
