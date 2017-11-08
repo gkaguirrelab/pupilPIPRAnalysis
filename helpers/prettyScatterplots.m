@@ -1,8 +1,9 @@
-function [ ] = prettyScatterPlots(x, y, xError, yError, varargin)
+function [ ] = prettyScatterPlots(x, y, varargin)
 
 %close all
 
 p = inputParser; p.KeepUnmatched = true;
+
 
 p.addParameter('stimulation','greyScale',@ischar);
 p.addParameter('save','none',@ischar);
@@ -21,8 +22,8 @@ p.addParameter('significance','none',@ischar);
 p.addParameter('close','none',@ischar);
 p.addParameter('subplot','none',@isvector);
 p.addParameter('title','',@ischar);
-
-
+p.addParameter('xError',[],@ismatrix);
+p.addParameter('yError',[],@ismatrix);
 
 
 
@@ -79,9 +80,37 @@ hold on
 
 
 
+% figure out how to deal with error bars
+if isempty(p.Results.xError)
+    xError = zeros(1,length(x));
+    errbar(x, y, xError, 'horiz', 'Color', errorBarColor)
+end
+if isempty(p.Results.yError)
+    yError = zeros(1,length(y));
+    errbar(x, y, yError, 'Color', errorBarColor)
+end
 
-errbar(x, y, yError, 'Color', errorBarColor)
-errbar(x, y, xError, 'horiz', 'Color', errorBarColor)
+if size(p.Results.xError, 1) == 1
+    errbar(x, y, p.Results.xError, 'horiz', 'Color', errorBarColor)
+end
+
+if size(p.Results.yError, 1) == 1
+    errbar(x, y, p.Results.yError, 'Color', errorBarColor)
+end
+
+if size(p.Results.xError, 1) == 2
+    xErrorLowerBounds = p.Results.xError(1,:);
+    xErrorUpperBounds = p.Results.xError(2,:);
+    errbar(x, y, xErrorLowerBounds, xErrorUpperBounds, 'horiz', 'Color', errorBarColor)
+end
+
+if size(p.Results.yError, 1) == 2
+    yErrorLowerBounds = p.Results.yError(1,:);
+    yErrorUpperBounds = p.Results.yError(2,:);
+    errbar(x, y, yErrorLowerBounds, yErrorUpperBounds, 'Color', errorBarColor)
+end
+    
+    
 
 scatterPlot = plot(x,y, 'o');
 
