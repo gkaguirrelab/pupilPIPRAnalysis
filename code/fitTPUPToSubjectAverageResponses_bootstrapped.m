@@ -75,7 +75,7 @@ for session = 1:length(goodSubjects)
     for ss = 1:length(goodSubjects{session}.ID)
         subject = goodSubjects{session}.ID{ss};
         date = goodSubjects{session}.date{ss};
-        fprintf(['Fitting subject %d, session %d. Started at ' char(datetime('now'))], ss, session)
+        fprintf(['Fitting subject %d, session %d. Started at ' char(datetime('now')), '\n'], ss, session)
         
         for stimulus = 1:length(p.Results.stimulusLabels)
             % create empty structure for accumulator
@@ -95,21 +95,21 @@ for session = 1:length(goodSubjects)
             % stimulus condition for a given subject. each row in the
             % matrix will be the response from a separate trial
             
-            
+            trialsMatrix = [];
             for trial = 1:numberTrials
-                trailsMatrix(trial,:) = allTrials(:,trial)';
+                trialsMatrix(trial,:) = allTrials(:,trial)';
             end
             
             % sometimes trials will be included even if all values are
             % NaNs. This happens because if the normalization window is
             % entirely NaNs, the entire response becomes NaNs when
             % attempting to divide each value by the baseline size
-            trailsMatrix = trailsMatrix(all(~isnan(trailsMatrix),2),:);
+            trialsMatrix = trialsMatrix(all(~isnan(trialsMatrix),2),:);
             
             % now to do the bootstrapping.
             nBootstraps = 100;
             
-            nTrials = size(trailsMatrix,1);
+            nTrials = size(trialsMatrix,1);
             
             initialValues = [TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).delay(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).gammaTau(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).exponentialTau(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).transientAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).sustainedAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).persistentAmplitude(ss)];
             vlb = p.Results.lbTPUPbyStimulus(stimulus,:);
@@ -120,7 +120,7 @@ for session = 1:length(goodSubjects)
                 trialIdx = randsample(1:nTrials, nTrials, true);
                 
                 % make average ersponse out of these trials
-                trialsMatrix_bootstrapped = trailsMatrix(trialIdx, :);
+                trialsMatrix_bootstrapped = trialsMatrix(trialIdx, :);
                 averageResponse_bootstrapped = nanmean(trialsMatrix_bootstrapped , 1);
                 
                 % stick the new bootstrapped average into the packet
