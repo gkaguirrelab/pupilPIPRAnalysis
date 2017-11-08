@@ -94,7 +94,8 @@ for session = 1:length(goodSubjects)
             string = (sprintf(['Delay: ', num2str(params0.paramMainMatrix(1)), '\nGamma Tau: ', num2str(params0.paramMainMatrix(2)), '\nExponential Tau: ', num2str(params0.paramMainMatrix(3)), '\n\nTransient: ', num2str(params0.paramMainMatrix(4)), '\nSustained: ', num2str(params0.paramMainMatrix(5)), '\nPersistent: ', num2str(params0.paramMainMatrix(6)), '\nR2: ', num2str(rSquared)]));
             text(xpos, ypos, string)
             title(goodSubjects{session}.ID(ss));
-            
+            saveas(plotFig, fullfile(outDir, [goodSubjects{session}.ID{ss}, '.png']), 'png');
+            close(plotFig)
             
             
         end % end loop over stimuli
