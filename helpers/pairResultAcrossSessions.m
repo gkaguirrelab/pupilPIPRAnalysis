@@ -54,8 +54,8 @@ else
             
             if sum(whichSubject) ~= 0
                 [maxValue, firstSessionIndex] = max(whichSubject);
-                pairedResult.sessionOneErrorBar(row,counter) = p.Results.sessionOneErrorBar(firstSessionIndex);
-                pairedResult.sessionTwoErrorBar(row,counter) = p.Results.sessionTwoErrorBar(secondSessionIndex);
+                pairedResult.sessionOneErrorBar(row,counter) = p.Results.sessionOneErrorBar(row,firstSessionIndex);
+                pairedResult.sessionTwoErrorBar(row,counter) = p.Results.sessionTwoErrorBar(row,secondSessionIndex);
                 counter = counter + 1;
             end
             
