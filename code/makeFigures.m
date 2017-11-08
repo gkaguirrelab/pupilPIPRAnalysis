@@ -6,6 +6,8 @@ outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
+
+confidenceInterval = {10 90};
 %% Figure 1: the average response at the group level shows characteristic features that differentiate the responses to each stimulus. These responses are also reproducible
 
 stimuli = {'LMS' 'Mel' 'Blue' 'Red'};
@@ -242,13 +244,23 @@ title('Subjects vary in overall pupil responsiveness')
 
 % calculate overall responsiveness
 [ overallPupilResponsiveness ] = calculateOverallPupilResponsiveness(goodSubjects, totalResponseArea, dropboxAnalysisDir);
+
+
 % match session 1 results to session 2 results
 [ pairedOverallResponsiveness ]  = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, overallPupilResponsiveness{1}, overallPupilResponsiveness{2}, dropboxAnalysisDir, 'xLabel', 'Session 1 Average Responsiveness', 'yLabel', 'Session 2 Average Responsiveness', 'significance', 'rho', 'xLims', [-225 0], 'yLims', [-225 0], 'subdir', 'figures', 'saveName', '3_overallPupilResponsiveness_1x2');
 
 
 %% Figure 4: Examining individual differences in the melanopsin and blue responses
+%make the error bars
+sessionOneErroBar(1,:) = TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
+sessionOneErroBar(2,:) = TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea;
+
+sessionTwoErroBar(1,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
+sessionTwoErroBar(2,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea;
+
+
 % 4 a.: Examining the reproducibility of the mel/lms response ratio
-[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, totalResponseArea{1}.Mel./totalResponseArea{1}.LMS, totalResponseArea{2}.Mel./totalResponseArea{2}.LMS, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
+[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea, TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErroBar, 'sessionTwoErrorBar', sessionTwoErroBar, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
 
 % 4 b.: how individual differences in the mel/lms response ratio relate to
 % individual differences in the blue/red response ratio
