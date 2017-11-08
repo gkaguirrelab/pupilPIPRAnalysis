@@ -252,15 +252,15 @@ title('Subjects vary in overall pupil responsiveness')
 
 %% Figure 4: Examining individual differences in the melanopsin and blue responses
 %make the error bars
-sessionOneErroBar(1,:) = TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
-sessionOneErroBar(2,:) = TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea;
+sessionOneErroBar(1,:) = TPUPParameters{1}.MeltoLMS.totalResponseArea - TPUPParameters{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
+sessionOneErroBar(2,:) = TPUPParameters{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{1}.MeltoLMS.totalResponseArea;
 
-sessionTwoErroBar(1,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
-sessionTwoErroBar(2,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea;
+sessionTwoErroBar(1,:) = TPUPParameters{2}.MeltoLMS.totalResponseArea - TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
+sessionTwoErroBar(2,:) = TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{2}.MeltoLMS.totalResponseArea;
 
 
 % 4 a.: Examining the reproducibility of the mel/lms response ratio
-[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea, TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErroBar, 'sessionTwoErrorBar', sessionTwoErroBar, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
+[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErroBar, 'sessionTwoErrorBar', sessionTwoErroBar, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
 
 % 4 b.: how individual differences in the mel/lms response ratio relate to
 % individual differences in the blue/red response ratio
@@ -268,7 +268,7 @@ sessionTwoErroBar(2,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalRespons
 [ combinedBluetoRed ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.Blue./totalResponseArea{1}.Red, totalResponseArea{2}.Blue./totalResponseArea{2}.Red);
 
 plotFig = figure;
-prettyScatterplots(combinedMeltoLMS.result, combinedBluetoRed.result, 0*combinedMeltoLMS.result, 0*combinedMeltoLMS.result, 'xLim', [0 2], 'yLim', [0 2], 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
+prettyScatterplots(combinedMeltoLMS.result, combinedBluetoRed.result, 'xLim', [0 2], 'yLim', [0 2], 'unity', 'on', 'significance', 'rho', 'plotOption', 'square')
 xlabel('Mel/LMS  Total Response Area')
 ylabel('Blue/Red Total Response Area')
 title('Session 1/2 Combined')
@@ -321,7 +321,7 @@ saveas(plotFig, fullfile(outDir, '6_PIPRbySession_window.pdf'), 'pdf')
 for session = 1:3
     plotFig = figure;
     title (['Session ' num2str(session')])
-    prettyScatterplots(netPIPRTotalAreaNormed{session}, totalResponseArea{session}.Mel./totalResponseArea{session}.LMS, 0*netPIPRTotalAreaNormed{session}, 0*netPIPRTotalAreaNormed{session}, 'xLabel', 'Net PIPR (Blue-Red)/(Blue+Red)', 'yLabel', 'Mel/LMS Total Response Area', 'significance', 'rho')
+    prettyScatterplots(netPIPRTotalAreaNormed{session}, TPUPParameters{session}.MeltoLMS.totalResponseArea,  'xLabel', 'Net PIPR (Blue-Red)/(Blue+Red)', 'yLabel', 'Mel/LMS Total Response Area', 'significance', 'rho')
     saveas(plotFig, fullfile(outDir, ['7_PIPRxSS_session', num2str(session), '.pdf']), 'pdf')
 end
 
@@ -381,8 +381,18 @@ saveas(plotFig, fullfile(outDir, '10_reproducibilityByStimulus_12x3.pdf'), 'pdf'
 lims = {-200, -200, -375, -375};
 for stimulus = 1:length(stimuli)
     plotFig = figure;
-    [ combinedTotalResponseArea.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.(stimuli{stimulus}), totalResponseArea{2}.(stimuli{stimulus}));
-    pairResultAcrossSessions(combinedTotalResponseArea.(stimuli{stimulus}).subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.(stimuli{stimulus}).result, totalResponseArea{3}.(stimuli{stimulus}), dropboxAnalysisDir, 'xLims', [lims{stimulus} 0], 'yLims', [lims{stimulus} 0], 'subdir', 'figures', 'xLabel', [stimuli{stimulus}, ' Session 1/2 Total Response Area'], 'yLabel', [stimuli{stimulus}, ' Session 3 Total Response Area'])
+    [ combinedTotalResponseArea.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).totalResponseArea, TPUPParameters{2}.(stimuli{stimulus}).totalResponseArea);
+    [ combinedTotalResponseArea_lowerBound.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]));
+    [ combinedTotalResponseArea_upperBound.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]));
+
+    session12error(1,:) = combinedTotalResponseArea.(stimuli{stimulus}).result - combinedTotalResponseArea_lowerBound.(stimuli{stimulus}).result;
+    session12error(2,:) = combinedTotalResponseArea_upperBound.(stimuli{stimulus}).result - combinedTotalResponseArea.(stimuli{stimulus}).result;
+    
+    session3error(1,:) = TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea - TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]);
+    session3error(2,:) = TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea;
+
+    
+    pairResultAcrossSessions(combinedTotalResponseArea.(stimuli{stimulus}).subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.(stimuli{stimulus}).result, TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea, dropboxAnalysisDir, 'xLims', [lims{stimulus} 0], 'yLims', [lims{stimulus} 0], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures', 'xLabel', [stimuli{stimulus}, ' Session 1/2 Total Response Area'], 'yLabel', [stimuli{stimulus}, ' Session 3 Total Response Area'])
     title(['Reproducibility of ' stimuli{stimulus}, ' Total Response Area from Session 1/2 to Session 3'])
     saveas(plotFig, fullfile(outDir, ['10_' stimuli{stimulus}, 'Reproducibility_12x3.pdf']), 'pdf')
 end
