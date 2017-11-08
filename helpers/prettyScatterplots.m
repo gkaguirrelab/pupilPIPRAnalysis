@@ -98,6 +98,10 @@ if size(p.Results.yError, 1) == 1
     errbar(x, y, p.Results.yError, 'Color', errorBarColor)
 end
 
+
+% note that with asymmetric error bars, the value refers to how far from
+% the point to place the boundary (value - errorValue), rather than just
+% explicitly defining that boundary (errorValue)
 if size(p.Results.xError, 1) == 2
     xErrorLowerBounds = p.Results.xError(1,:);
     xErrorUpperBounds = p.Results.xError(2,:);
