@@ -44,19 +44,22 @@ end
 % now do the pairing for the error bars if called for
 if isempty(p.Results.sessionOneErrorBar)
 else
-    pairedResult.sessionOneErrorBar = [];
-    pairedResult.sessionTwoErrorBar = [];
-    for ss = 1:length(sessionTwoSubjectList) % loop over subjects that have completed both sessions
-        subject = sessionTwoSubjectList(ss);
-        
-        secondSessionIndex = ss;
-        whichSubject = cellfun(@(x) strcmp(x, subject), sessionOneSubjectList);
-        if sum(whichSubject) ~= 0
-            [maxValue, firstSessionIndex] = max(whichSubject);
-            pairedResult.sessionOneErrorBar = [pairedResult.sessionOneErrorBar, p.Results.sessionOneErrorBar(firstSessionIndex)];
-            pairedResult.sessionTwoErrorBar = [pairedResult.sessionTwoErrorBar, p.Results.sessionTwoErrorBar(secondSessionIndex)];
+    for row = 1:size(p.Results.sessionOneErrorBar,1)
+       counter = 1;
+        for ss = 1:length(sessionTwoSubjectList) % loop over subjects that have completed both sessions
+            subject = sessionTwoSubjectList(ss);
+            
+            secondSessionIndex = ss;
+            whichSubject = cellfun(@(x) strcmp(x, subject), sessionOneSubjectList);
+            
+            if sum(whichSubject) ~= 0
+                [maxValue, firstSessionIndex] = max(whichSubject);
+                pairedResult.sessionOneErrorBar(row,counter) = p.Results.sessionOneErrorBar(firstSessionIndex);
+                pairedResult.sessionTwoErrorBar(row,counter) = p.Results.sessionTwoErrorBar(secondSessionIndex);
+                counter = counter + 1;
+            end
+            
         end
-        
     end
 end
 
@@ -65,12 +68,12 @@ if p.Results.makePlot
     if ~isempty(p.Results.saveName)
         plotFig = figure;
     end
-
+    
     if isempty(p.Results.sessionOneErrorBar)
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 0*pairedResult.sessionOne, 0*pairedResult.sessionOne, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square', 'title', p.Results.title)
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square', 'title', p.Results.title)
         
     else
-        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, pairedResult.sessionOneErrorBar, pairedResult.sessionTwoErrorBar, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square', 'title', p.Results.title)
+        prettyScatterplots(pairedResult.sessionOne, pairedResult.sessionTwo, 'xError', pairedResult.sessionOneErrorBar, 'yError', pairedResult.sessionTwoErrorBar, 'unity', 'on', 'xLim', p.Results.xLims, 'yLim', p.Results.yLims, 'significance', p.Results.significance, 'xLabel', p.Results.xLabel, 'yLabel', p.Results.yLabel, 'plotOption', 'square', 'title', p.Results.title)
         
     end
     if ~isempty(p.Results.saveName)
