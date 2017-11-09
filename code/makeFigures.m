@@ -140,13 +140,13 @@ title('Session 1/2 Combined')
 % is percent persistent of mel significantly greater than that of LMS?
 [ significance ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
 if significance < 1
-    plot(1.5, 0.98, '*')
+    plot(1.5, 0.98, '*', 'Color', 'k')
 end
 
 % is percent persistent of blue significantly greater than that of red?
 [ significance ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Blue.result, combinedPercentPersistent.Red.result, dropboxAnalysisDir);
 if significance < 1
-    plot(3.5, 0.9, '*')
+    plot(3.5, 0.9, '*', 'Color', 'k')
 end
 
 
@@ -170,13 +170,13 @@ for session = 1:3
     % is percent persistent of mel significantly greater than that of LMS?
     [ significance ] = evaluateSignificanceOfMedianDifference(percentPersistentPerSubject{session}.Mel, percentPersistentPerSubject{session}.LMS, dropboxAnalysisDir);
     if significance < 1
-        plot(1.5, 0.98, '*')
+        plot(1.5, 0.98, '*', 'Color', 'k')
     end
     
     % is percent persistent of blue significantly greater than that of red?
     [ significance ] = evaluateSignificanceOfMedianDifference(percentPersistentPerSubject{session}.Blue, percentPersistentPerSubject{session}.Red, dropboxAnalysisDir);
     if significance < 1
-        plot(3.5, 0.9, '*')
+        plot(3.5, 0.9, '*', 'Color', 'k')
     end
     
     saveas(plotFig, fullfile(outDir, ['2_percentPersistent_session', num2str(session), '.pdf']), 'pdf')
@@ -325,15 +325,15 @@ for session = 1:3
     
     % evaluate significance of median differences:
     % is exponentialTau of mel significantly greater than that of LMS?
-    [ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel, combinedExponentialTau.LMS, dropboxAnalysisDir);
+    [ significance ] = evaluateSignificanceOfMedianDifference(TPUPParameters{session}.Mel.exponentialTau, TPUPParameters{session}.LMS.exponentialTau, dropboxAnalysisDir);
     if significance < 1
-        plot(1.5, 16, '*')
+        plot(1.5, 16, '*', 'Color', 'k')
     end
     
     % is exponentialTau of blue significantly greater than that of red?
-    [ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue, combinedExponentialTau.Red, dropboxAnalysisDir);
+    [ significance ] = evaluateSignificanceOfMedianDifference(TPUPParameters{session}.Blue.exponentialTau, TPUPParameters{session}.Red.exponentialTau, dropboxAnalysisDir);
     if significance < 1
-        plot(3.5, 16, '*')
+        plot(3.5, 16, '*', 'Color', 'k')
     end
     
     saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session', num2str(session), '.pdf']), 'pdf')
@@ -360,15 +360,15 @@ title('Session 1/2 Combined')
 
 % evaluate significance of median differences:
 % is exponentialTau of mel significantly greater than that of LMS?
-[ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel, combinedExponentialTau.LMS, dropboxAnalysisDir);
+[ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
 if significance < 1
-    plot(1.5, 14, '*')
+    plot(1.5, 14, '*', 'Color', 'k')
 end
 
 % is exponentialTau of blue significantly greater than that of red?
-[ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue, combinedExponentialTau.Red, dropboxAnalysisDir);
+[ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue.result, combinedExponentialTau.Red.result, dropboxAnalysisDir);
 if significance < 1
-    plot(3.5, 14, '*')
+    plot(3.5, 14, '*', 'Color', 'k')
 end
 
 saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session1-2Combined.pdf']), 'pdf')
@@ -531,7 +531,7 @@ for stimulus = 1:length(stimuli)
     session12error(1,:) = combinedTotalResponseArea.(stimuli{stimulus}).result - combinedTotalResponseArea_lowerBound.(stimuli{stimulus}).result;
     session12error(2,:) = combinedTotalResponseArea_upperBound.(stimuli{stimulus}).result - combinedTotalResponseArea.(stimuli{stimulus}).result;
     
-    session3error(1,:) = [];
+    session3error = [];
     session3error(1,:) = TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea - TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]);
     session3error(2,:) = TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea;
     
@@ -541,6 +541,50 @@ for stimulus = 1:length(stimuli)
     saveas(plotFig, fullfile(outDir, ['10_' stimuli{stimulus}, 'Reproducibility_12x3.pdf']), 'pdf')
     close(plotFig)
 end
+
+%% The mel/lms response ratio is not reproducibile between sessions 1/2 combined and session 3 at higher light levels
+% Ultimatley we think the explanation for this observation is that the
+% melanopsin responses, or at least our fits to these responses, are
+% associated with larger error. Here is a summary figure that looks at how
+% the width of the 90% confidence interval compares for melanopsin and
+% cones
+
+% first just looking at the width of the 90% confidence interval for all
+% sessions
+confidenceIntervalWidth = [];
+plotFig = figure;
+for session = 1:3
+    confidenceIntervalWidth.Mel(session,:) = mean(TPUPParameters{session}.Mel.totalResponseArea_90 - TPUPParameters{session}.Mel.totalResponseArea_10);
+    confidenceIntervalWidth.LMS(session,:) = mean(TPUPParameters{session}.LMS.totalResponseArea_90 - TPUPParameters{session}.LMS.totalResponseArea_10);
+end
+
+b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS));
+b(1).FaceColor = 'c';
+b(2).FaceColor = 'k';
+legend('Mel', 'LMS')
+ylabel('90% Confidence Interval Width, Raw Values')
+xlabel('Session')
+saveas(plotFig, fullfile(outDir, ['11_confidenceIntervalWidth_rawValues.pdf']), 'pdf')
+
+% first just looking at the width of the 90% confidence interval for all
+% sessions, but now normalizing 90% confidence interval width for
+% differences in size of response
+confidenceIntervalWidth = [];
+plotFig = figure;
+for session = 1:3
+    confidenceIntervalWidth.Mel(session,:) = mean(-(TPUPParameters{session}.Mel.totalResponseArea_90./TPUPParameters{session}.Mel.totalResponseArea - TPUPParameters{session}.Mel.totalResponseArea_10./TPUPParameters{session}.Mel.totalResponseArea));
+    confidenceIntervalWidth.LMS(session,:) = mean(-(TPUPParameters{session}.LMS.totalResponseArea_90./TPUPParameters{session}.LMS.totalResponseArea - TPUPParameters{session}.LMS.totalResponseArea_10./TPUPParameters{session}.LMS.totalResponseArea));
+end
+
+b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS));
+b(1).FaceColor = 'c';
+b(2).FaceColor = 'k';
+legend('Mel', 'LMS')
+ylabel('90% Confidence Interval Width, %')
+xlabel('Session')
+saveas(plotFig, fullfile(outDir, ['11_confidenceIntervalWidth_percent.pdf']), 'pdf')
+
+
 
 
 
