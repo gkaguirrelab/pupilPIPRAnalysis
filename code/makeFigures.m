@@ -135,7 +135,23 @@ xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
 xlabel('Stimulus')
 ylabel('Percent Persistent (P/(T+S+P)x100%)')
 title('Session 1/2 Combined')
+
+% evaluate significance of median differences:
+% is percent persistent of mel significantly greater than that of LMS?
+[ significance ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
+if significance < 1
+    plot(1.5, 0.98, '*')
+end
+
+% is percent persistent of blue significantly greater than that of red?
+[ significance ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Blue.result, combinedPercentPersistent.Red.result, dropboxAnalysisDir);
+if significance < 1
+    plot(3.5, 0.9, '*')
+end
+
+
 saveas(plotFig, fullfile(outDir, ['2_percentPersistent_session1-2Combined.pdf']), 'pdf')
+close(plotFig)
 
 for session = 1:3
     plotFig = figure;
@@ -149,55 +165,151 @@ for session = 1:3
     xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
     xlabel('Stimulus')
     ylabel('Percent Persistent (P/(T+S+P)x100%)')
+    
+    % evaluate significance of median differences:
+    % is percent persistent of mel significantly greater than that of LMS?
+    [ significance ] = evaluateSignificanceOfMedianDifference(percentPersistentPerSubject{session}.Mel, percentPersistentPerSubject{session}.LMS, dropboxAnalysisDir);
+    if significance < 1
+        plot(1.5, 0.98, '*')
+    end
+    
+    % is percent persistent of blue significantly greater than that of red?
+    [ significance ] = evaluateSignificanceOfMedianDifference(percentPersistentPerSubject{session}.Blue, percentPersistentPerSubject{session}.Red, dropboxAnalysisDir);
+    if significance < 1
+        plot(3.5, 0.9, '*')
+    end
+    
     saveas(plotFig, fullfile(outDir, ['2_percentPersistent_session', num2str(session), '.pdf']), 'pdf')
     close(plotFig)
 end
 
-% what if we look instead at response integration time (area under the
-% curve normalized by amplitude)
 
-% by session
-[ totalResponseArea ] = calculateTotalResponseArea(TPUPParameters, dropboxAnalysisDir);
-[responseIntegrationTime] = calculateModeledResponseIntegrationTime(goodSubjects, totalResponseArea, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir);
+% across stimulus correlations for exponential tau
+% looking at the comparison between LMS and Mel, Blue and Red,
+% session 1/2 combined
 
+[ percentPersistent ] = calculatePercentPersistent(goodSubjects, TPUPParameters, dropboxAnalysisDir);
+comparisons(1,:) = {'LMS', 'Blue'};
+comparisons(2,:) = {'Mel', 'Red'};
+for cc = 1:size(comparisons,2)
+    xError = [];
+    yError = [];
+    [ XcombinedPercentPersistent.(comparisons{1,cc}) ] = combineResultAcrossSessions(goodSubjects, percentPersistent{1}.(comparisons{1,cc}), percentPersistent{2}.(comparisons{1,cc}));
+    [ XcombinedPercentPersistent_lowerBound.(comparisons{1,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{1,cc}).(['percentPersistent_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(comparisons{1,cc}).(['percentPersistent_', num2str(confidenceInterval{1})]));
+    [ XcombinedPercentPersistent_upperBound.(comparisons{1,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{1,cc}).(['percentPersistent_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(comparisons{1,cc}).(['percentPersistent_', num2str(confidenceInterval{2})]));
+    xError(1,:) = XcombinedPercentPersistent.(comparisons{1,cc}).result - XcombinedPercentPersistent_lowerBound.(comparisons{1,cc}).result;
+    xError(2,:) = XcombinedPercentPersistent_upperBound.(comparisons{1,cc}).result - XcombinedPercentPersistent.(comparisons{1,cc}).result;
+    
+    % i noticed that the bootstrap distribution of exponential tau could be
+    % highly skewed. As a result, I've noticed that the mean of the
+    % bootstrap distribution can actually be larger than the 90th
+    % percentile. in specifying error bars in this case, i've decided make
+    % the error bar not extend from the mean value in that direction
+    
+    xError(xError<0) = 0;
+    
+    [ YcombinedPercentPersistent.(comparisons{2,cc}) ] = combineResultAcrossSessions(goodSubjects, percentPersistent{1}.(comparisons{2,cc}), percentPersistent{2}.(comparisons{2,cc}));
+    [ YcombinedPercentPersistent_lowerBound.(comparisons{2,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{2,cc}).(['percentPersistent_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(comparisons{2,cc}).(['percentPersistent_', num2str(confidenceInterval{1})]));
+    [ YcombinedPercentPersistent_upperBound.(comparisons{2,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{2,cc}).(['percentPersistent_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(comparisons{2,cc}).(['percentPersistent_', num2str(confidenceInterval{2})]));
+    yError(1,:) = YcombinedPercentPersistent.(comparisons{2,cc}).result - YcombinedPercentPersistent_lowerBound.(comparisons{2,cc}).result;
+    yError(2,:) = YcombinedPercentPersistent_upperBound.(comparisons{2,cc}).result - YcombinedPercentPersistent.(comparisons{2,cc}).result;
+    
+    yError(yError<0) = 0;
+    
+    plotFig = figure;
+    prettyScatterplots(XcombinedPercentPersistent.(comparisons{1,cc}).result, YcombinedPercentPersistent.(comparisons{2,cc}).result, 'xError', xError, 'yError', yError, 'xLabel', [comparisons{1, cc} ' Percent Persistent'], 'yLabel', [comparisons{2, cc} ' Percent Persistent'], 'plotOption', 'square', 'significance', 'rho', 'unity', 'on', 'xLim', [0 1], 'yLim', [0 1])
+    title('Session 1/2 Combined')
+    saveas(plotFig, fullfile(outDir, ['2_percentPersistent_', comparisons{1,cc}, 'x', comparisons{2,cc} 'session12Combined.pdf']), 'pdf')
+    close(plotFig)
+    
+end
+% each session separately
 
 for session = 1:3
+    for cc = 1:size(comparisons,2)
+        xError = [];
+        yError = [];
+        xError(1,:) = percentPersistent{session}.(comparisons{1,cc}) - TPUPParameters{session}.(comparisons{1,cc}).(['percentPersistent_', num2str(confidenceInterval{1})]);
+        xError(2,:) = TPUPParameters{session}.(comparisons{1,cc}).(['percentPersistent_', num2str(confidenceInterval{2})]) - percentPersistent{session}.(comparisons{1,cc});
+        
+        yError(1,:) = percentPersistent{session}.(comparisons{2,cc}) - TPUPParameters{session}.(comparisons{2,cc}).(['percentPersistent_', num2str(confidenceInterval{1})]);
+        yError(2,:) = TPUPParameters{session}.(comparisons{2,cc}).(['percentPersistent_', num2str(confidenceInterval{2})]) - percentPersistent{session}.(comparisons{2,cc});
+        
+        xError(xError<0) = 0;
+        yError(yError<0) = 0;
+        
+        plotFig = figure;
+        prettyScatterplots(percentPersistent{session}.(comparisons{1,cc}), percentPersistent{session}.(comparisons{2,cc}), 'xError', xError, 'yError', yError, 'xLabel', [comparisons{1, cc} ' Percent Persistent'], 'yLabel', [comparisons{2, cc} ' Percent Persistent'], 'plotOption', 'square', 'significance', 'rho', 'unity', 'on', 'xLim', [0 1], 'yLim', [0 1])
+        title(['Session ' num2str(session)])
+        saveas(plotFig, fullfile(outDir, ['2_percentPersistent_', comparisons{1,cc}, 'x', comparisons{2,cc} '_session', num2str(session), '.pdf']), 'pdf')
+        close(plotFig)
+    end
+end
+
+
+
+% across stimulus correlations for exponential tau
+% looking at the comparison between LMS and Mel, Blue and Red,
+% session 1/2 combined
+comparisons(1,:) = {'LMS', 'Blue'};
+comparisons(2,:) = {'Mel', 'Red'};
+for cc = 1:size(comparisons,2)
+    xError = [];
+    yError = [];
+    [ XcombinedExponentialTau.(comparisons{1,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{1,cc}).exponentialTau, TPUPParameters{2}.(comparisons{1,cc}).exponentialTau);
+    [ XcombinedExponentialTau_lowerBound.(comparisons{1,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{1,cc}).(['exponentialTau_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(comparisons{1,cc}).(['exponentialTau_', num2str(confidenceInterval{1})]));
+    [ XcombinedExponentialTau_upperBound.(comparisons{1,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{1,cc}).(['exponentialTau_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(comparisons{1,cc}).(['exponentialTau_', num2str(confidenceInterval{2})]));
+    xError(1,:) = XcombinedExponentialTau.(comparisons{1,cc}).result - XcombinedExponentialTau_lowerBound.(comparisons{1,cc}).result;
+    xError(2,:) = XcombinedExponentialTau_upperBound.(comparisons{1,cc}).result - XcombinedExponentialTau.(comparisons{1,cc}).result;
+    
+    % i noticed that the bootstrap distribution of exponential tau could be
+    % highly skewed. As a result, I've noticed that the mean of the
+    % bootstrap distribution can actually be larger than the 90th
+    % percentile. in specifying error bars in this case, i've decided make
+    % the error bar not extend from the mean value in that direction
+    
+    xError(xError<0) = 0;
+    
+    [ YcombinedExponentialTau.(comparisons{2,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{2,cc}).exponentialTau, TPUPParameters{2}.(comparisons{2,cc}).exponentialTau);
+    [ YcombinedExponentialTau_lowerBound.(comparisons{2,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{2,cc}).(['exponentialTau_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(comparisons{2,cc}).(['exponentialTau_', num2str(confidenceInterval{1})]));
+    [ YcombinedExponentialTau_upperBound.(comparisons{2,cc}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(comparisons{2,cc}).(['exponentialTau_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(comparisons{2,cc}).(['exponentialTau_', num2str(confidenceInterval{2})]));
+    yError(1,:) = YcombinedExponentialTau.(comparisons{2,cc}).result - YcombinedExponentialTau_lowerBound.(comparisons{2,cc}).result;
+    yError(2,:) = YcombinedExponentialTau_upperBound.(comparisons{2,cc}).result - YcombinedExponentialTau.(comparisons{2,cc}).result;
+    
+    yError(yError<0) = 0;
+    
     plotFig = figure;
-    hold on
-    bplot(responseIntegrationTime{session}.LMS, 1, 'color', 'k')
-    bplot(responseIntegrationTime{session}.Mel, 2, 'color', 'c')
-    bplot(responseIntegrationTime{session}.Blue, 3, 'color', 'b')
-    bplot(responseIntegrationTime{session}.Red, 4, 'color', 'r')
-    xticks([1, 2, 3, 4])
-    xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
-    ylabel('Response Integration Time')
-    ylim([0 8])
-    title(['Session ' num2str(session)])
-    saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session', num2str(session), '.pdf']), 'pdf')
+    prettyScatterplots(XcombinedExponentialTau.(comparisons{1,cc}).result, YcombinedExponentialTau.(comparisons{2,cc}).result, 'xError', xError, 'yError', yError, 'xLabel', [comparisons{1, cc} ' Exponential Tau'], 'yLabel', [comparisons{2, cc} ' Exponential Tau'], 'plotOption', 'square', 'significance', 'rho', 'unity', 'on', 'xLim', [0 20], 'yLim', [0 20])
+    title('Session 1/2 Combined')
+    saveas(plotFig, fullfile(outDir, ['2_exponentialTau_', comparisons{1,cc}, 'x', comparisons{2,cc} 'session12Combined.pdf']), 'pdf')
     close(plotFig)
+    
+end
+% each session separately
+
+for session = 1:3
+    for cc = 1:size(comparisons,2)
+        xError = [];
+        yError = [];
+        xError(1,:) = TPUPParameters{session}.(comparisons{1,cc}).exponentialTau - TPUPParameters{session}.(comparisons{1,cc}).(['exponentialTau_', num2str(confidenceInterval{1})]);
+        xError(2,:) = TPUPParameters{session}.(comparisons{1,cc}).(['exponentialTau_', num2str(confidenceInterval{2})]) - TPUPParameters{session}.(comparisons{1,cc}).exponentialTau;
+        
+        yError(1,:) = TPUPParameters{session}.(comparisons{2,cc}).exponentialTau - TPUPParameters{session}.(comparisons{2,cc}).(['exponentialTau_', num2str(confidenceInterval{1})]);
+        yError(2,:) = TPUPParameters{session}.(comparisons{2,cc}).(['exponentialTau_', num2str(confidenceInterval{2})]) - TPUPParameters{session}.(comparisons{2,cc}).exponentialTau;
+        
+        xError(xError<0) = 0;
+        yError(yError<0) = 0;
+        
+        plotFig = figure;
+        prettyScatterplots(TPUPParameters{session}.(comparisons{1,cc}).exponentialTau, TPUPParameters{session}.(comparisons{2,cc}).exponentialTau, 'xError', xError, 'yError', yError, 'xLabel', [comparisons{1, cc} ' Exponential Tau'], 'yLabel', [comparisons{2, cc} ' Exponential Tau'], 'plotOption', 'square', 'significance', 'rho', 'unity', 'on', 'xLim', [0 20], 'yLim', [0 20])
+        title(['Session ' num2str(session)])
+        saveas(plotFig, fullfile(outDir, ['2_exponentialTau_', comparisons{1,cc}, 'x', comparisons{2,cc} '_session', num2str(session), '.pdf']), 'pdf')
+        close(plotFig)
+    end
 end
 
-% session 1 and 2 combined
-stimuli = {'LMS', 'Mel', 'Blue', 'Red'};
-for stimulus = 1:length(stimuli)
-    [ combinedResponseIntegrationTime.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, responseIntegrationTime{1}.(stimuli{stimulus}), responseIntegrationTime{2}.(stimuli{stimulus}));
-end
-plotFig = figure;
-hold on
-bplot(combinedResponseIntegrationTime.LMS.result, 1, 'color', 'k')
-bplot(combinedResponseIntegrationTime.Mel.result, 2, 'color', 'c')
-bplot(combinedResponseIntegrationTime.Blue.result, 3, 'color', 'b')
-bplot(combinedResponseIntegrationTime.Red.result, 4, 'color', 'r')
-xticks([1, 2, 3, 4])
-xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
-xlabel('Stimulus')
-ylim([0 8])
-ylabel('Response Integration Time')
-title('Session 1/2 Combined')
-saveas(plotFig, fullfile(outDir, ['2_responseIntegrationTime_session1-2Combined.pdf']), 'pdf')
-close(plotFig)
 
-
+% Now looking at exponential tau
 for session = 1:3
     plotFig = figure;
     hold on
@@ -210,6 +322,20 @@ for session = 1:3
     ylabel('Exponential Tau')
     ylim([0 20])
     title(['Session ' num2str(session)])
+    
+    % evaluate significance of median differences:
+    % is exponentialTau of mel significantly greater than that of LMS?
+    [ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel, combinedExponentialTau.LMS, dropboxAnalysisDir);
+    if significance < 1
+        plot(1.5, 16, '*')
+    end
+    
+    % is exponentialTau of blue significantly greater than that of red?
+    [ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue, combinedExponentialTau.Red, dropboxAnalysisDir);
+    if significance < 1
+        plot(3.5, 16, '*')
+    end
+    
     saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session', num2str(session), '.pdf']), 'pdf')
     close(plotFig)
 end
@@ -229,8 +355,22 @@ xticks([1, 2, 3, 4])
 xticklabels({'LMS', 'Mel', 'Blue', 'Red'})
 xlabel('Stimulus')
 ylim([0 20])
-ylabel('Response Integration Time')
+ylabel('Exponential Tau')
 title('Session 1/2 Combined')
+
+% evaluate significance of median differences:
+% is exponentialTau of mel significantly greater than that of LMS?
+[ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel, combinedExponentialTau.LMS, dropboxAnalysisDir);
+if significance < 1
+    plot(1.5, 14, '*')
+end
+
+% is exponentialTau of blue significantly greater than that of red?
+[ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue, combinedExponentialTau.Red, dropboxAnalysisDir);
+if significance < 1
+    plot(3.5, 14, '*')
+end
+
 saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session1-2Combined.pdf']), 'pdf')
 close(plotFig)
 
@@ -252,9 +392,11 @@ title('Subjects vary in overall pupil responsiveness')
 
 %% Figure 4: Examining individual differences in the melanopsin and blue responses
 %make the error bars
+sessionOneErrorBar = [];
 sessionOneErroBar(1,:) = TPUPParameters{1}.MeltoLMS.totalResponseArea - TPUPParameters{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
 sessionOneErroBar(2,:) = TPUPParameters{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{1}.MeltoLMS.totalResponseArea;
 
+sessionTwoErrorBar = [];
 sessionTwoErroBar(1,:) = TPUPParameters{2}.MeltoLMS.totalResponseArea - TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
 sessionTwoErroBar(2,:) = TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{2}.MeltoLMS.totalResponseArea;
 
@@ -384,17 +526,20 @@ for stimulus = 1:length(stimuli)
     [ combinedTotalResponseArea.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).totalResponseArea, TPUPParameters{2}.(stimuli{stimulus}).totalResponseArea);
     [ combinedTotalResponseArea_lowerBound.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]));
     [ combinedTotalResponseArea_upperBound.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]));
-
+    
+    session12error = [];
     session12error(1,:) = combinedTotalResponseArea.(stimuli{stimulus}).result - combinedTotalResponseArea_lowerBound.(stimuli{stimulus}).result;
     session12error(2,:) = combinedTotalResponseArea_upperBound.(stimuli{stimulus}).result - combinedTotalResponseArea.(stimuli{stimulus}).result;
     
+    session3error(1,:) = [];
     session3error(1,:) = TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea - TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]);
     session3error(2,:) = TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea;
-
+    
     
     pairResultAcrossSessions(combinedTotalResponseArea.(stimuli{stimulus}).subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.(stimuli{stimulus}).result, TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea, dropboxAnalysisDir, 'xLims', [lims{stimulus} 0], 'yLims', [lims{stimulus} 0], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures', 'xLabel', [stimuli{stimulus}, ' Session 1/2 Total Response Area'], 'yLabel', [stimuli{stimulus}, ' Session 3 Total Response Area'])
     title(['Reproducibility of ' stimuli{stimulus}, ' Total Response Area from Session 1/2 to Session 3'])
     saveas(plotFig, fullfile(outDir, ['10_' stimuli{stimulus}, 'Reproducibility_12x3.pdf']), 'pdf')
+    close(plotFig)
 end
 
 
