@@ -556,12 +556,16 @@ plotFig = figure;
 for session = 1:3
     confidenceIntervalWidth.Mel(session,:) = mean(TPUPParameters{session}.Mel.totalResponseArea_90 - TPUPParameters{session}.Mel.totalResponseArea_10);
     confidenceIntervalWidth.LMS(session,:) = mean(TPUPParameters{session}.LMS.totalResponseArea_90 - TPUPParameters{session}.LMS.totalResponseArea_10);
+    confidenceIntervalWidth.Blue(session,:) = mean(TPUPParameters{session}.Blue.totalResponseArea_90 - TPUPParameters{session}.Blue.totalResponseArea_10);
+    confidenceIntervalWidth.Red(session,:) = mean(TPUPParameters{session}.Red.totalResponseArea_90 - TPUPParameters{session}.Red.totalResponseArea_10);
 end
 
-b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS));
+b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS, confidenceIntervalWidth.Blue, confidenceIntervalWidth.Red));
 b(1).FaceColor = 'c';
 b(2).FaceColor = 'k';
-legend('Mel', 'LMS')
+b(3).FaceColor = 'b';
+b(4).FaceColor = 'r';
+legend('Mel', 'LMS', 'Blue', 'Red')
 ylabel('90% Confidence Interval Width, Raw Values')
 xlabel('Session')
 saveas(plotFig, fullfile(outDir, ['11_confidenceIntervalWidth_rawValues.pdf']), 'pdf')
@@ -574,12 +578,17 @@ plotFig = figure;
 for session = 1:3
     confidenceIntervalWidth.Mel(session,:) = mean(-(TPUPParameters{session}.Mel.totalResponseArea_90./TPUPParameters{session}.Mel.totalResponseArea - TPUPParameters{session}.Mel.totalResponseArea_10./TPUPParameters{session}.Mel.totalResponseArea));
     confidenceIntervalWidth.LMS(session,:) = mean(-(TPUPParameters{session}.LMS.totalResponseArea_90./TPUPParameters{session}.LMS.totalResponseArea - TPUPParameters{session}.LMS.totalResponseArea_10./TPUPParameters{session}.LMS.totalResponseArea));
+    confidenceIntervalWidth.Blue(session,:) = mean(-(TPUPParameters{session}.Blue.totalResponseArea_90./TPUPParameters{session}.Blue.totalResponseArea - TPUPParameters{session}.Blue.totalResponseArea_10./TPUPParameters{session}.Blue.totalResponseArea));
+    confidenceIntervalWidth.Red(session,:) = mean(-(TPUPParameters{session}.Red.totalResponseArea_90./TPUPParameters{session}.Red.totalResponseArea - TPUPParameters{session}.Red.totalResponseArea_10./TPUPParameters{session}.Red.totalResponseArea));
+
 end
 
-b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS));
+b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS, confidenceIntervalWidth.Blue, confidenceIntervalWidth.Red));
 b(1).FaceColor = 'c';
 b(2).FaceColor = 'k';
-legend('Mel', 'LMS')
+b(3).FaceColor = 'b';
+b(4).FaceColor = 'r';
+legend('Mel', 'LMS', 'Blue', 'Red')
 ylabel('90% Confidence Interval Width, %')
 xlabel('Session')
 saveas(plotFig, fullfile(outDir, ['11_confidenceIntervalWidth_percent.pdf']), 'pdf')
