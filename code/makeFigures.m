@@ -140,13 +140,17 @@ title('Session 1/2 Combined')
 % is percent persistent of mel significantly greater than that of LMS?
 [ significance ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
 if significance < 1
-    plot(1.5, 0.98, '*', 'Color', 'k')
+    text(1.5, 0.98, '**', 'FontSize', 22)
+elseif significance < 5
+    text(1.5, 0.98, '*', 'FontSize', 22)
 end
 
 % is percent persistent of blue significantly greater than that of red?
 [ significance ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Blue.result, combinedPercentPersistent.Red.result, dropboxAnalysisDir);
 if significance < 1
-    plot(3.5, 0.9, '*', 'Color', 'k')
+    text(3.5, 0.9, '**', 'FontSize', 22)
+elseif significance < 5
+    text(3.5, 0.9, '*', 'FontSize', 22)
 end
 
 
@@ -170,13 +174,17 @@ for session = 1:3
     % is percent persistent of mel significantly greater than that of LMS?
     [ significance ] = evaluateSignificanceOfMedianDifference(percentPersistentPerSubject{session}.Mel, percentPersistentPerSubject{session}.LMS, dropboxAnalysisDir);
     if significance < 1
-        plot(1.5, 0.98, '*', 'Color', 'k')
+        text(1.5, 0.98, '**', 'FontSize', 22)
+    elseif significance < 5
+        text(1.5, 0.98, '*', 'FontSize', 22)
     end
     
     % is percent persistent of blue significantly greater than that of red?
     [ significance ] = evaluateSignificanceOfMedianDifference(percentPersistentPerSubject{session}.Blue, percentPersistentPerSubject{session}.Red, dropboxAnalysisDir);
     if significance < 1
-        plot(3.5, 0.9, '*', 'Color', 'k')
+        text(3.5, 0.9, '**', 'FontSize', 22)
+    elseif significance < 5
+        text(3.5, 0.9, '*', 'FontSize', 22)
     end
     
     saveas(plotFig, fullfile(outDir, ['2_percentPersistent_session', num2str(session), '.pdf']), 'pdf')
@@ -327,13 +335,17 @@ for session = 1:3
     % is exponentialTau of mel significantly greater than that of LMS?
     [ significance ] = evaluateSignificanceOfMedianDifference(TPUPParameters{session}.Mel.exponentialTau, TPUPParameters{session}.LMS.exponentialTau, dropboxAnalysisDir);
     if significance < 1
-        plot(1.5, 16, '*', 'Color', 'k')
+        text(1.5, 16, '**', 'FontSize', 22)
+    elseif significance < 5
+        text(1.5, 16, '*', 'FontSize', 22)
     end
     
     % is exponentialTau of blue significantly greater than that of red?
     [ significance ] = evaluateSignificanceOfMedianDifference(TPUPParameters{session}.Blue.exponentialTau, TPUPParameters{session}.Red.exponentialTau, dropboxAnalysisDir);
     if significance < 1
-        plot(3.5, 16, '*', 'Color', 'k')
+        text(3.5, 16, '**', 'FontSize', 22)
+    elseif significance < 5
+        text(3.5, 16, '*', 'FontSize', 22)
     end
     
     saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session', num2str(session), '.pdf']), 'pdf')
@@ -362,13 +374,17 @@ title('Session 1/2 Combined')
 % is exponentialTau of mel significantly greater than that of LMS?
 [ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
 if significance < 1
-    plot(1.5, 14, '*', 'Color', 'k')
+    text(1.5, 14, '**', 'FontSize', 22)
+elseif significance < 5
+    text(1.5, 14, '*', 'FontSize', 22)
 end
 
 % is exponentialTau of blue significantly greater than that of red?
 [ significance ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue.result, combinedExponentialTau.Red.result, dropboxAnalysisDir);
 if significance < 1
-    plot(3.5, 14, '*', 'Color', 'k')
+    text(3.5, 14, '**', 'FontSize', 22)
+elseif significance < 5
+    text(3.5, 14, '*', 'FontSize', 22)
 end
 
 saveas(plotFig, fullfile(outDir, ['2_exponentialTau_session1-2Combined.pdf']), 'pdf')
@@ -404,7 +420,24 @@ sessionTwoErroBar(2,:) = TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2s
 % 4 a.: Examining the reproducibility of the mel/lms response ratio
 [ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErroBar, 'sessionTwoErrorBar', sessionTwoErroBar, 'subdir', 'figures', 'saveName', ['4a_melToLMS_1x2'], 'xLim', [0 1.6], 'yLim', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
 
-% 4 b.: how individual differences in the mel/lms response ratio relate to
+% 4 b.: a violin plot showing the distribution of this mel/lms response
+% ratio
+[ combinedMeltoLMS] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea);
+plotFig = figure;
+subplot(1,2,1)
+distributionPlot(combinedMeltoLMS.result')
+ylabel('Mel/LMS Total Response Area')
+title('Session 1/2 Combined')
+subplot(1,2,2)
+s1 = distributionPlot(TPUPParameters{1}.MeltoLMS.totalResponseArea','widthDiv',[2 1],'histOri','left','color','b','showMM',1);
+s2 = distributionPlot(gca,TPUPParameters{2}.MeltoLMS.totalResponseArea','widthDiv',[2 2],'histOri','right','color','k','showMM',1);
+ylabel('Mel/LMS Total Response Area')
+xticks([0.5 1.5])
+xticklabels({'Session 1', 'Session 2'})
+saveas(plotFig, fullfile(outDir, ['4b_violinPlot_MeltoLMS_session12Combined.pdf']), 'pdf')
+
+
+% 4 c.: how individual differences in the mel/lms response ratio relate to
 % individual differences in the blue/red response ratio
 [ combinedMeltoLMS ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.Mel./totalResponseArea{1}.LMS, totalResponseArea{2}.Mel./totalResponseArea{2}.LMS);
 [ combinedBluetoRed ] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.Blue./totalResponseArea{1}.Red, totalResponseArea{2}.Blue./totalResponseArea{2}.Red);
@@ -414,10 +447,10 @@ prettyScatterplots(combinedMeltoLMS.result, combinedBluetoRed.result, 'xLim', [0
 xlabel('Mel/LMS  Total Response Area')
 ylabel('Blue/Red Total Response Area')
 title('Session 1/2 Combined')
-saveas(plotFig, fullfile(outDir, ['4b_meltoLMSxBluetoRed_session1-2Combined.pdf']), 'pdf')
+saveas(plotFig, fullfile(outDir, ['4c_meltoLMSxBluetoRed_session1-2Combined.pdf']), 'pdf')
 close all
 
-% 4 c.: Examining the reproducibility of the percent persistent, averaged
+% 4 d.: Examining the reproducibility of the percent persistent, averaged
 % across all responses for session 1 to session 2
 [ percentPersistentPerSubject ] = calculatePercentPersistent(goodSubjects, TPUPParameters, dropboxAnalysisDir);
 for session = 1:2
@@ -425,7 +458,7 @@ for session = 1:2
         averagePercentPersistentAcrossStimuli{session}(ss) = (percentPersistentPerSubject{session}.LMS(ss) + percentPersistentPerSubject{session}.Mel(ss) + percentPersistentPerSubject{session}.Blue(ss) + percentPersistentPerSubject{session}.Red(ss))/4;
     end
 end
-[ pairedAveragePercentPersistentAcrossStimuli ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, averagePercentPersistentAcrossStimuli{1}*100, averagePercentPersistentAcrossStimuli{2}*100, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4c_averagePercentPersistent_1x2'], 'xLim', [0 100], 'yLim', [0 100], 'plotOption', 'square', 'xLabel', ['Session 1 Average Percent Persistent'], 'yLabel', ['Session 2 Average Percent Persistent'], 'title', 'Reproducibility of Average Percent Persistent');
+[ pairedAveragePercentPersistentAcrossStimuli ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, averagePercentPersistentAcrossStimuli{1}*100, averagePercentPersistentAcrossStimuli{2}*100, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', ['4d_averagePercentPersistent_1x2'], 'xLim', [0 100], 'yLim', [0 100], 'plotOption', 'square', 'xLabel', ['Session 1 Average Percent Persistent'], 'yLabel', ['Session 2 Average Percent Persistent'], 'title', 'Reproducibility of Average Percent Persistent');
 
 
 %% Additional Figures to highlight session 3 differences
