@@ -464,8 +464,22 @@ end
 %% Additional Figures to highlight session 3 differences
 % Figure 5: is the mel/lms response area ratio reproducible at a higher
 % light level?
-[ OneTwoCombined] = combineResultAcrossSessions(goodSubjects, totalResponseArea{1}.Mel./totalResponseArea{1}.LMS, totalResponseArea{2}.Mel./totalResponseArea{2}.LMS);
-[pairedMeltoLMS_12x3] = pairResultAcrossSessions(OneTwoCombined.subjectKey, goodSubjects{3}.ID, OneTwoCombined.result, totalResponseArea{3}.Mel./totalResponseArea{3}.LMS, dropboxAnalysisDir, 'subdir', 'figures', 'saveName', '5_melToLMS_12x3', 'xLims', [0 1.6], 'yLims', [0 1.6], 'plotOption', 'square', 'xLabel', ['Session 1/2 Combined Mel/LMS Total Response Area'], 'yLabel', ['Session 3 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio at Higher Light Level');
+[ combinedTotalResponseArea.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea);
+[ combinedTotalResponseArea_lowerBound.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]), TPUPParameters{2}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]));
+[ combinedTotalResponseArea_upperBound.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]), TPUPParameters{2}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]));
+
+session12error = [];
+session12error(1,:) = combinedTotalResponseArea.MeltoLMS.result - combinedTotalResponseArea_lowerBound.MeltoLMS.result;
+session12error(2,:) = combinedTotalResponseArea_upperBound.MeltoLMS.result - combinedTotalResponseArea.MeltoLMS.result;
+
+session3error = [];
+session3error(1,:) = TPUPParameters{3}.MeltoLMS.totalResponseArea - TPUPParameters{3}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]);
+session3error(2,:) = TPUPParameters{3}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters{3}.MeltoLMS.totalResponseArea;
+
+plotFig = figure;
+pairResultAcrossSessions(combinedTotalResponseArea.MeltoLMS.subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.MeltoLMS.result, TPUPParameters{3}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'xLims', [0 4.5], 'yLims', [0 4.5], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures', 'xLabel', ['Mel/LMS Session 1/2 Total Response Area'], 'yLabel', ['Mel/LMS Session 3 Total Response Area'])
+title('Reproducibility of Mel/LMS Response Ratio at Higher Light Level')
+saveas(plotFig, fullfile(outDir, '5_melToLMS_12x3.pdf'), 'pdf')
 
 % Figure 6: at the higher light level, the PIPR is increased
 [piprTotalAreaNormed, netPIPRTotalAreaNormed] = calculatePIPR(goodSubjects, amplitudesPerSubject, TPUPParameters, dropboxAnalysisDir, 'computeMethod', 'totalAreaNormed');
@@ -613,7 +627,7 @@ for session = 1:3
     confidenceIntervalWidth.LMS(session,:) = mean(-(TPUPParameters{session}.LMS.totalResponseArea_90./TPUPParameters{session}.LMS.totalResponseArea - TPUPParameters{session}.LMS.totalResponseArea_10./TPUPParameters{session}.LMS.totalResponseArea));
     confidenceIntervalWidth.Blue(session,:) = mean(-(TPUPParameters{session}.Blue.totalResponseArea_90./TPUPParameters{session}.Blue.totalResponseArea - TPUPParameters{session}.Blue.totalResponseArea_10./TPUPParameters{session}.Blue.totalResponseArea));
     confidenceIntervalWidth.Red(session,:) = mean(-(TPUPParameters{session}.Red.totalResponseArea_90./TPUPParameters{session}.Red.totalResponseArea - TPUPParameters{session}.Red.totalResponseArea_10./TPUPParameters{session}.Red.totalResponseArea));
-
+    
 end
 
 b = bar(horzcat(confidenceIntervalWidth.Mel, confidenceIntervalWidth.LMS, confidenceIntervalWidth.Blue, confidenceIntervalWidth.Red));
