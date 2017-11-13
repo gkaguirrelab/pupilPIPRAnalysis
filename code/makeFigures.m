@@ -79,7 +79,7 @@ close(plotFig)
 %% Figure 3: Model fits
 % For now, just model fits for the first session of data
 plotFig = figure;
-set(gcf,'un','n','pos',[.05,.05,.7,.3])
+set(gcf,'un','n','pos',[.05,.05,.7,.15])
 
 session = 1;
 for stimulus = 1:length(stimuli)
@@ -134,5 +134,123 @@ print(plotFig, fullfile(outDir,'3_TPUPFits'), '-dpdf', '-bestfit')
 close(plotFig)
 
 %% Figure 4: Group comparisons of exponential tau and percent persistent
+% Exponential tau
+plotFig = figure;
+set(gcf,'un','n','pos',[.05,.05,.7,.3])
+for stimulus = 1:length(stimuli)
+    [ combinedExponentialTau.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).exponentialTau, TPUPParameters{2}.(stimuli{stimulus}).exponentialTau);
+end
 
+subplot(1,2,1)
+
+
+data = horzcat(combinedExponentialTau.LMS.result', combinedExponentialTau.Mel.result', combinedExponentialTau.Blue.result', combinedExponentialTau.Red.result');
+plotSpread(data, 'distributionColors', {'k', 'c', 'b', 'r'}, 'xNames', {'LMS', 'Mel', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1)
+
+
+[ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
+
+% is exponentialTau of blue significantly greater than that of red?
+[ significanceBlueRed ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue.result, combinedExponentialTau.Red.result, dropboxAnalysisDir);
+string = sprintf(['Mel - LMS:  p = ',num2str(significanceMelLMS, 2), '\nBlue - Red: p = ', num2str(significanceBlueRed, 2)]);
+
+text(0.1, 18.5, string, 'FontSize', 12)
+
+
+title('Exponential Tau')
+ylabel('Exponential Tau, Session 1/2 Combined')
+
+for stimulus = 1:length(stimuli)
+    [ combinedPercentPersistent.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, (TPUPParameters{1}.(stimuli{stimulus}).persistentAmplitude./(TPUPParameters{1}.(stimuli{stimulus}).transientAmplitude + TPUPParameters{1}.(stimuli{stimulus}).sustainedAmplitude + TPUPParameters{1}.(stimuli{stimulus}).persistentAmplitude))*100, (TPUPParameters{2}.(stimuli{stimulus}).persistentAmplitude./(TPUPParameters{2}.(stimuli{stimulus}).transientAmplitude + TPUPParameters{2}.(stimuli{stimulus}).sustainedAmplitude + TPUPParameters{2}.(stimuli{stimulus}).persistentAmplitude))*100);
+end
+subplot(1,2,2)
+
+
+data = horzcat(combinedPercentPersistent.LMS.result', combinedPercentPersistent.Mel.result', combinedPercentPersistent.Blue.result', combinedPercentPersistent.Red.result');
+plotSpread(data, 'distributionColors', {'k', 'c', 'b', 'r'}, 'xNames', {'LMS', 'Mel', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1)
+
+[ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
+% is exponentialTau of blue significantly greater than that of red?
+[ significanceBlueRed ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Blue.result, combinedPercentPersistent.Red.result, dropboxAnalysisDir);
+string = sprintf(['Mel - LMS:  p = ',num2str(significanceMelLMS, 2), '\nBlue - Red: p = ', num2str(significanceBlueRed, 2)]);
+text(0.1, 96, string, 'FontSize', 12)
+
+title('Percent Persistent')
+ylabel('Percent Persistent P/(T+S+P) (%), Session 1/2 Combined')
+ylim([0 100])
+
+
+print(plotFig, fullfile(outDir,'4_compareStimuli'), '-dpdf', '-bestfit')
+close(plotFig)
+
+%% Figure 5: Session 3 results at higher light levels
+% first showing average responses, +/- SEM
+plotFig = figure;
+set(gcf,'un','n','pos',[.05,.05,.7,.6])
+session = 3;
+for stimulus = 1:length(stimuli)
+    subplotIndex = stimulus;
+    subplot(1,4, subplotIndex)
+    
+    hold on
+    
+    title(stimuli{stimulus})
+    
+    
+    xlim([ 0 14000])
+    ylim([-50 10])
+    ylabel('Pupil Diameter (% Change)')
+    xlabel('Time (ms)')
+    
+    errBar(1,:) = groupAverageResponse{session}.([stimuli{stimulus}, '_SEM']);
+    errBar(2,:) = groupAverageResponse{session}.([stimuli{stimulus}, '_SEM']);
+    
+    shadedErrorBar(timebase, groupAverageResponse{session}.(stimuli{stimulus}) * 100, errBar*100, 'LineProps', ['-', colors{stimulus}])
+    
+    
+    line([1000 4000], [5 5], 'LineWidth', 4, 'Color', 'k');
+    
+end
+suptitle('Session 3 Group Average Responses at Higher Light Levels')
+
+print(plotFig, fullfile(outDir,'5a_session3AverageResponses'), '-dpdf', '-bestfit')
+close(plotFig)
+
+% now showing reproducibility of shape of response from sessions 1/2 and
+% session 3
+for stimulus = 1:length(stimuli)
+    for tt = 1:length(timebase)
+        [combinedResultAtTimepoint] = combineResultAcrossSessions(goodSubjects, averageResponsePerSubject{1}.(stimuli{stimulus})(:, tt), averageResponsePerSubject{2}.(stimuli{stimulus})(:, tt));
+        combinedGroupAverageResponse.(stimuli{stimulus})(tt) = nanmean(combinedResultAtTimepoint.result);
+    end
+end
+
+plotFig = figure;
+set(gcf,'un','n','pos',[.05,.05,.7,.6])
+for stimulus = 1:length(stimuli)
+    subplot(1,4,stimulus)
+    hold on
+    
+    timebase = 0:20:13980;
+    
+
+    
+    plot(timebase, combinedGroupAverageResponse.(stimuli{stimulus})*100, '-.', 'Color', [0.4, 0.4, 0.4], 'LineWidth', 4)
+    hold on
+    plot(timebase, groupAverageResponse{3}.(stimuli{stimulus})*100, 'Color', colors{stimulus})
+    
+    % now adjust the plot a bit
+    if stimulus == 1
+        legend('Session 1/2 Combined', 'Session 3', 'Location', 'SouthEast')
+    end
+    xlabel('Time (ms)')
+    ylabel('Pupil Diameter (% Change)')
+    ylim([-50 10])
+    xlim([0 14000])
+    title([stimuli{stimulus}])
+    
+end
+suptitle('Reproducibility of group average response at higher light levels')
+print(plotFig, fullfile(outDir,'5b_reproducibilityOfSession12With3'), '-dpdf', '-bestfit')
+close(plotFig)
 end % end function
