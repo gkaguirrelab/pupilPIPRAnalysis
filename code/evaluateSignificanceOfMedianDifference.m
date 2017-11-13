@@ -35,7 +35,7 @@ end
 
 observedMedianDifference = median(sampleOne) - median(sampleTwo);
 numberOfPermutationsLessThanObserved = result < observedMedianDifference;
-significance = 100-(sum(numberOfPermutationsLessThanObserved)/length(result)*100); % in units of %
+significance = 1-(sum(numberOfPermutationsLessThanObserved)/length(result)); % in units of %
 
 
 %% plot the results if specified
