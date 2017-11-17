@@ -39,8 +39,8 @@ fitIAMPCacheHash='d8a50c002b704f1b28a1343521334aac'; % FINAL SAMPLE; amplitudesP
 
 fitTPUPCacheBehavior='load';
 fitTPUPCacheTag='TPUPParameters';
-%fitTPUPCacheHash='f4e5cca771b3eb2c431ac5d15ba81369'; % final sample, with bootstrapping (100 iterations)
-fitTPUPCacheHash='e948f2bf632bf829ab23c9c472ab6806'; % FINAL SAMPLE; TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms
+fitTPUPCacheHash='f4e5cca771b3eb2c431ac5d15ba81369'; % final sample, with bootstrapping (100 iterations)
+%fitTPUPCacheHash='e948f2bf632bf829ab23c9c472ab6806'; % FINAL SAMPLE; TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms
 %fitTPUPCacheHash='9a509f623f277c16ac330a05c9499091'; % TPUPParameter format, maxGamma 750 for blue/red, 400 for mel/lms; 20 session 3 subjects
 %fitTPUPCacheHash='71a1232f88f36a9d4fe50b27b2eeec82'; % TPUPParamter format, maxGamma 750
 %fitTPUPCacheHash='3e8657fda425c1ff57c7eb9c939efef5'; % TPUPParameter format, maxGamma 400
