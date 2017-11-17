@@ -15,7 +15,7 @@ nBootstraps = 10000;
 
 for bb = 1:nBootstraps
     % grab a list of subjects, with replacement
-    nSubjects = 24;
+    nSubjects = length(firstSessionResult);
     randomSubjects = randsample(1:nSubjects, nSubjects, true);
     
     rho = corr(resultCombined.sessionOne(randomSubjects)', resultCombined.sessionTwo(randomSubjects)', 'type', 'Spearman');
