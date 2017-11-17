@@ -53,10 +53,16 @@ for ss = 1:nSimulations
     % we're saying the consequence of disease is a 10% reduction in the
     % persistent amplitude for mel
     experimentalMeltoLMS = (combinedTPUPParameters.Mel.transientAmplitude(experimentalSubjectIndices) + combinedTPUPParameters.Mel.sustainedAmplitude(experimentalSubjectIndices) + combinedTPUPParameters.Mel.persistentAmplitude(experimentalSubjectIndices)*(1-effectSize))./(combinedTPUPParameters.LMS.transientAmplitude(experimentalSubjectIndices) + combinedTPUPParameters.LMS.sustainedAmplitude(experimentalSubjectIndices) + combinedTPUPParameters.LMS.persistentAmplitude(experimentalSubjectIndices));
-    
     % evaluate the significance of this group difference
     
-    [h, p] = ttest(controlMeltoLMS, experimentalMeltoLMS, 'Tail', 'right');
+    [h, p] = ttest2(controlMeltoLMS, experimentalMeltoLMS, 'Tail', 'right');
+    
+    % below is a bit of code if instead of looking at the mel/lms response
+    % ratio, just looking if the total response area for mel differs
+    % between these two groups
+    %controlMel = abs((combinedTPUPParameters.Mel.transientAmplitude(controlSubjectIndices) + combinedTPUPParameters.Mel.sustainedAmplitude(controlSubjectIndices) + combinedTPUPParameters.Mel.persistentAmplitude(controlSubjectIndices)));
+    %experimentalMel = abs((combinedTPUPParameters.Mel.transientAmplitude(experimentalSubjectIndices) + combinedTPUPParameters.Mel.sustainedAmplitude(experimentalSubjectIndices) + combinedTPUPParameters.Mel.persistentAmplitude(experimentalSubjectIndices)*(1-effectSize)));
+    %[h, p] = ttest2(controlMel, experimentalMel, 'Tail', 'right');
     
     % stash the p value
     pAccumulator = [pAccumulator, p];
