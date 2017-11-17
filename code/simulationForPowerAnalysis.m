@@ -31,6 +31,7 @@ for ii = 1:50
 end
 
 % plot to summarize
+plotFig = figure;
 plot(1:50, powerAccumulator)
 xlabel('Number of Subjects')
 ylabel('Power')
