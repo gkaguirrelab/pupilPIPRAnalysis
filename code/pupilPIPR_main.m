@@ -9,7 +9,7 @@ subAnalysisDirectory = 'pupilPIPRAnalysis';
 
 %% Determine which subjects pass inclusion/exclusion criteria for use in further analyses
 
-[ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir)
+[ goodSubjects, badSubjects ] = excludeSubjects(dropboxAnalysisDir);
 
 
 %% Set-up cache behavior
