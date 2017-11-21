@@ -7,11 +7,11 @@ if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
 
-colors = {'k', 'c', 'b', 'r'};
-stimuli = {'LMS', 'Mel', 'Blue', 'Red'};
+colors = {'c', 'k', 'b', 'r'};
+stimuli = {'Mel', 'LMS', 'Blue', 'Red'};
 timebase = 0:20:13980;
 
-confidenceInterval = {10 90};
+confidenceInterval = {10, 90};
 
 % make group median responses
 for session = 1:3
@@ -47,13 +47,13 @@ for session = 1:2
             title(stimuli{stimulus})
         end
         
-        xlim([ 0 14000])
+        xlim([ 0 15000])
         ylim([-50 10])
         
         if subplotIndex == 1 || subplotIndex == 5
             ylabel('Pupil Diameter (% Change)')
         end
-        xlabel('Time (ms)')
+        xlabel('Time (s)')
         
         errBar = [];
         
@@ -68,7 +68,8 @@ for session = 1:2
         
         
         line([1000 4000], [5 5], 'LineWidth', 4, 'Color', 'k');
-        
+        xticks([0, 5000, 10000, 15000])
+        xticklabels([0, 5, 10, 15])
     end
 end
 %suptitle('Reproducibility of group average responses')
@@ -96,11 +97,13 @@ for stimulus = 1:length(stimuli)
         leg = legend({'First Session', 'Second Session'}, 'Location', 'SouthEast','FontSize', 5);
         ylabel('Pupil Diameter (% Change)')
     end
-    xlabel('Time (ms)')
+    xlabel('Time (s)')
     
     ylim([-50 10])
-    xlim([0 14000])
+    xlim([0 15000])
     title([stimuli{stimulus}])
+    xticks([0, 5000, 10000, 15000])
+    xticklabels([0, 5, 10, 15])
     
 end
 %suptitle('Reproducibility of group average responses')
@@ -159,11 +162,13 @@ for stimulus = 1:length(stimuli)
         
         ylabel('Pupil Diameter (% Change)')
     end
-    xlabel('Time (ms)')
+    xlabel('Time (s)')
     
     ylim([-50 10])
-    xlim([0 14000])
+    xlim([0 15000])
     title([stimuli{stimulus}])
+    xticks([0, 5000, 10000, 15000])
+    xticklabels([0, 5, 10, 15])
 end
 
 %suptitle('TPUP Model Fits')
@@ -182,8 +187,8 @@ subplot(1,2,1)
 pbaspect([1 1 1])
 
 
-data = horzcat(combinedExponentialTau.LMS.result', combinedExponentialTau.Mel.result', combinedExponentialTau.Blue.result', combinedExponentialTau.Red.result');
-plotSpread(data, 'distributionColors', {'k', 'c', 'b', 'r'}, 'xNames', {'LMS', 'Mel', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+data = horzcat(combinedExponentialTau.Mel.result', combinedExponentialTau.LMS.result', combinedExponentialTau.Blue.result', combinedExponentialTau.Red.result');
+plotSpread(data, 'distributionColors', {'c', 'k', 'b', 'r'}, 'xNames', {'Mel', 'LMS', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 
 
 [ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
@@ -204,8 +209,8 @@ end
 subplot(1,2,2)
 
 
-data = horzcat(combinedPercentPersistent.LMS.result', combinedPercentPersistent.Mel.result', combinedPercentPersistent.Blue.result', combinedPercentPersistent.Red.result');
-plotSpread(data, 'distributionColors', {'k', 'c', 'b', 'r'}, 'xNames', {'LMS', 'Mel', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+data = horzcat(combinedPercentPersistent.Mel.result', combinedPercentPersistent.LMS.result', combinedPercentPersistent.Blue.result', combinedPercentPersistent.Red.result');
+plotSpread(data, 'distributionColors', {'c', 'k', 'b', 'r'}, 'xNames', {'Mel', 'LMS', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 
 [ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
 % is exponentialTau of blue significantly greater than that of red?
@@ -238,12 +243,14 @@ for stimulus = 1:length(stimuli)
     title(stimuli{stimulus})
     
     
-    xlim([ 0 14000])
+    xlim([ 0 15000])
     ylim([-50 10])
     if stimulus == 1
         ylabel('Pupil Diameter (% Change)')
     end
-    xlabel('Time (ms)')
+    xlabel('Time (ss)')
+    xticks([0, 5000, 10000, 15000])
+    xticklabels([0, 5, 10, 15])
     errBar = [];
     
     % for median approach
@@ -294,10 +301,12 @@ for stimulus = 1:length(stimuli)
         leg.FontSize = 5;
         ylabel('Pupil Diameter (% Change)')
     end
-    xlabel('Time (ms)')
+    xlabel('Time (s)')
     
     ylim([-50 10])
-    xlim([0 14000])
+    xlim([0 15000])
+    xticks([0, 5000, 10000, 15000])
+    xticklabels([0, 5, 10, 15])
     title([stimuli{stimulus}])
     
 end
@@ -343,7 +352,7 @@ sessionTwoErroBar(1,:) = TPUPParameters{2}.MeltoLMS.totalResponseArea - TPUPPara
 sessionTwoErroBar(2,:) = TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{2}.MeltoLMS.totalResponseArea;
 
 [ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErroBar, 'sessionTwoErrorBar', sessionTwoErroBar, 'subdir', 'figures', 'saveName', ['appendix_melToLMS_1x2'], 'xLim', [0 4.5], 'yLim', [0 4.5], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
-[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, pairedTotalResponseAreaNormed.sessionOne, pairedTotalResponseAreaNormed.sessionTwo, dropboxAnalysisDir);
+[ CI, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, pairedTotalResponseAreaNormed.sessionOne, pairedTotalResponseAreaNormed.sessionTwo, dropboxAnalysisDir);
 
 
 % correlation of mel/lms response ratio from sessions 1/2 combined with
@@ -362,7 +371,7 @@ session3error(2,:) = TPUPParameters{3}.MeltoLMS.(['totalResponseArea_', num2str(
 
 plotFig = figure;
 [ pairedResult12x3 ] = pairResultAcrossSessions(combinedTotalResponseArea.MeltoLMS.subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.MeltoLMS.result, TPUPParameters{3}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'xLims', [0 4.5], 'yLims', [0 4.5], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures', 'xLabel', ['Mel/LMS Session 1/2 Total Response Area'], 'yLabel', ['Mel/LMS Session 3 Total Response Area'])
-[ confidenceInterval, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, pairedResult12x3.sessionOne, pairedResult12x3.sessionTwo, dropboxAnalysisDir);
+[ CI, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, pairedResult12x3.sessionOne, pairedResult12x3.sessionTwo, dropboxAnalysisDir);
 
 
 title('Reproducibility of Mel/LMS Response Ratio at Higher Light Level')
