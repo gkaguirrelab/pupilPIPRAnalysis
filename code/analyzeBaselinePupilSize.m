@@ -68,7 +68,7 @@ for stimulus = 1:length(stimuliType)
     plotSpread(data,  'xNames', {'Session 1', 'Session 2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 end
 
-
+% now combine the first and second session
 plotFig = figure;
 set(gcf,'un','n','pos',[.05,.05,.7,.3])
 for stimulus = 1:length(stimuliType)
@@ -83,5 +83,55 @@ for stimulus = 1:length(stimuliType)
     data = {combinedBaselinePupilSize.result', baselinePupilSize{3}.(stimuliType{stimulus})'};
     plotSpread(data,  'xNames', {'Session 1/2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 end
+
+% make sure our background luminance is behaving as we expect
+stimuliTypeValidation = {'LMS', 'Melanopsin', 'PIPR'};
+for session = 1:3
+    for ss = 1:length(goodSubjects{session}.ID)
+        subject = goodSubjects{session}.ID{ss};
+        date = goodSubjects{session}.date{ss};
+        [ passStatus, validation, medianMelanopsinBackgroundLuminance ] = analyzeValidation(subject, date, dropboxAnalysisDir, 'plot', 'off');
+        if passStatus == 0
+            subject
+            date
+        end
+        for stimulus = 1:length(stimuliTypeValidation)
+            if strcmp(stimuliTypeValidation{stimulus}, 'PIPR')
+                medianValidation{session}.PIPR(ss) = (median([validation.Blue.backgroundLuminance])+median([validation.Red.backgroundLuminance]))/2;
+            else
+            medianValidation{session}.(stimuliTypeValidation{stimulus})(ss) = median([validation.(stimuliTypeValidation{stimulus}).backgroundLuminance]);
+            end
+        end
+    end
+end
+plotFig = figure;
+set(gcf,'un','n','pos',[.05,.05,.7,.3])
+for stimulus = 1:length(stimuliType)
+    
+    
+    subplot(1,3,stimulus)
+    pbaspect([1 1 1])
+    title(stimuliType{stimulus});
+    
+    data = {medianValidation{1}.(stimuliTypeValidation{stimulus})', medianValidation{2}.(stimuliTypeValidation{stimulus})', medianValidation{3}.(stimuliTypeValidation{stimulus})'};
+    plotSpread(data,  'xNames', {'Session 1', 'Session 2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+end
+
+% now combine the first and second session
+plotFig = figure;
+set(gcf,'un','n','pos',[.05,.05,.7,.3])
+for stimulus = 1:length(stimuliType)
+    
+    
+    subplot(1,3,stimulus)
+    pbaspect([1 1 1])
+    title(stimuliType{stimulus});
+    
+    [combinedMedianValidation] = combineResultAcrossSessions(goodSubjects, medianValidation{1}.(stimuliTypeValidation{stimulus}), medianValidation{2}.(stimuliTypeValidation{stimulus}));
+    
+    data = {combinedMedianValidation.result', medianValidation{3}.(stimuliTypeValidation{stimulus})'};
+    plotSpread(data,  'xNames', {'Session 1/2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+end
+
 
 end % end function
