@@ -176,16 +176,58 @@ for stimulus = 1:length(stimuli)
                 
                 % read in that validation file
                 fileID = fopen(fullValidationResultsFile);
-                textFileContents = textscan(fileID, '%s', 'Delimiter', ' ');
+                textFileContents = textscan(fileID, '%s', 'Delimiter', '\n');
                 fclose('all');
                 
                 % extract the relevant validation measurements form that
                 % file
-                backgroundLuminance = str2num(textFileContents{1}{4});
-                SConeContrast = str2num(textFileContents{1}{60});
-                LMinusMContrast = str2num(textFileContents{1}{53});
-                LMSContrast = str2num(textFileContents{1}{44});
-                MelanopsinContrast = str2num(textFileContents{1}{67});
+                
+                % determine background luminance:
+                key = 'Background luminance [cd/m2]: ';
+                whichCell = find(~cellfun(@isempty, cellfun(@(x) strfind(x(1:30), key(1:30)), textFileContents{1}, 'UniformOutput', false)));
+                if isempty(whichCell)
+                    backgroundLuminance = NaN;
+                else
+                    backgroundLuminance = sscanf(textFileContents{1}{whichCell(1)}(1+length(key):end), '%g');
+                end
+              
+                
+         
+                
+               
+                
+                key = '- SConeTabulatedAbsorbance: contrast =';
+                whichCell = find(~cellfun(@isempty, cellfun(@(x) strfind(x(1:30), key(1:30)), textFileContents{1}, 'UniformOutput', false)));
+                if isempty(whichCell)
+                    SConeContrast = NaN;
+                else
+                    SConeContrast = sscanf(textFileContents{1}{whichCell(end)}(1+length(key):end), '%g');
+                end
+                
+                key = '- LConeTabulatedAbsorbance + MConeTabulatedAbsorbance + SConeTabulatedAbsorbance: contrast =';  
+                whichCell = find(~cellfun(@isempty, cellfun(@(x) strfind(x(1:30), key(1:30)), textFileContents{1}, 'UniformOutput', false)));
+                if isempty(whichCell)
+                    LMSContrast = NaN;
+                else
+                    LMSContrast = sscanf(textFileContents{1}{whichCell(end)}(1+length(key):end), '%g');
+                end
+                
+                key = '- LConeTabulatedAbsorbance - MConeTabulatedAbsorbance: contrast =';  
+                whichCell = find(~cellfun(@isempty, cellfun(@(x) strfind(x(1:30), key(1:30)), textFileContents{1}, 'UniformOutput', false)));
+                if isempty(whichCell)
+                    LMinusMContrast = NaN;
+                else
+                    LMinusMContrast = sscanf(textFileContents{1}{whichCell(end)}(1+length(key):end), '%g');
+                end
+                
+                key = '- Melanopsin: contrast =';  
+                whichCell = find(~cellfun(@isempty, cellfun(@(x) strfind(x(1:24), key(1:24)), textFileContents{1}, 'UniformOutput', false)));
+                if isempty(whichCell)
+                    MelanopsinContrast = NaN;
+                else
+                    MelanopsinContrast = sscanf(textFileContents{1}{whichCell(end)}(1+length(key):end), '%g');
+                end
+                
                 
                 % save out these validation measurements
                 validation.(stimuli{stimulus})(ii).SConeContrast = SConeContrast;
