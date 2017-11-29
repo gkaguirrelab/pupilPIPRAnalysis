@@ -22,7 +22,7 @@ for session = 1:3
             sortedTimepoint = sort(averageResponsePerSubject{session}.(stimuli{stimulus})(:,tt));
             groupMedianResponse{session}.([stimuli{stimulus}, '_25'])(tt) = sortedTimepoint(round(length(averageResponsePerSubject{session}.(stimuli{stimulus})(:,tt))*0.25));
             groupMedianResponse{session}.([stimuli{stimulus}, '_75'])(tt) = sortedTimepoint(round(length(averageResponsePerSubject{session}.(stimuli{stimulus})(:,tt))*0.75));
-
+            
         end
     end
 end
@@ -256,8 +256,8 @@ for stimulus = 1:length(stimuli)
     % for median approach
     %errBar(2,:) = groupMedianResponse{session}.(stimuli{stimulus}) - groupMedianResponse{session}.([stimuli{stimulus}, '_25']);
     %errBar(1,:) = groupMedianResponse{session}.([stimuli{stimulus}, '_75']) - groupMedianResponse{session}.(stimuli{stimulus});
-     errBar(1,:) = groupAverageResponse{session}.([stimuli{stimulus}, '_SEM']);
-     errBar(2,:) = groupAverageResponse{session}.([stimuli{stimulus}, '_SEM']);   
+    errBar(1,:) = groupAverageResponse{session}.([stimuli{stimulus}, '_SEM']);
+    errBar(2,:) = groupAverageResponse{session}.([stimuli{stimulus}, '_SEM']);
     
     shadedErrorBar(timebase, groupAverageResponse{session}.(stimuli{stimulus}) * 100, errBar*100, 'LineProps', ['-', colors{stimulus}])
     
@@ -288,7 +288,7 @@ for stimulus = 1:length(stimuli)
     
     timebase = 0:20:13980;
     
-
+    
     
     firstsecond = plot(timebase, combinedGroupAverageResponse.(stimuli{stimulus})*100, 'Color', colors{stimulus}, 'LineWidth', 2);
     hold on
@@ -341,6 +341,33 @@ ylim([0 100])
 
 print(plotFig, fullfile(outDir,'appendix_percentPersistent_temporalParametersFixed'), '-dpdf', '-bestfit')
 close(plotFig)
+
+% does group difference obserevd in exponential tau hold up if we fix the
+% other temporal parameters?
+plotFig = figure;
+for stimulus = 1:length(stimuli)
+    [ combinedExponentialTau.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters_fixedTemporalParameters_exceptExponentialTau{1}.(stimuli{stimulus}).exponentialTau, TPUPParameters_fixedTemporalParameters_exceptExponentialTau{2}.(stimuli{stimulus}).exponentialTau);
+end
+
+
+pbaspect([1 1 1])
+
+
+data = horzcat(combinedExponentialTau.Mel.result', combinedExponentialTau.LMS.result', combinedExponentialTau.Blue.result', combinedExponentialTau.Red.result');
+plotSpread(data, 'distributionColors', {'c', 'k', 'b', 'r'}, 'xNames', {'Mel', 'LMS', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+
+
+[ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
+
+% is exponentialTau of blue significantly greater than that of red?
+[ significanceBlueRed ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Blue.result, combinedExponentialTau.Red.result, dropboxAnalysisDir);
+string = sprintf(['Mel - LMS:  p = ',num2str(significanceMelLMS, 2), '\nBlue - Red: p = ', num2str(significanceBlueRed, 2)]);
+
+text(0.1, 18.5, string, 'FontSize', 7)
+ylabel('Exponential Tau')
+print(plotFig, fullfile(outDir,'appendix_exponentialTau_temporalParametersFixed'), '-dpdf', '-bestfit')
+close(plotFig)
+
 
 % correlation of mel/lms response ratio from sessions 1/2
 sessionOneErrorBar = [];
@@ -403,6 +430,6 @@ for stimulus = 1:2
     
 end
 saveas(plotFig, fullfile(outDir, ['appendix_totalResponseAreaReproducibility_12x3.pdf']), 'pdf')
-    close(plotFig)
+close(plotFig)
 
 end % end function
