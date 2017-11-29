@@ -130,6 +130,7 @@ p.addParameter('makePlots',true,@islogical);
 % Optional analysis parameters
 p.addParameter('stimulusLabels',{'LMS' 'Mel' 'Blue' 'Red'},@iscell);
 p.addParameter('pairedStimulus',{'Mel' 'LMS' 'Red' 'Blue'},@iscell);
+p.addParameter('fixExponentialTau',true,@islogical);
 
 
 % order of parameters is: delay, gamma tau, exponential tau, transient
@@ -193,10 +194,17 @@ for session = 1:length(goodSubjects) % loop over sessions
             % subject
             
            
-            bestInitialValues = [(TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).delay(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).delay(ss))/2, (TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).gammaTau(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).gammaTau(ss))/2, (TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).exponentialTau(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).exponentialTau(ss))/2, TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).transientAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).sustainedAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).persistentAmplitude(ss)];
-            lb = [bestInitialValues(1), bestInitialValues(2), bestInitialValues(3), p.Results.lbTPUPbyStimulus(stimulus,4), p.Results.lbTPUPbyStimulus(stimulus,5), p.Results.lbTPUPbyStimulus(stimulus,6)];
-            ub = [bestInitialValues(1), bestInitialValues(2), bestInitialValues(3), p.Results.ubTPUPbyStimulus(stimulus,4), p.Results.ubTPUPbyStimulus(stimulus,5), p.Results.ubTPUPbyStimulus(stimulus,6)];
-
+            
+            if p.Results.fixExponentialTau
+                bestInitialValues = [(TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).delay(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).delay(ss))/2, (TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).gammaTau(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).gammaTau(ss))/2, (TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).exponentialTau(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).exponentialTau(ss))/2, TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).transientAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).sustainedAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).persistentAmplitude(ss)];
+                lb = [bestInitialValues(1), bestInitialValues(2), bestInitialValues(3), p.Results.lbTPUPbyStimulus(stimulus,4), p.Results.lbTPUPbyStimulus(stimulus,5), p.Results.lbTPUPbyStimulus(stimulus,6)];
+                ub = [bestInitialValues(1), bestInitialValues(2), bestInitialValues(3), p.Results.ubTPUPbyStimulus(stimulus,4), p.Results.ubTPUPbyStimulus(stimulus,5), p.Results.ubTPUPbyStimulus(stimulus,6)];
+            elseif ~p.Results.fixExponentialTau
+                bestInitialValues = [(TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).delay(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).delay(ss))/2, (TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).gammaTau(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).gammaTau(ss))/2, (TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).exponentialTau(ss)+TPUPParameters{session}.(p.Results.pairedStimulus{stimulus}).exponentialTau(ss))/2, TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).transientAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).sustainedAmplitude(ss), TPUPParameters{session}.(p.Results.stimulusLabels{stimulus}).persistentAmplitude(ss)];
+                lb = [bestInitialValues(1), bestInitialValues(2), p.Results.lbTPUPbyStimulus(stimulus,3), p.Results.lbTPUPbyStimulus(stimulus,4), p.Results.lbTPUPbyStimulus(stimulus,5), p.Results.lbTPUPbyStimulus(stimulus,6)];
+                ub = [bestInitialValues(1), bestInitialValues(2), p.Results.ubTPUPbyStimulus(stimulus,3), p.Results.ubTPUPbyStimulus(stimulus,4), p.Results.ubTPUPbyStimulus(stimulus,5), p.Results.ubTPUPbyStimulus(stimulus,6)];
+            end
+            
             
             % do the fit with the best initialValues
             thePacket.response.values = averageResponsePerSubject{session}.(p.Results.stimulusLabels{stimulus})(ss,:)*100;
