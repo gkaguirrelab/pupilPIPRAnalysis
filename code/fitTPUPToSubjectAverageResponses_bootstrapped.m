@@ -1,4 +1,4 @@
-function [ TPUPParameters_bootstrapped ] = fitTPUPToSubjectAverageResponses_bootstrapped(goodSubjects, TPUPParameters, dropboxAnalysisDir, varargin)
+function [ TPUPParameters_bootstrapped, distribution ] = fitTPUPToSubjectAverageResponses_bootstrapped(goodSubjects, TPUPParameters, dropboxAnalysisDir, varargin)
 
 %% Parse vargin for options passed here
 p = inputParser; p.KeepUnmatched = true;
@@ -149,6 +149,8 @@ for session = 1:length(goodSubjects)
                 accumulator.(p.Results.stimulusLabels{stimulus}) = [accumulator.(p.Results.stimulusLabels{stimulus}), fitParams];
             end % end bootstraps
             
+            
+            
             % extract information from bootstrap accumulator
             measures = fieldnames(accumulator.(p.Results.stimulusLabels{stimulus}));
             for mm = 1:length(measures)
@@ -167,6 +169,7 @@ for session = 1:length(goodSubjects)
             
         end % end loop over stimuli
         
+        distribution{session}.(goodSubjects{session}.ID{ss}) = accumulator;
         % now determine the mel to lms response ratio
         nSimulations = 1000;
         for st = 1:nSimulations
@@ -177,6 +180,8 @@ for session = 1:length(goodSubjects)
             
             melToLMSAccumulator(st) = melResponse/lmsResponse;
         end
+        
+        
         TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea(ss) = mean(melToLMSAccumulator);
         TPUPParameters_bootstrapped{session}.MeltoLMS.totalResponseArea_SEM(ss) = std(melToLMSAccumulator);
         
