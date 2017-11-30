@@ -22,6 +22,8 @@ p.parse(goodSubjects, dropboxAnalysisDir, varargin{:});
 stimuliType = {'LMS', 'Mel', 'PIPR'};
 
 
+
+
 for session = 1:length(goodSubjects)
     if session == 1 || session == 2
         subdir = '';
@@ -54,7 +56,11 @@ for session = 1:length(goodSubjects)
 end % end loop over sessions
 
 %% now do some plotting to summarize
+outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/baselinePupilSize');
 
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
+end
 plotFig = figure;
 set(gcf,'un','n','pos',[.05,.05,.7,.3])
 for stimulus = 1:length(stimuliType)
@@ -63,10 +69,16 @@ for stimulus = 1:length(stimuliType)
     subplot(1,3,stimulus)
     pbaspect([1 1 1])
     title(stimuliType{stimulus});
+    xlabel('Session')
+    ylabel('Pupil Diameter (mm)')
     
     data = {baselinePupilSize{1}.(stimuliType{stimulus})', baselinePupilSize{2}.(stimuliType{stimulus})', baselinePupilSize{3}.(stimuliType{stimulus})'};
-    plotSpread(data,  'xNames', {'Session 1', 'Session 2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    plotSpread(data,  'xNames', {'S 1', 'S 2', 'S 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    ylim([2 10])
+    ylabel('Pupil Diameter (mm)')
 end
+print(plotFig, fullfile(outDir,'baselinePupilSize_sessions123'), '-dpdf', '-bestfit')
+close(plotFig)
 
 % now combine the first and second session
 plotFig = figure;
@@ -77,12 +89,18 @@ for stimulus = 1:length(stimuliType)
     subplot(1,3,stimulus)
     pbaspect([1 1 1])
     title(stimuliType{stimulus});
+    xlabel('Session')
+    ylabel('Pupil Diameter (mm)')
     
     [combinedBaselinePupilSize] = combineResultAcrossSessions(goodSubjects, baselinePupilSize{1}.(stimuliType{stimulus}), baselinePupilSize{2}.(stimuliType{stimulus}));
     
     data = {combinedBaselinePupilSize.result', baselinePupilSize{3}.(stimuliType{stimulus})'};
-    plotSpread(data,  'xNames', {'Session 1/2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    plotSpread(data,  'xNames', {'S 1/2', 'S 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    ylim([2 10])
+    ylabel('Pupil Diameter (mm)')
 end
+print(plotFig, fullfile(outDir,'baselinePupilSize_sessions12combined3'), '-dpdf', '-bestfit')
+close(plotFig)
 
 % make sure our background luminance is behaving as we expect
 stimuliTypeValidation = {'LMS', 'Melanopsin', 'PIPR'};
@@ -99,11 +117,13 @@ for session = 1:3
             if strcmp(stimuliTypeValidation{stimulus}, 'PIPR')
                 medianValidation{session}.PIPR(ss) = (median([validation.Blue.backgroundLuminance])+median([validation.Red.backgroundLuminance]))/2;
             else
-            medianValidation{session}.(stimuliTypeValidation{stimulus})(ss) = median([validation.(stimuliTypeValidation{stimulus}).backgroundLuminance]);
+                medianValidation{session}.(stimuliTypeValidation{stimulus})(ss) = median([validation.(stimuliTypeValidation{stimulus}).backgroundLuminance]);
             end
         end
     end
 end
+
+
 plotFig = figure;
 set(gcf,'un','n','pos',[.05,.05,.7,.3])
 for stimulus = 1:length(stimuliType)
@@ -112,10 +132,16 @@ for stimulus = 1:length(stimuliType)
     subplot(1,3,stimulus)
     pbaspect([1 1 1])
     title(stimuliType{stimulus});
+    xlabel('Session')
+    ylabel('Luminance (cd/m2)')
     
     data = {medianValidation{1}.(stimuliTypeValidation{stimulus})', medianValidation{2}.(stimuliTypeValidation{stimulus})', medianValidation{3}.(stimuliTypeValidation{stimulus})'};
-    plotSpread(data,  'xNames', {'Session 1', 'Session 2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    plotSpread(data,  'xNames', {'S 1', 'S 2', 'S 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    ylabel('Luminance (cd/m2)')
+    
 end
+print(plotFig, fullfile(outDir,'backgroundLuminance_sessions123'), '-dpdf', '-bestfit')
+close(plotFig)
 
 % now combine the first and second session
 plotFig = figure;
@@ -126,12 +152,37 @@ for stimulus = 1:length(stimuliType)
     subplot(1,3,stimulus)
     pbaspect([1 1 1])
     title(stimuliType{stimulus});
+    xlabel('Session')
+    ylabel('Luminance (cd/m2)')
     
     [combinedMedianValidation] = combineResultAcrossSessions(goodSubjects, medianValidation{1}.(stimuliTypeValidation{stimulus}), medianValidation{2}.(stimuliTypeValidation{stimulus}));
     
     data = {combinedMedianValidation.result', medianValidation{3}.(stimuliTypeValidation{stimulus})'};
-    plotSpread(data,  'xNames', {'Session 1/2', 'Session 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    plotSpread(data,  'xNames', {'S 1/2', 'S 3'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+    ylabel('Luminance (cd/m2)')
+    
+end
+print(plotFig, fullfile(outDir,'backgroundLuminance_sessions12combined3'), '-dpdf', '-bestfit')
+close(plotFig)
+
+%% now to look at paired difference in pupil size bewteen session 3 and session 1/2 combined
+for stimulus = 1:length(stimuliType)
+    [combinedBaselinePupilSize.(stimuliType{stimulus}) ] = combineResultAcrossSessions(goodSubjects, baselinePupilSize{1}.(stimuliType{stimulus}), baselinePupilSize{2}.(stimuliType{stimulus}));
+    [pairedBaselinePupilSize.(stimuliType{stimulus})] = pairResultAcrossSessions(combinedBaselinePupilSize.(stimuliType{stimulus}).subjectKey, goodSubjects{3}.ID, combinedBaselinePupilSize.(stimuliType{stimulus}).result,  baselinePupilSize{3}.(stimuliType{stimulus}), dropboxAnalysisDir, 'makePlot', false);
 end
 
+plotFig = figure;
+data = {pairedBaselinePupilSize.Mel.sessionOne' - pairedBaselinePupilSize.Mel.sessionTwo', pairedBaselinePupilSize.LMS.sessionOne' - pairedBaselinePupilSize.LMS.sessionTwo', pairedBaselinePupilSize.PIPR.sessionOne' - pairedBaselinePupilSize.PIPR.sessionTwo'};
+plotSpread(data,  'xNames', {'Mel', 'LMS', 'PIPR'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+ylabel('Session 3 - Session 1/2 (mm)')
+print(plotFig, fullfile(outDir,'pairedPupilDifference_mm'), '-dpdf', '-bestfit')
+close(plotFig)
+
+plotFig = figure;
+data = {100*(pairedBaselinePupilSize.Mel.sessionOne' - pairedBaselinePupilSize.Mel.sessionTwo')./pairedBaselinePupilSize.Mel.sessionOne', 100*(pairedBaselinePupilSize.LMS.sessionOne' - pairedBaselinePupilSize.LMS.sessionTwo')./pairedBaselinePupilSize.LMS.sessionOne', 100*(pairedBaselinePupilSize.PIPR.sessionOne' - pairedBaselinePupilSize.PIPR.sessionTwo')./pairedBaselinePupilSize.PIPR.sessionOne'};
+plotSpread(data,  'xNames', {'Mel', 'LMS', 'PIPR'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+ylabel('(Session 3 - Session 1/2)/(Session 1/2) (%)')
+print(plotFig, fullfile(outDir,'pairedPupilDifference_percent'), '-dpdf', '-bestfit')
+close(plotFig)
 
 end % end function
