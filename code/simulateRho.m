@@ -2,7 +2,15 @@ function [ confidenceInterval ] = simulateRho(goodSubjects, distribution)
 
 % This function uses the bootstrap distribution of TPUP model fit
 % parameters to create a confidence interval of the rho value quantifying
-% the reproducibility from one session with another. 
+% the reproducibility from one session with another.
+
+% We have a bootstrap distribution of all TPUP parameters for each subject
+% for each session. In this code, for each session for each stimulus we
+% make two draws from the bootstrap distribution of total response area.
+% The first draw represents the simulated session 1 result; the second draw
+% represents the simulated session 2 result. Do this for all subjects
+% studied in that session, measure the correlation, stash this value, and
+% repeat. Then analyze the distribution of the rho values.
 
 % simulate mel first
 nSimulations = 1000;
