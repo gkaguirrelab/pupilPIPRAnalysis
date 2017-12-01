@@ -1,5 +1,34 @@
 function [baselinePupilSize] = analyzeBaselinePupilSize(goodSubjects, dropboxAnalysisDir, varargin)
 
+% This function looks at the baseline size, which here refers to the mean
+% pupil size preceeding any light pulses during the 6 trials of background
+% adaptation. The motivation for this analysis was basically to confirm
+% that the our stimuli was having some of the basic effects we would expect
+% on pupil size, namely that was increased the luminance of the background
+% spectra that pupil size would get smaller.
+
+% INPUT:
+%   - goodSubjects: list of subjects and associated dates when they
+%           were studied. This is necessary to specify which subjects were
+%           studied when to go look up their raw data
+%   - dropboxAnalysisDir: string that defines the path to the dropbox
+%           directory so we know where the data lives
+
+% OUTPUT:
+%   - baselinePupilSize: a 1x3 cell array, where each cell refers to a
+%           different session. The contents of each cell is a structure,
+%           where each subfield of the structure is a stimulus type (Mel,
+%           LMS, or PIPR). The concents of each subfield is a vector of
+%           length N, where N is the number of subjects studied in that
+%           session
+
+% OPTIONS:
+%   - whichTrials: a key value pair to specify which background trials to
+%           include in this analysis. The default is to use all background
+%           trials, but another sensible option is to just use the last
+%           trial (when the pupil is more or less fully adapted)
+
+
 %% Parse vargin for options passed here
 p = inputParser; p.KeepUnmatched = true;
 p.addRequired('goodSubjects',@iscell);
@@ -174,14 +203,14 @@ end
 plotFig = figure;
 data = {pairedBaselinePupilSize.Mel.sessionOne' - pairedBaselinePupilSize.Mel.sessionTwo', pairedBaselinePupilSize.LMS.sessionOne' - pairedBaselinePupilSize.LMS.sessionTwo', pairedBaselinePupilSize.PIPR.sessionOne' - pairedBaselinePupilSize.PIPR.sessionTwo'};
 plotSpread(data,  'xNames', {'Mel', 'LMS', 'PIPR'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
-ylabel('Session 3 - Session 1/2 (mm)')
+ylabel('Session 1/2 - Session 3 (mm)')
 print(plotFig, fullfile(outDir,'pairedPupilDifference_mm'), '-dpdf', '-bestfit')
 close(plotFig)
 
 plotFig = figure;
 data = {100*(pairedBaselinePupilSize.Mel.sessionOne' - pairedBaselinePupilSize.Mel.sessionTwo')./pairedBaselinePupilSize.Mel.sessionOne', 100*(pairedBaselinePupilSize.LMS.sessionOne' - pairedBaselinePupilSize.LMS.sessionTwo')./pairedBaselinePupilSize.LMS.sessionOne', 100*(pairedBaselinePupilSize.PIPR.sessionOne' - pairedBaselinePupilSize.PIPR.sessionTwo')./pairedBaselinePupilSize.PIPR.sessionOne'};
 plotSpread(data,  'xNames', {'Mel', 'LMS', 'PIPR'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
-ylabel('(Session 3 - Session 1/2)/(Session 1/2) (%)')
+ylabel('(Session 1/2 - Session 3)/(Session 1/2) (%)')
 print(plotFig, fullfile(outDir,'pairedPupilDifference_percent'), '-dpdf', '-bestfit')
 close(plotFig)
 
