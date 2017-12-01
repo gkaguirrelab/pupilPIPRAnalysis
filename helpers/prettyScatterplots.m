@@ -74,6 +74,11 @@ if strcmp(p.Results.stimulation, 'red')
     markerEdgeColor = [ 1, 0, 0];
     markerFaceColor = [ 1, 0.8, 0.8];
 end
+if strcmp(p.Results.stimulation, 'cyan')
+    errorBarColor = 'c';
+    markerEdgeColor = 'c';
+    markerFaceColor = 'c';
+end
 
 
 hold on
