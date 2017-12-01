@@ -33,6 +33,8 @@ for session = 1:3
     confidenceInterval{session}.Mel.percentile10 = sortedRho(round(0.10*nSimulations));
     confidenceInterval{session}.Mel.percentile05 = sortedRho(round(0.05*nSimulations));
     confidenceInterval{session}.Mel.percentile025 = sortedRho(round(0.025*nSimulations));
+    confidenceInterval{session}.Mel.mean = mean(sortedRho);
+
 end
 
 %% now for LMS pulses
@@ -62,6 +64,18 @@ for session = 1:3
     confidenceInterval{session}.LMS.percentile10 = sortedRho(round(0.10*nSimulations));
     confidenceInterval{session}.LMS.percentile05 = sortedRho(round(0.05*nSimulations));
     confidenceInterval{session}.LMS.percentile025 = sortedRho(round(0.025*nSimulations));
+    confidenceInterval{session}.LMS.mean = mean(sortedRho);
 end
+% plot to summarize
+plotFig = figure;
+for session = 1:3
+    MelErrBar(2,:) = confidenceInterval{session}.Mel.mean - confidenceInterval{session}.Mel.percentile025;
+    MelErrBar(1,:) = confidenceInterval{session}.Mel.percentile975 - confidenceInterval{session}.Mel.mean;
+    LMSErrBar(2,:) = confidenceInterval{session}.LMS.mean - confidenceInterval{session}.LMS.percentile025;
+    LMSErrBar(1,:) = confidenceInterval{session}.LMS.percentile975 - confidenceInterval{session}.LMS.mean;
+    prettyScatterplots(session+0.1, confidenceInterval{session}.Mel.mean, 'yError', MelErrBar, 'stimulation', 'cyan');
+    prettyScatterplots(session-0.1, confidenceInterval{session}.LMS.mean, 'yError', LMSErrBar);
 
 end
+xticks([1, 2, 3])
+xticklabels({'Session 1', 'Session 2', 'Session 3'})
