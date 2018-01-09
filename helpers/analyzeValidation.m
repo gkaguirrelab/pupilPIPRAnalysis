@@ -148,6 +148,7 @@ for stimulus = 1:length(stimuli)
     if lastValidationIndex - firstValidationIndex+1 > numberValidations
         failStatus = failStatus + 1; % if we're trying to analyze more validation files than are available, that's a fail
         passStatus = 0;
+        error(['Attempted to find ' num2str(lastValidationIndex - firstValidationIndex+1), ' validations, but only found ' num2str(numberValidations)]);
         return
         
     % assuming we can find all of the validation files we need, now we can start to look at some of the validation results    
@@ -259,6 +260,17 @@ for stimulus = 1:length(stimuli)
                 backgroundLuminance = str2num(textFileContents{1}{4});
                 
                 validation.(stimuli{stimulus})(ii).backgroundLuminance = backgroundLuminance;
+            end
+            
+            % also have to extract the PIPR intensities from the validation
+            % files
+            for ii = firstValidationIndex:lastValidationIndex
+                validationResultsFile = dir([fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name) '/*.mat']);
+                validationResultsFile = {validationResultsFile.name};
+                fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
+                
+                [retinalIrradiance] = calculateRetinalIrradiance(fullValidationResultsFile);
+                validation.(stimuli{stimulus})(ii).retinalIrradiance = retinalIrradiance.log10SumIrradianceQuantaPerCm2Sec;
             end
         end
     end
