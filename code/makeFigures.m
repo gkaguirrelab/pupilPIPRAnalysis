@@ -1,4 +1,4 @@
-function makeFigures(goodSubjects, averageResponsePerSubject, groupAverageResponse, TPUPParameters, TPUPParameters_fixedTemporalParameters, dropboxAnalysisDir)
+function makeFigures(goodSubjects, averageResponsePerSubject, groupAverageResponse, TPUPParameters, TPUPParameters_fixedTemporalParameters, TPUPParameters_fixedTemporalParameters_exceptExponentialTau, TPUPParameters_bootstrapped, dropboxAnalysisDir)
 
 %% Set up some basic variables
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
@@ -7,8 +7,8 @@ if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
 
-colors = {'c', 'k', 'b', 'r'};
-stimuli = {'Mel', 'LMS', 'Blue', 'Red'};
+colors = {'k', 'c', 'r', 'b'};
+stimuli = {'LMS', 'Mel', 'Red', 'Blue'};
 timebase = 0:20:13980;
 
 confidenceInterval = {10, 90};
@@ -187,8 +187,8 @@ subplot(1,2,1)
 pbaspect([1 1 1])
 
 
-data = horzcat(combinedExponentialTau.Mel.result', combinedExponentialTau.LMS.result', combinedExponentialTau.Blue.result', combinedExponentialTau.Red.result');
-plotSpread(data, 'distributionColors', {'c', 'k', 'b', 'r'}, 'xNames', {'Mel', 'LMS', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+data = horzcat(combinedExponentialTau.LMS.result', combinedExponentialTau.Mel.result',   combinedExponentialTau.Red.result', combinedExponentialTau.Blue.result');
+plotSpread(data, 'distributionColors', {'k', 'c', 'r', 'b'}, 'xNames', {'LMS', 'Mel', 'Red', 'Blue'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 
 
 [ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
@@ -209,8 +209,8 @@ end
 subplot(1,2,2)
 
 
-data = horzcat(combinedPercentPersistent.Mel.result', combinedPercentPersistent.LMS.result', combinedPercentPersistent.Blue.result', combinedPercentPersistent.Red.result');
-plotSpread(data, 'distributionColors', {'c', 'k', 'b', 'r'}, 'xNames', {'Mel', 'LMS', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+data = horzcat(combinedPercentPersistent.LMS.result', combinedPercentPersistent.Mel.result', combinedPercentPersistent.Red.result', combinedPercentPersistent.Blue.result');
+plotSpread(data, 'distributionColors', {'k', 'c', 'r', 'b'}, 'xNames', {'LMS', 'Mel', 'Red', 'Blue'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 
 [ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
 % is exponentialTau of blue significantly greater than that of red?
@@ -318,14 +318,17 @@ close(plotFig)
 % does the group differernces in percent persistent hold up even if we lock
 % the temporal paramters in comparing the mel response to the lms repsonse,
 % and the blue to red?
+combinedPercentPersistent = [];
 for stimulus = 1:length(stimuli)
     [ combinedPercentPersistent.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, (TPUPParameters_fixedTemporalParameters{1}.(stimuli{stimulus}).persistentAmplitude./(TPUPParameters_fixedTemporalParameters{1}.(stimuli{stimulus}).transientAmplitude + TPUPParameters_fixedTemporalParameters{1}.(stimuli{stimulus}).sustainedAmplitude + TPUPParameters_fixedTemporalParameters{1}.(stimuli{stimulus}).persistentAmplitude))*100, (TPUPParameters_fixedTemporalParameters{2}.(stimuli{stimulus}).persistentAmplitude./(TPUPParameters_fixedTemporalParameters{2}.(stimuli{stimulus}).transientAmplitude + TPUPParameters_fixedTemporalParameters{2}.(stimuli{stimulus}).sustainedAmplitude + TPUPParameters_fixedTemporalParameters{2}.(stimuli{stimulus}).persistentAmplitude))*100);
 end
 plotFig = figure;
+subplot(1,2,2)
+pbaspect([1 1 1])
 
 
-data = horzcat(combinedPercentPersistent.LMS.result', combinedPercentPersistent.Mel.result', combinedPercentPersistent.Blue.result', combinedPercentPersistent.Red.result');
-plotSpread(data, 'distributionColors', {'k', 'c', 'b', 'r'}, 'xNames', {'LMS', 'Mel', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1)
+data = horzcat(combinedPercentPersistent.LMS.result', combinedPercentPersistent.Mel.result', combinedPercentPersistent.Red.result', combinedPercentPersistent.Blue.result');
+plotSpread(data, 'distributionColors', {'k', 'c', 'r', 'b'}, 'xNames', {'LMS', 'Mel', 'Red', 'Blue'}, 'distributionMarkers', 'o', 'showMM', 1)
 
 [ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedPercentPersistent.Mel.result, combinedPercentPersistent.LMS.result, dropboxAnalysisDir);
 % is exponentialTau of blue significantly greater than that of red?
@@ -339,12 +342,13 @@ ylim([0 100])
 
 
 
-print(plotFig, fullfile(outDir,'appendix_percentPersistent_temporalParametersFixed'), '-dpdf', '-bestfit')
-close(plotFig)
+
 
 % does group difference obserevd in exponential tau hold up if we fix the
 % other temporal parameters?
-plotFig = figure;
+subplot(1,2,1)
+pbaspect([1 1 1])
+combinedExponentialTau = [];
 for stimulus = 1:length(stimuli)
     [ combinedExponentialTau.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters_fixedTemporalParameters_exceptExponentialTau{1}.(stimuli{stimulus}).exponentialTau, TPUPParameters_fixedTemporalParameters_exceptExponentialTau{2}.(stimuli{stimulus}).exponentialTau);
 end
@@ -353,8 +357,8 @@ end
 pbaspect([1 1 1])
 
 
-data = horzcat(combinedExponentialTau.Mel.result', combinedExponentialTau.LMS.result', combinedExponentialTau.Blue.result', combinedExponentialTau.Red.result');
-plotSpread(data, 'distributionColors', {'c', 'k', 'b', 'r'}, 'xNames', {'Mel', 'LMS', 'Blue', 'Red'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
+data = horzcat( combinedExponentialTau.LMS.result', combinedExponentialTau.Mel.result',  combinedExponentialTau.Red.result', combinedExponentialTau.Blue.result');
+plotSpread(data, 'distributionColors', {'k', 'c', 'r', 'b'}, 'xNames', {'LMS', 'Mel', 'Red', 'Blue'}, 'distributionMarkers', 'o', 'showMM', 1, 'binWidth', 0.3)
 
 
 [ significanceMelLMS ] = evaluateSignificanceOfMedianDifference(combinedExponentialTau.Mel.result, combinedExponentialTau.LMS.result, dropboxAnalysisDir);
@@ -365,71 +369,68 @@ string = sprintf(['Mel - LMS:  p = ',num2str(significanceMelLMS, 2), '\nBlue - R
 
 text(0.1, 18.5, string, 'FontSize', 7)
 ylabel('Exponential Tau')
-print(plotFig, fullfile(outDir,'appendix_exponentialTau_temporalParametersFixed'), '-dpdf', '-bestfit')
+print(plotFig, fullfile(outDir,'appendix_compareStimuli_temporalParametersFixed'), '-dpdf', '-bestfit')
 close(plotFig)
 
 
 % correlation of mel/lms response ratio from sessions 1/2
 sessionOneErrorBar = [];
-sessionOneErroBar(1,:) = TPUPParameters{1}.MeltoLMS.totalResponseArea - TPUPParameters{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
-sessionOneErroBar(2,:) = TPUPParameters{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{1}.MeltoLMS.totalResponseArea;
+sessionOneErrorBar(1,:) = TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
+sessionOneErrorBar(2,:) = TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea;
 
 sessionTwoErrorBar = [];
-sessionTwoErroBar(1,:) = TPUPParameters{2}.MeltoLMS.totalResponseArea - TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
-sessionTwoErroBar(2,:) = TPUPParameters{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters{2}.MeltoLMS.totalResponseArea;
+sessionTwoErrorBar(1,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{1})]);
+sessionTwoErrorBar(2,:) = TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_' num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea;
 
-[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErroBar, 'sessionTwoErrorBar', sessionTwoErroBar, 'subdir', 'figures', 'saveName', ['appendix_melToLMS_1x2'], 'xLim', [0 4.5], 'yLim', [0 4.5], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
+[ pairedTotalResponseAreaNormed ] = pairResultAcrossSessions(goodSubjects{1}.ID, goodSubjects{2}.ID, TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea, TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'sessionOneErrorBar', sessionOneErrorBar, 'sessionTwoErrorBar', sessionTwoErrorBar, 'subdir', 'figures', 'saveName', ['appendix_melToLMS_1x2'], 'xLim', [0 4.5], 'yLim', [0 4.5], 'plotOption', 'square', 'xLabel', ['Session 1 Mel/LMS Total Response Area'], 'yLabel', ['Session 2 Mel/LMS Total Response Area'], 'title', 'Reproducibility of Mel/LMS Response Ratio');
 [ CI, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, pairedTotalResponseAreaNormed.sessionOne, pairedTotalResponseAreaNormed.sessionTwo, dropboxAnalysisDir);
 
 
 % correlation of mel/lms response ratio from sessions 1/2 combined with
 % session 3
-[ combinedTotalResponseArea.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.totalResponseArea, TPUPParameters{2}.MeltoLMS.totalResponseArea);
-[ combinedTotalResponseArea_lowerBound.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]), TPUPParameters{2}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]));
-[ combinedTotalResponseArea_upperBound.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]), TPUPParameters{2}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]));
+[ combinedTotalResponseArea.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters_bootstrapped{1}.MeltoLMS.totalResponseArea, TPUPParameters_bootstrapped{2}.MeltoLMS.totalResponseArea);
+[ combinedTotalResponseArea_lowerBound.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]), TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]));
+[ combinedTotalResponseArea_upperBound.MeltoLMS ] = combineResultAcrossSessions(goodSubjects, TPUPParameters_bootstrapped{1}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]), TPUPParameters_bootstrapped{2}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]));
 
 session12error = [];
 session12error(1,:) = combinedTotalResponseArea.MeltoLMS.result - combinedTotalResponseArea_lowerBound.MeltoLMS.result;
 session12error(2,:) = combinedTotalResponseArea_upperBound.MeltoLMS.result - combinedTotalResponseArea.MeltoLMS.result;
 
 session3error = [];
-session3error(1,:) = TPUPParameters{3}.MeltoLMS.totalResponseArea - TPUPParameters{3}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]);
-session3error(2,:) = TPUPParameters{3}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters{3}.MeltoLMS.totalResponseArea;
+session3error(1,:) = TPUPParameters_bootstrapped{3}.MeltoLMS.totalResponseArea - TPUPParameters_bootstrapped{3}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{1})]);
+session3error(2,:) = TPUPParameters_bootstrapped{3}.MeltoLMS.(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters_bootstrapped{3}.MeltoLMS.totalResponseArea;
 
 plotFig = figure;
-[ pairedResult12x3 ] = pairResultAcrossSessions(combinedTotalResponseArea.MeltoLMS.subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.MeltoLMS.result, TPUPParameters{3}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'xLims', [0 4.5], 'yLims', [0 4.5], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures', 'xLabel', ['Mel/LMS Session 1/2 Total Response Area'], 'yLabel', ['Mel/LMS Session 3 Total Response Area'])
+[ pairedResult12x3 ] = pairResultAcrossSessions(combinedTotalResponseArea.MeltoLMS.subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.MeltoLMS.result, TPUPParameters_bootstrapped{3}.MeltoLMS.totalResponseArea, dropboxAnalysisDir, 'xLims', [0 4.5], 'yLims', [0 4.5], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures', 'xLabel', ['Mel/LMS Session 1/2 Total Response Area'], 'yLabel', ['Mel/LMS Session 3 Total Response Area'])
 [ CI, meanRho, rhoCombined ] = bootstrapRho(goodSubjects, pairedResult12x3.sessionOne, pairedResult12x3.sessionTwo, dropboxAnalysisDir);
 
 
 title('Reproducibility of Mel/LMS Response Ratio at Higher Light Level')
 saveas(plotFig, fullfile(outDir, 'appendix_melToLMS_12x3.pdf'), 'pdf')
-
-plotFig = figure;
-lims = {-200, -200, -375, -375};
-for stimulus = 1:2
-    subplot(1 ,2, stimulus)
-    [ combinedTotalResponseArea.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).totalResponseArea, TPUPParameters{2}.(stimuli{stimulus}).totalResponseArea);
-    [ combinedTotalResponseArea_lowerBound.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]), TPUPParameters{2}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]));
-    [ combinedTotalResponseArea_upperBound.(stimuli{stimulus}) ] = combineResultAcrossSessions(goodSubjects, TPUPParameters{1}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]), TPUPParameters{2}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]));
-    
-    session12error = [];
-    session12error(1,:) = combinedTotalResponseArea.(stimuli{stimulus}).result - combinedTotalResponseArea_lowerBound.(stimuli{stimulus}).result;
-    session12error(2,:) = combinedTotalResponseArea_upperBound.(stimuli{stimulus}).result - combinedTotalResponseArea.(stimuli{stimulus}).result;
-    
-    session3error = [];
-    session3error(1,:) = TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea - TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{1})]);
-    session3error(2,:) = TPUPParameters{3}.(stimuli{stimulus}).(['totalResponseArea_', num2str(confidenceInterval{2})]) - TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea;
-    
-    
-    pairResultAcrossSessions(combinedTotalResponseArea.(stimuli{stimulus}).subjectKey, goodSubjects{3}.ID, combinedTotalResponseArea.(stimuli{stimulus}).result, TPUPParameters{3}.(stimuli{stimulus}).totalResponseArea, dropboxAnalysisDir, 'xLims', [lims{stimulus} 0], 'yLims', [lims{stimulus} 0], 'sessionOneErrorBar', session12error, 'sessionTwoErrorBar', session3error, 'subdir', 'figures')
-    if stimulus == 1
-        ylabel('Session 3 Total Response Area')
-    end
-    xlabel('Session 1/2 Total Response Area')
-    title(stimuli{stimulus})
-    
-end
-saveas(plotFig, fullfile(outDir, ['appendix_totalResponseAreaReproducibility_12x3.pdf']), 'pdf')
 close(plotFig)
 
+% correlation of silent substitution to PIPR: we think the mel/lms ratio is
+% our best metric of the mel driven response via silent substitution, and
+% we think that the (blue-red)/(blue+red) is our best measure of the
+% melanopsin response elicited through the PIPR. do they correlate?
+
+for session = 1:2
+    plotFig = figure;
+    melToLMSRatio = [];
+    melToLMSRatio = (TPUPParameters{session}.Mel.transientAmplitude + TPUPParameters{session}.Mel.sustainedAmplitude + TPUPParameters{session}.Mel.persistentAmplitude)./(TPUPParameters{session}.LMS.transientAmplitude + TPUPParameters{session}.LMS.sustainedAmplitude + TPUPParameters{session}.LMS.persistentAmplitude);
+    PIPR = [];
+    PIPR = ((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) - (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude))./((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) + (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude));
+    plot(melToLMSRatio, PIPR, 'o')
+    rho = corr(melToLMSRatio', PIPR', 'type', 'Spearman');
+    string = sprintf(['rho = ',num2str(rho, 2)]);
+    text(1.6, 0.2, string, 'FontSize', 12)
+    xlabel('Mel/LMS Total Response Area')
+    ylabel('(Blue-Red)/(Blue+Red) Total Response Area')
+    ylim([-0.2 0.4])
+    xlim([0 3])
+    title(['Session ' num2str(session)'])
+    saveas(plotFig, fullfile(outDir, ['appendix_SSxPIPR_session', num2str(session), '.pdf']), 'pdf')
+end
+    
+    
 end % end function
