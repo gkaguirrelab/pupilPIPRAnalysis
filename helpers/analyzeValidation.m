@@ -148,7 +148,7 @@ for stimulus = 1:length(stimuli)
     if lastValidationIndex - firstValidationIndex+1 > numberValidations
         failStatus = failStatus + 1; % if we're trying to analyze more validation files than are available, that's a fail
         passStatus = 0;
-        error(['Attempted to find ' num2str(lastValidationIndex - firstValidationIndex+1), ' validations, but only found ' num2str(numberValidations)]);
+        sprintf('Attempted to find %s validations, but only found %s', num2str(lastValidationIndex - firstValidationIndex+1), num2str(numberValidations));
         return
         
     % assuming we can find all of the validation files we need, now we can start to look at some of the validation results    
@@ -299,7 +299,7 @@ for stimulus = 1:length(stimuli)
         
         % for LMS stimuli, apply exclusion criteria
         if strcmp(stimuli(stimulus), 'LMS')
-            if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
+            if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'post')
                 if median(LMSContrastVector(1:5)) < 3.5
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
@@ -329,29 +329,29 @@ for stimulus = 1:length(stimuli)
                     end
                 end
             end
-            if strcmp(p.Results.whichValidation, 'post') || strcmp(p.Results.whichValidation, 'combined')
-                if median(LMSContrastVector(6:10)) < 3.5
+            if strcmp(p.Results.whichValidation, 'combined')
+                if median(LMSContrastVector(1:10)) < 3.5
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
                         sprintf('Post-LMS contrast for LMS stimulation too low')
                     end
                 end
-                if median(SConeContrastVector(6:10)) > 0.2
+                if median(SConeContrastVector(1:10)) > 0.2
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
                         sprintf('Post-SCone contrast for LMS stimulation too high')
                     end
                 end
-                if median(LMinusMContrastVector(6:10)) > 0.2
+                if median(LMinusMContrastVector(1:10)) > 0.2
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
                         sprintf('Pre-L-M contrast for LMS stimulation too high')
                     end
                 end
-                if median(MelanopsinContrastVector(6:10)) > 0.2
+                if median(MelanopsinContrastVector(1:10)) > 0.2
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
@@ -364,7 +364,7 @@ for stimulus = 1:length(stimuli)
         
         % for melanopsin stimuli, apply the exlcusion criteria
         if strcmp(stimuli(stimulus), 'Melanopsin')
-            if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'combined')
+            if strcmp(p.Results.whichValidation, 'pre') || strcmp(p.Results.whichValidation, 'post')
                 
                 if median(MelanopsinContrastVector(1:5)) < 3.5
                     failStatus = failStatus + 1;
@@ -398,15 +398,15 @@ for stimulus = 1:length(stimuli)
                     
                 end
             end
-            if strcmp(p.Results.whichValidation, 'post') || strcmp(p.Results.whichValidation, 'combined')
-                if median(MelanopsinContrastVector(6:10)) < 3.5
+            if strcmp(p.Results.whichValidation, 'combined')
+                if median(MelanopsinContrastVector(1:10)) < 3.5
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
                         sprintf('Post-Melanopsin contrast for Melanopsin stimulation too low')
                     end
                 end
-                if median(SConeContrastVector(6:10)) > 0.2
+                if median(SConeContrastVector(1:10)) > 0.2
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
@@ -414,7 +414,7 @@ for stimulus = 1:length(stimuli)
                     end
                     
                 end
-                if median(LMinusMContrastVector(6:10)) > 0.2
+                if median(LMinusMContrastVector(1:10)) > 0.2
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
@@ -422,7 +422,7 @@ for stimulus = 1:length(stimuli)
                     end
                     
                 end
-                if median(LMSContrastVector(6:10)) > 0.2
+                if median(LMSContrastVector(1:10)) > 0.2
                     failStatus = failStatus + 1;
                     if strcmp(p.Results.verbose, 'on')
                         
