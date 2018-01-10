@@ -17,11 +17,11 @@ bgSpd = tmp.cals{end}.modulationBGMeas.meas.pr650.spectrum;
 modSpd = tmp.cals{end}.modulationMaxMeas.meas.pr650.spectrum;
 
 % Plot them
-figure;
-plot(wls, bgSpd, '-k'); hold on;
-plot(wls, modSpd, '-b', 'LineWidth', 2);
-pbaspect([1 1 1]); set(gca, 'TickDir', 'out');
-xlabel('Wavelength'); ylabel('Radiance [mW/sr/cm-1/nm]');
+% figure;
+% plot(wls, bgSpd, '-k'); hold on;
+% plot(wls, modSpd, '-b', 'LineWidth', 2);
+% pbaspect([1 1 1]); set(gca, 'TickDir', 'out');
+% xlabel('Wavelength'); ylabel('Radiance [mW/sr/cm-1/nm]');
 
 %% (1) Calculate the properties of the light
 pupilDiameterMm = 6;
