@@ -1,4 +1,4 @@
-function [ retinalIrradiance ] = calculateRetinalIrradiance(validationFile)
+function [ retinalIrradiance ] = calculateRetinalIrradiance(validationFile, date)
 
 % The purpose of this function is to load up an individual validation file
 % and extract the retinal irradiance of the stimulus. The meat of this code
@@ -29,7 +29,11 @@ out1 = CalculateLightProperties(S, modSpd, pupilDiameterMm);
 
 
 %% (2) Now, filter the stimulus by the pre-receptoral filtering and do the calculations again
-observerAgeInYears =  tmp.cals{end}.describe.OBSERVER_AGE;
+if datenum(date, 'mmddyy') > datenum('010517', 'mmddyy') 
+    observerAgeInYears =  tmp.cals{end}.describe.OBSERVER_AGE;
+else
+    observerAgeInYears =  tmp.cals{end}.describe.REFERENCE_OBSERVER_AGE;
+end
 fieldSizeDeg = tmp.cals{end}.describe.cache.data(observerAgeInYears).describe.params.fieldSizeDegrees;
 lensTransmit = LensTransmittance(S, 'Human', 'CIE', observerAgeInYears, pupilDiameterMm);
 macTransmit = MacularTransmittance(S, 'Human', 'CIE', fieldSizeDeg);
