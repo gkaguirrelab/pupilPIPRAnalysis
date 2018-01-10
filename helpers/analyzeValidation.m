@@ -269,7 +269,7 @@ for stimulus = 1:length(stimuli)
                 validationResultsFile = {validationResultsFile.name};
                 fullValidationResultsFile = char(fullfile(dropboxAnalysisDir, subdir, date, validationFolder, availableValidations(ii).name, validationResultsFile));
                 
-                [retinalIrradiance] = calculateRetinalIrradiance(fullValidationResultsFile);
+                [retinalIrradiance] = calculateRetinalIrradiance(fullValidationResultsFile, date);
                 validation.(stimuli{stimulus})(ii).retinalIrradiance = retinalIrradiance.log10SumIrradianceQuantaPerCm2Sec;
             end
         end
