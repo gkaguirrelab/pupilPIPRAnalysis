@@ -1,4 +1,4 @@
-function [dates, validationSummary] = makeSummaryTables(goodSubjects, dropboxAnalysisDir)
+function [dates, validationSummary, TPUPSummary] = makeSummaryTables(goodSubjects, dropboxAnalysisDir)
 
 % maek date summary table
 dates = [];
@@ -69,6 +69,36 @@ for session = 1:3
         end
         counter = counter + 1;
     end
+end
+
+for session = 1:3
+    TPUPSummary(session,1) = median(TPUPParameters{session}.LMS.transientAmplitude);
+    TPUPSummary(session,2) = median(TPUPParameters{session}.LMS.sustainedAmplitude);
+    TPUPSummary(session,3) = median(TPUPParameters{session}.LMS.persistentAmplitude);
+    TPUPSummary(session,4) = median(TPUPParameters{session}.LMS.exponentialTau);
+    TPUPSummary(session,5) = median(TPUPParameters{session}.LMS.gammaTau);
+    TPUPSummary(session,6) = median(TPUPParameters{session}.LMS.delay);
+    
+    TPUPSummary(session,7) = median(TPUPParameters{session}.Mel.transientAmplitude);
+    TPUPSummary(session,8) = median(TPUPParameters{session}.Mel.sustainedAmplitude);
+    TPUPSummary(session,9) = median(TPUPParameters{session}.Mel.persistentAmplitude);
+    TPUPSummary(session,10) = median(TPUPParameters{session}.Mel.exponentialTau);
+    TPUPSummary(session,11) = median(TPUPParameters{session}.Mel.gammaTau);
+    TPUPSummary(session,12) = median(TPUPParameters{session}.Mel.delay);
+    
+    TPUPSummary(session,13) = median(TPUPParameters{session}.Red.transientAmplitude);
+    TPUPSummary(session,14) = median(TPUPParameters{session}.Red.sustainedAmplitude);
+    TPUPSummary(session,15) = median(TPUPParameters{session}.Red.persistentAmplitude);
+    TPUPSummary(session,16) = median(TPUPParameters{session}.Red.exponentialTau);
+    TPUPSummary(session,17) = median(TPUPParameters{session}.Red.gammaTau);
+    TPUPSummary(session,18) = median(TPUPParameters{session}.Red.delay);
+    
+    TPUPSummary(session,19) = median(TPUPParameters{session}.Blue.transientAmplitude);
+    TPUPSummary(session,20) = median(TPUPParameters{session}.Blue.sustainedAmplitude);
+    TPUPSummary(session,21) = median(TPUPParameters{session}.Blue.persistentAmplitude);
+    TPUPSummary(session,22) = median(TPUPParameters{session}.Blue.exponentialTau);
+    TPUPSummary(session,23) = median(TPUPParameters{session}.Blue.gammaTau);
+    TPUPSummary(session,24) = median(TPUPParameters{session}.Blue.delay);
 end
                 
 end % end function
