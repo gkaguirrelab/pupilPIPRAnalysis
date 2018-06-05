@@ -2,6 +2,7 @@ function makeFigures(goodSubjects, averageResponsePerSubject, groupAverageRespon
 
 %% Set up some basic variables
 outDir = fullfile(dropboxAnalysisDir,'pupilPIPRAnalysis/figures');
+outDir = fullfile('~/Desktop/pupilPIPRAnalysis/figures');
 
 if ~exist(outDir, 'dir')
     mkdir(outDir);
@@ -431,6 +432,37 @@ for session = 1:2
     title(['Session ' num2str(session)'])
     saveas(plotFig, fullfile(outDir, ['appendix_SSxPIPR_session', num2str(session), '.pdf']), 'pdf')
 end
-    
+
+%% a figure showing how the PIPR calculation would change as a function of increased irradiance
+plotFig = figure;
+hold on
+
+subplot(1,2,1)
+pbaspect([1 1 1])
+hold on
+title('Session 1/2 Combined')
+ylabel('Pupil Diameter (% Change)')
+xlabel('Time (s)')
+xticks([0, 5000, 10000, 15000])
+xticklabels([0, 5, 10, 15])
+plot(timebase, combinedGroupAverageResponse.Blue*100, 'Color', 'b', 'LineWidth', 2)
+plot(timebase, combinedGroupAverageResponse.Red*100, 'Color', 'r', 'LineWidth', 2)
+plot(timebase, (combinedGroupAverageResponse.Red- combinedGroupAverageResponse.Blue)*100, 'Color', 'k', 'LineWidth', 2)
+plot(timebase, zeros(1,length(timebase)), '--', 'Color', [0 0 0]+0.05*10)
+
+subplot(1,2,2)
+pbaspect([1 1 1])
+hold on
+title('Session 3')
+
+xlabel('Time (s)')
+xticks([0, 5000, 10000, 15000])
+xticklabels([0, 5, 10, 15])
+plot(timebase, groupAverageResponse{3}.Blue*100, 'Color', 'b', 'LineWidth', 2)
+plot(timebase, groupAverageResponse{3}.Red*100, 'Color', 'r', 'LineWidth', 2)
+plot(timebase, (groupAverageResponse{3}.Red- groupAverageResponse{3}.Blue)*100, 'Color', 'k', 'LineWidth', 2)
+plot(timebase, zeros(1,length(timebase)), '--', 'Color', [0 0 0]+0.05*10)
+        saveas(plotFig, fullfile(outDir, ['appendix_PIPRCalculations.pdf']), 'pdf')
+
     
 end % end function
