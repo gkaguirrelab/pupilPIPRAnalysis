@@ -417,10 +417,10 @@ close(plotFig)
 
 for session = 1:2
     plotFig = figure;
-    melToLMSRatio = [];
-    melToLMSRatio = (TPUPParameters{session}.Mel.transientAmplitude + TPUPParameters{session}.Mel.sustainedAmplitude + TPUPParameters{session}.Mel.persistentAmplitude)./(TPUPParameters{session}.LMS.transientAmplitude + TPUPParameters{session}.LMS.sustainedAmplitude + TPUPParameters{session}.LMS.persistentAmplitude);
-    PIPR = [];
-    PIPR = ((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) - (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude))./((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) + (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude));
+    melToLMSRatio{session} = [];
+    melToLMSRatio{session} = (TPUPParameters{session}.Mel.transientAmplitude + TPUPParameters{session}.Mel.sustainedAmplitude + TPUPParameters{session}.Mel.persistentAmplitude)./(TPUPParameters{session}.LMS.transientAmplitude + TPUPParameters{session}.LMS.sustainedAmplitude + TPUPParameters{session}.LMS.persistentAmplitude);
+    PIPR{session} = [];
+    PIPR{session} = ((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) - (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude))./((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) + (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude));
     plot(melToLMSRatio, PIPR, 'o')
     rho = corr(melToLMSRatio', PIPR', 'type', 'Spearman');
     string = sprintf(['rho = ',num2str(rho, 2)]);
@@ -432,6 +432,29 @@ for session = 1:2
     title(['Session ' num2str(session)'])
     saveas(plotFig, fullfile(outDir, ['appendix_SSxPIPR_session', num2str(session), '.pdf']), 'pdf')
 end
+
+% now look at sessions 1 and 2 combined
+for session = 1:2
+    melToLMSRatio{session} = [];
+    melToLMSRatio{session} = (TPUPParameters{session}.Mel.transientAmplitude + TPUPParameters{session}.Mel.sustainedAmplitude + TPUPParameters{session}.Mel.persistentAmplitude)./(TPUPParameters{session}.LMS.transientAmplitude + TPUPParameters{session}.LMS.sustainedAmplitude + TPUPParameters{session}.LMS.persistentAmplitude);
+    PIPR{session} = [];
+    PIPR{session} = ((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) - (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude))./((TPUPParameters{session}.Blue.transientAmplitude + TPUPParameters{session}.Blue.sustainedAmplitude + TPUPParameters{session}.Blue.persistentAmplitude) + (TPUPParameters{session}.Red.transientAmplitude + TPUPParameters{session}.Red.sustainedAmplitude + TPUPParameters{session}.Red.persistentAmplitude));
+end
+
+combinedMelToLMSRatio = combineResultAcrossSessions(goodSubjects, melToLMSRatio{1}, melToLMSRatio{2});
+combinedPIPR = combineResultAcrossSessions(goodSubjects, PIPR{1}, PIPR{2});
+
+plot(combinedMelToLMSRatio.result, combinedPIPR.result, 'o')
+rho = corr(combinedMelToLMSRatio.result', combinedPIPR.result', 'type', 'Spearman');
+string = sprintf(['rho = ',num2str(rho, 2)]);
+text(1.6, 0.2, string, 'FontSize', 12)
+xlabel('Mel/LMS Total Response Area')
+ylabel('(Blue-Red)/(Blue+Red) Total Response Area')
+ylim([-0.2 0.4])
+xlim([0 3])
+
+
+saveas(plotFig, fullfile(outDir, ['appendix_SSxPIPR_session.pdf']), 'pdf')
 
 %% a figure showing how the PIPR calculation would change as a function of increased irradiance
 plotFig = figure;
