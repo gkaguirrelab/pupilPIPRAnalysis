@@ -1,11 +1,12 @@
-function [ MelanopsinContrasts ] = calculateContrastForPIPRStimuli(goodSubjects, dropboxAnalysisDir)
+function [ MelanopsinContrasts, LMSContrasts ] = calculateContrastForPIPRStimuli(goodSubjects, dropboxAnalysisDir)
 
 for session = 1:3
     for ss = 1:length(goodSubjects{session}.ID)
         subjectID = goodSubjects{session}.ID{ss};
         date = goodSubjects{session}.date{ss};
-        [ meanMelanopsinContrast ] = calculateContrastForPIPRStimuliPerSubject(subjectID, date, dropboxAnalysisDir);
+        [ meanMelanopsinContrast, meanLMSContrast ] = calculateContrastForPIPRStimuliPerSubject(subjectID, date, dropboxAnalysisDir);
         MelanopsinContrasts{session}(ss) = meanMelanopsinContrast;
+        LMSContrasts{session}(ss) = meanLMSContrast;
     end
     
 end
@@ -13,7 +14,7 @@ end
 
 
 
-    function [ meanMelanopsinContrast ] = calculateContrastForPIPRStimuliPerSubject(subjectID, date, dropboxAnalysisDir)
+    function [ meanMelanopsinContrast, meanLMSContrast ] = calculateContrastForPIPRStimuliPerSubject(subjectID, date, dropboxAnalysisDir)
         
         if exist(fullfile(fullfile(dropboxAnalysisDir, '..', 'MELA_materials', 'Legacy', 'PIPRMaxPulse', date)), 'dir')
             subdir = '../MELA_materials/Legacy/PIPRMaxPulse';
@@ -53,9 +54,18 @@ end
             contrasts = (T_receptors*stimulusSpectrum-T_receptors*backgroundSpectrum)./(T_receptors*backgroundSpectrum);
             
             MelanopsinContrast(mm) = contrasts(4);
+            
+            contrastStrings = photoreceptorClasses;
+
+            [postreceptoralContrasts, postreceptoralStrings] = ComputePostreceptoralContrastsFromLMSContrasts(contrasts(1:3));
+            
+            LMSContrast(mm) = postreceptoralContrasts(1);
+
+            
         end
         
         meanMelanopsinContrast = median(MelanopsinContrast);
+        meanLMSContrast = median(LMSContrast);
         
     end
 
