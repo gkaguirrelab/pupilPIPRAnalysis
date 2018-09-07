@@ -7,12 +7,15 @@ function [ luminance ] = calculateLuminance(backgroundSpectrum, S, luminanceType
 % Description:
 %    Calculate the luminance of the inputted spectrum.
 %
-%    This function takes in an SPD and calculates the luminance of that spectrum. This function can calculate either photopic or scoptopic luminance depending on the user input. Note that the photopic luminance is currently calculated according to the 10 degree CIE fundamentals
+%    This function takes in an SPD and calculates the luminance of that spectrum. This function can calculate either
+%    photopic or scoptopic luminance depending on the user input. Note that the photopic luminance is currently
+%    calculated according to the 10 degree CIE fundamentals
 %
 % Input:
 %    backgroundSpectrum     - Background spd in column vector of length nWls.
 %    S (1x3)                - Wavelength spacing.
-%    luminanceType          - A string that specifies which luminance should be calculated. Options are limited to 'photopic' or 'scotopic'
+%    luminanceType          - A string that specifies which luminance should be calculated. Options are limited to
+%                            'photopic' or 'scotopic'
 %
 %
 % Output:
